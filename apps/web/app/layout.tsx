@@ -8,7 +8,7 @@ import { APP_NAME } from '@/lib/copy';
 import Providers from './providers';
 
 export const metadata: Metadata = {
-  title: APP_NAME,
+  title: { default: APP_NAME, template: `%s | ${APP_NAME}` },
   robots: { index: false, follow: false },
 };
 

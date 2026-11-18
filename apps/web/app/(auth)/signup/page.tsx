@@ -1,6 +1,10 @@
-import ScreenPlaceholder from '@/components/ScreenPlaceholder';
-import { SCREEN_TITLES } from '@/lib/copy';
+import SignupForm from '@/components/SignupForm';
+import { SEASON } from '@/lib/rules';
+import { serverToday } from '@/lib/time';
+import { PAGE_TITLES } from '@/lib/copy';
 
-export default function Page() {
-  return <ScreenPlaceholder title={SCREEN_TITLES.signup} />;
+export const metadata = { title: PAGE_TITLES.signup };
+
+export default function SignupPage() {
+  return <SignupForm closed={serverToday() > SEASON.end} />;
 }

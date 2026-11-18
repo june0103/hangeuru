@@ -184,3 +184,12 @@ export function treeModel(seed: Seed, days: number, harvested: boolean): TreeMod
 
   return { n, height, topY, cy, base, parts, fruit, basket };
 }
+
+/** 사과 도형 r 9로 그린 브랜드 마크 SVG 문자열 (4.6). 파비콘과 홈 화면 아이콘에 쓴다 */
+export function brandMarkSvg(size: number, background = '#FFFFFF') {
+  const paths = fruitShapes('apple', SIZES.brand.r)
+    .map(s => `<path d="${s.d}" fill="${s.fill ?? 'none'}"${s.stroke ? ` stroke="${s.stroke}" stroke-width="${s.sw}" stroke-linecap="round"` : ''}${s.o ? ` opacity="${s.o}"` : ''}/>`)
+    .join('');
+  // 정사각형 아이콘 가운데에 마크를 둔다. 마크는 아이콘 폭의 64%
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="-20 -20.5 40 40"><rect x="-20" y="-20.5" width="40" height="40" fill="${background}"/><g transform="scale(1.07)">${paths}</g></svg>`;
+}

@@ -1,6 +1,8 @@
-import ScreenPlaceholder from '@/components/ScreenPlaceholder';
-import { SCREEN_TITLES } from '@/lib/copy';
+import LoginForm from '@/components/LoginForm';
+import { PAGE_TITLES } from '@/lib/copy';
 
-export default function Page() {
-  return <ScreenPlaceholder title={SCREEN_TITLES.login} />;
+export const metadata = { title: PAGE_TITLES.login };
+
+export default function LoginPage() {
+  return <LoginForm />;
 }
