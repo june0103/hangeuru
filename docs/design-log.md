@@ -19,3 +19,4 @@
 - 몽타주 `sx` 콜백은 `theme` 타입을 추론하지 못해 `(theme: Theme) =>`로 타입을 적는다
 - `typecheck` 스크립트는 `next typegen && tsc --noEmit`이다
 - Vitest는 1단계에 설치하고 테스트가 없어도 통과하게 했다(`passWithNoTests`). CI의 `pnpm test`가 2단계 전에도 돈다
+- 브랜치를 `develop`(평소 푸시, Vercel 미리보기)과 `main`(운영 배포 전용)으로 나눴다. spec 11.1, 12.2, 13.3과 CLAUDE.md, CI에 반영했다 (사용자 요청)

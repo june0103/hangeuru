@@ -1159,7 +1159,7 @@ grant select on public.profiles, public.attendance to authenticated;
 2. SQL Editor에서 7.1의 `0001_init.sql`을 실행한다
 3. Authentication 설정을 7.4 표대로 맞춘다
 4. API 키 화면에서 프로젝트 URL, publishable key, secret key를 복사한다
-5. 코드를 GitHub 저장소에 올리고 Vercel에서 그 저장소로 프로젝트를 만든다. Root Directory는 apps/web으로 지정한다
+5. 코드를 GitHub 저장소에 올리고 Vercel에서 그 저장소로 프로젝트를 만든다. Root Directory는 apps/web, Production Branch는 `main`으로 지정한다. `main`에 푸시되면 운영 배포, `develop`과 PR은 미리보기 배포가 된다(12.2)
 6. Vercel 환경 변수에 6.4의 3개를 Production과 Preview 모두에 넣는다
 7. 배포한 주소에서 10장의 수용 기준을 점검한다. 점검용 계정은 끝나고 Supabase 대시보드에서 지운다
 8. 캠프 채널에 주소를 공유한다
@@ -1242,9 +1242,16 @@ camp-attendance/
 | `.nvmrc` | Node.js 버전 한 줄. Vercel 프로젝트의 Node.js 버전과 같은 메이저로 맞춘다 |
 | `.gitignore` | `node_modules`, `.next`, `.env*.local`, `.vercel` |
 | `apps/web/.env.example` | 6.4의 변수 이름만 적고 값은 비운다 |
-| `.github/workflows/ci.yml` | PR과 main 푸시마다 `pnpm lint`, `pnpm typecheck`, `pnpm test` |
+| `.github/workflows/ci.yml` | PR과 `main`·`develop` 푸시마다 `pnpm lint`, `pnpm typecheck`, `pnpm test` |
 
-작업은 단계나 디자인 반영 단위로 브랜치를 만들어 PR로 main에 합친다. Vercel이 PR마다 미리보기 주소를 만들어 주므로 디자이너와 구성원은 그 주소로 확인한다.
+브랜치는 둘을 둔다.
+
+| 브랜치 | 쓰임 | Vercel |
+| --- | --- | --- |
+| `develop` | 작업 내용을 모으는 브랜치. 평소 푸시는 여기에 한다 | 미리보기 배포 |
+| `main` | 운영 배포용. `develop`을 합칠 때만 바뀌고 직접 커밋하지 않는다 | 운영 배포(Production Branch) |
+
+작업은 `develop`에서 하거나, 단계나 디자인 반영 단위로 `develop`에서 브랜치를 만들어 PR로 `develop`에 합친다. 배포할 때는 `develop`을 `main`에 합쳐 푸시하고, 그 푸시로 Vercel 운영 배포가 자동으로 돈다. Vercel이 `develop`과 PR마다 미리보기 주소를 만들어 주므로 디자이너와 구성원은 그 주소로 확인한다.
 
 ### 12.3 받은 파일 두는 곳
 
@@ -1384,6 +1391,7 @@ camp-attendance/
 
 ## 일하는 순서
 - docs/spec.md 13.2의 단계를 순서대로 한다. 단계가 끝나면 완료 기준을 확인하고 커밋한 뒤 보고한다
+- 평소 커밋과 푸시는 develop 에 한다. main 은 운영 배포용이라 사용자가 배포를 요청할 때만 develop 을 합쳐 푸시한다(12.2)
 - 규칙이나 화면이 바뀌면 docs/spec.md 를 먼저 고치고 코드를 고친다
 - 디자이너 작업물은 docs/spec.md 12.5 순서로 반영하고 docs/design-log.md 에 기록한다
 ```
