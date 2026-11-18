@@ -92,3 +92,25 @@ describe('workdaysLeft (2.4)', () => {
     expect(workdaysLeft('2026-12-17', true)).toBe(5);
   });
 });
+
+describe('위치 확인 (2.8)', () => {
+  it('캠프 위치는 반경 안이다', async () => {
+    const { CAMP, campCheck } = await import('./rules');
+    expect(campCheck(CAMP)).toEqual({ distance: 0, inside: true });
+  });
+  it('위도 0.004도(약 445m) 북쪽은 안, 0.005도(약 556m)는 밖이다', async () => {
+    const { CAMP, campCheck } = await import('./rules');
+    const a = campCheck({ lat: CAMP.lat + 0.004, lng: CAMP.lng });
+    const b = campCheck({ lat: CAMP.lat + 0.005, lng: CAMP.lng });
+    expect(a.inside).toBe(true);
+    expect(Math.round(a.distance)).toBe(445);
+    expect(b.inside).toBe(false);
+    expect(Math.round(b.distance)).toBe(556);
+  });
+  it('서울역은 12km 넘게 떨어져 반경 밖이다', async () => {
+    const { campCheck } = await import('./rules');
+    const c = campCheck({ lat: 37.5547, lng: 126.9707 });
+    expect(c.inside).toBe(false);
+    expect(c.distance).toBeGreaterThan(12000);
+  });
+});

@@ -255,6 +255,14 @@ export const ACTION = {
   },
 } as const;
 
+/* ---------- 위치 확인 (2.8) ---------- */
+const meters = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)}km` : `${Math.round(m / 10) * 10}m`);
+export const LOCATION = {
+  denied: '위치 권한을 허용해야 출근과 퇴근을 기록할 수 있어요. 브라우저 설정에서 위치를 허용해 주세요.',
+  unavailable: '지금 위치를 확인하지 못했어요. 잠시 후 다시 시도해 주세요.',
+  outside: (distance: number, radius: number) => `캠프에서 ${meters(distance)} 떨어져 있어요. 캠프 ${radius}m 안에서 기록할 수 있어요.`,
+} as const;
+
 /* ---------- 불러오기와 오류 화면 (9.4) ---------- */
 export const ERROR_PAGE = { title: '화면을 불러오지 못했어요', desc: '잠시 후 다시 시도해 주세요.', retry: '다시 시도' } as const;
 export const NOT_FOUND = { title: '찾는 화면이 없어요', home: '홈으로 가기' } as const;

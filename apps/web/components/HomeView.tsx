@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState, useTransition } from 'react';
 
 import { checkIn, checkOut, harvest } from '@/app/actions';
+import { LOCATION } from '@/lib/copy';
+import { getPosition } from '@/lib/geo';
 import type { ActionResult } from '@/lib/types';
 import type { CampView, CardModel, TodayView, TreeView, WeekView } from '@/lib/view';
 
@@ -58,7 +60,13 @@ export default function HomeView({ today, week, tree, camp, card, welcome }: Pro
     const act = today.button.action;
     if (!act) return;
     start(async () => {
-      const r = act === 'checkIn' ? await checkIn() : await checkOut();
+      // 버튼을 누르면 위치부터 구한다. 구하지 못하면 기록하지 않고 안내만 한다(spec 2.8)
+      const pos = await getPosition();
+      if (typeof pos === 'string') {
+        toast({ content: pos === 'denied' ? LOCATION.denied : LOCATION.unavailable, variant: 'normal' });
+        return;
+      }
+      const r = act === 'checkIn' ? await checkIn(pos) : await checkOut(pos);
       if (r.ok && act === 'checkIn' && r.message) pop();
       report(r);
     });

@@ -5,12 +5,12 @@
 import { revalidatePath } from 'next/cache';
 import { redirect, unstable_rethrow } from 'next/navigation';
 
-import { ACTION, ERRORS, SETTINGS } from '@/lib/copy';
+import { ACTION, ERRORS, LOCATION, SETTINGS } from '@/lib/copy';
 import {
   createAuthUser, deleteAuthUser, getProfile, getSessionUserId, insertCheckIn, insertProfile, listAttendanceOf, markHarvested,
   signInWithPassword, signOutSession, updateCheckOut, updateProfileRow,
 } from '@/lib/data';
-import { FRUIT_DAYS, PLANS, SEASON, SEEDS, isWorkday } from '@/lib/rules';
+import { CAMP, FRUIT_DAYS, PLANS, SEASON, SEEDS, campCheck, isWorkday } from '@/lib/rules';
 import { serverNow, serverToday } from '@/lib/time';
 import type { ActionResult, PlanKey, SeedKey } from '@/lib/types';
 import { checkInMessage, statsOf } from '@/lib/view';
@@ -20,6 +20,18 @@ const str = (f: FormData, k: string) => String(f.get(k) ?? '');
 const validName = (name: string) => name.length >= 2 && name.length <= 20;
 const isPlan = (v: string): v is PlanKey => v in PLANS;
 const isSeed = (v: string): v is SeedKey => v in SEEDS;
+
+// 브라우저가 보낸 위치를 검사한다(spec 2.8). 위치는 저장하지 않는다
+function locationError(pos: unknown): ActionResult | null {
+  const p = pos as { lat?: unknown; lng?: unknown } | null;
+  const lat = Number(p?.lat);
+  const lng = Number(p?.lng);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+    return { ok: false, message: ACTION.failed };
+  }
+  const c = campCheck({ lat, lng });
+  return c.inside ? null : { ok: false, message: LOCATION.outside(c.distance, CAMP.radiusM) };
+}
 
 async function requireUser() {
   const id = await getSessionUserId();
@@ -96,11 +108,13 @@ export async function signOut() {
   redirect('/login');
 }
 
-export async function checkIn(): Promise<ActionResult> {
+export async function checkIn(pos: { lat: number; lng: number }): Promise<ActionResult> {
   return guard(async () => {
     const me = await requireUser();
     const today = serverToday();
     if (!isWorkday(today)) return { ok: false, message: ACTION.notWorkday };
+    const outside = locationError(pos);
+    if (outside) return outside;
     const before = statsOf(me, await listAttendanceOf(me.id), today);
     const inserted = await insertCheckIn(me.id, today, serverNow());
     if (!inserted) return done({ ok: true });
@@ -109,12 +123,14 @@ export async function checkIn(): Promise<ActionResult> {
   });
 }
 
-export async function checkOut(): Promise<ActionResult> {
+export async function checkOut(pos: { lat: number; lng: number }): Promise<ActionResult> {
   return guard(async () => {
     const me = await requireUser();
     const today = serverToday();
     const rec = (await listAttendanceOf(me.id)).find(r => r.workDate === today);
     if (!rec?.checkInAt) return { ok: false, message: ACTION.checkInFirst };
+    const outside = locationError(pos);
+    if (outside) return outside;
     await updateCheckOut(me.id, today, serverNow());
     return done({ ok: true, message: ACTION.checkedOut });
   });

@@ -77,3 +77,11 @@ describe('캘린더 (3.6)', () => {
     expect(xmas && !xmas.blank && [xmas.off, xmas.note]).toEqual([true, '성탄절']);
   });
 });
+
+describe('위치 안내 문구 (2.8)', () => {
+  it('거리를 10m 단위, 1km 이상은 km로 보인다', async () => {
+    const { LOCATION } = await import('./copy');
+    expect(LOCATION.outside(612.4, 500)).toBe('캠프에서 610m 떨어져 있어요. 캠프 500m 안에서 기록할 수 있어요.');
+    expect(LOCATION.outside(12840, 500)).toBe('캠프에서 12.8km 떨어져 있어요. 캠프 500m 안에서 기록할 수 있어요.');
+  });
+});

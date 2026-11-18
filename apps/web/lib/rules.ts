@@ -81,3 +81,22 @@ export function growth(days: number) {
   STAGES.forEach((s, k) => { if (days >= s.from) index = k; });
   return { index, cur: STAGES[index], next: STAGES[index + 1] ?? null, canHarvest: days >= FRUIT_DAYS };
 }
+
+// 2.8 위치 확인. 캠프 반경 안에서만 출근·퇴근을 기록한다
+export const CAMP = { lat: 37.504, lng: 127.1042, radiusM: 500 } as const;
+
+/** 두 지점 사이 거리(m). 하버사인 공식 */
+export function distanceM(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
+  const R = 6371000;
+  const rad = (d: number) => (d * Math.PI) / 180;
+  const dLat = rad(b.lat - a.lat);
+  const dLng = rad(b.lng - a.lng);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+/** 캠프까지의 거리와 반경 안인지 */
+export function campCheck(pos: { lat: number; lng: number }) {
+  const d = distanceM(pos, CAMP);
+  return { distance: d, inside: d <= CAMP.radiusM };
+}
