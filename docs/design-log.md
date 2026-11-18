@@ -65,3 +65,10 @@
 
 확인하지 못한 것
 - 19일 계정으로 `harvest` 액션을 직접 불러 서버가 거절하는지는 코드로만 확인했다(액션이 기록을 다시 읽어 20일 미만이면 거절)
+
+### 2026-11-18 5단계(배포)
+
+- Vercel 프로젝트 `hangeuru`(MedicalMate, Hobby)를 대시보드에서 만들었다. Root Directory `apps/web`, Production Branch `main`, 환경 변수 3개(Production, Preview)
+- Vercel 프로젝트의 Node.js가 26.x라서 그대로 두고 `.nvmrc`를 24에서 26으로 바꿨다(사용자 결정). 1단계의 "Node.js 24" 결정을 대신한다
+- 배포 주소에서 보호 경로 리다이렉트, `noindex`, 캐시 금지 헤더, 매니페스트와 아이콘, 클라이언트 번들에 secret key가 없음을 확인했다
+- 배포 주소에서의 가입·출근·퇴근 확인은 사용자가 직접 한다(운영 사이트에 에이전트가 계정을 만들지 않는다)

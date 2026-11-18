@@ -5,8 +5,8 @@
 
 ## 준비
 
-- Node.js 24 (`.nvmrc`)
-- pnpm 10 (`corepack enable pnpm`으로 켠다. 버전은 루트 `package.json`의 `packageManager`)
+- Node.js 26 (`.nvmrc`, Vercel 프로젝트와 같은 메이저)
+- pnpm 10 (`corepack enable pnpm` 또는 `npm i -g pnpm@10`으로 설치한다. 버전은 루트 `package.json`의 `packageManager`)
 
 ## 실행
 
