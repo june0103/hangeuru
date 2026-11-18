@@ -223,7 +223,7 @@ export function growth(days: number) {
 
 | 상수 | 값 | 뜻 |
 | --- | --- | --- |
-| `CAMP.lat`, `CAMP.lng` | 37.5040, 127.1042 | 그라운드(교육장) 위치. 서울 송파구 백제고분로37길 22(도로 단위 좌표) |
+| `CAMP.lat`, `CAMP.lng` | 37.503763, 127.103984 | 그라운드(교육장) 위치. 서울 송파구 백제고분로37길 22(건물 좌표) |
 | `CAMP.radiusM` | 500 | 허용 반경(m) |
 
 1. 출근이나 퇴근 버튼을 누르면 브라우저가 `navigator.geolocation.getCurrentPosition`으로 지금 위치를 구한다. 높은 정확도, 제한 시간 10초, 저장된 위치를 쓰지 않는다(`maximumAge: 0`)
