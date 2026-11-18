@@ -45,3 +45,23 @@
 남은 확인(3단계에서 못 한 것)
 - "이미지 복사" 붙여 넣기는 실제 기기(데스크톱 Chrome, iOS Safari, Android Chrome)에서 확인해야 한다
 - 홈 인디케이터가 있는 아이폰의 안전 영역과 "홈 화면에 추가"는 실기기에서 확인해야 한다
+
+### 2026-11-18 4단계(서버)
+
+- Supabase 연결 코드는 공식 Next.js 예제(`vercel/next.js` examples/with-supabase)와 `@supabase/ssr` 0.12.7 타입을 따랐다. 공식 문서 페이지의 코드 블록은 페이지를 그린 뒤에 나타나서 받아 오지 못했다
+- `@supabase/ssr` 0.12.7의 `setAll(cookies, headers)`가 캐시 금지 헤더를 넘겨 준다. `proxy.ts`는 이 헤더를 응답과 리다이렉트 응답에 함께 옮긴다
+- 새 Supabase 프로젝트는 새 테이블에 `service_role` 권한을 주지 않아 secret key 쓰기가 막혔다. `0002_service_role.sql`을 추가하고 spec 7.1, 11.1을 고쳤다(라이브러리가 문서와 다르게 동작해 보고 후 진행, spec 13.4)
+- `lib/data.ts`는 같은 함수 이름으로 Supabase 구현이 됐다. 3단계 fixtures는 단위 테스트에서만 쓴다
+- 로그인했지만 profiles 행이 없으면 `/auth/signout`(GET)에서 로그아웃시키고 `/login`으로 보낸다. 서버 컴포넌트는 쿠키를 지울 수 없어서다
+- 예상하지 못한 실패는 `unstable_rethrow`로 redirect 신호만 다시 던지고 나머지는 공통 실패 문구로 돌려준다
+
+확인한 것(로컬, 실제 Supabase)
+- 공개 가입 API가 `signup_disabled`로 거절된다. 로그인하지 않은 사람은 테이블을 읽을 수 없다
+- 가입 → 자동 로그인 → 환영 토스트, 같은 이메일 재가입 오류, 없는 이메일·틀린 비밀번호 같은 문구, 보호 경로 리다이렉트, 로그아웃
+- 예시 기록 19일(운영자처럼 secret key로 넣음)에서 spec 2.6 첫 줄 값, 출근 → 열매 → 수확 → 수확 카드, 과수원, 캘린더(시각 없는 기록은 "–")
+- 구성원 토큰으로 attendance 추가·삭제와 profiles.harvested_at 수정이 모두 403으로 거절된다
+- `.next/static`에 secret key 값과 변수 이름이 없다
+- 점검용 계정은 지웠다(profiles, attendance도 같이 지워짐)
+
+확인하지 못한 것
+- 19일 계정으로 `harvest` 액션을 직접 불러 서버가 거절하는지는 코드로만 확인했다(액션이 기록을 다시 읽어 20일 미만이면 거절)

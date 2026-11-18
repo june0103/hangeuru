@@ -1,120 +1,137 @@
-// 화면과 서버 액션이 데이터를 읽고 쓰는 함수 (spec 7.5, 12.6). 데이터는 이 파일의 함수로만 다룬다.
-// 3단계: fixtures를 개발 서버 메모리에 두고 쓴다. 서버를 다시 켜면 처음 상태로 돌아간다.
-// 4단계: 같은 함수 이름을 유지한 채 Supabase 구현으로 바꾼다.
+// 화면과 서버 액션이 데이터를 읽고 쓰는 함수 (spec 6.5, 7.5, 12.6). 데이터는 이 파일의 함수로만 다룬다.
+// 읽기: 로그인한 사용자의 세션 클라이언트(행 수준 보안 적용). 쓰기: secret key 클라이언트(서버 액션에서만 부른다).
 import 'server-only';
 
-import { cookies } from 'next/headers';
-
-import { createFixtures, type FixtureAccount } from './fixtures';
-import { serverNow, serverToday } from './time';
+import { createAdminClient } from './supabase/admin';
+import { createClient } from './supabase/server';
 import type { Attendance, PlanKey, Profile, SeedKey } from './types';
 
-type Store = { profiles: Profile[]; attendance: Attendance[]; accounts: FixtureAccount[] };
-const g = globalThis as unknown as { __yeolmaeFixtures?: Store };
-const store = () => (g.__yeolmaeFixtures ??= createFixtures());
+type ProfileRow = { id: string; name: string; plan: PlanKey; seed: SeedKey; join_date: string; harvested_at: string | null };
+type AttendanceRow = { user_id: string; work_date: string; check_in_at: string | null; check_out_at: string | null };
 
-const SESSION_COOKIE = 'yeolmae-fixture-session';
+const PROFILE_COLS = 'id, name, plan, seed, join_date, harvested_at';
+const ATTENDANCE_COLS = 'user_id, work_date, check_in_at, check_out_at';
+const PAGE = 1000;
 
-/* ---------- 세션 (3단계 임시. 4단계에서 Supabase Auth로 바꾼다) ---------- */
+const toProfile = (r: ProfileRow): Profile => ({
+  id: r.id, name: r.name, plan: r.plan, seed: r.seed, joinDate: r.join_date, harvestedAt: r.harvested_at,
+});
+const toAttendance = (r: AttendanceRow): Attendance => ({
+  userId: r.user_id, workDate: r.work_date, checkInAt: r.check_in_at, checkOutAt: r.check_out_at,
+});
 
+function must<T>(res: { data: T | null; error: { message: string } | null }): T {
+  if (res.error) throw new Error(res.error.message);
+  return res.data as T;
+}
+
+/* ---------- 세션과 계정 ---------- */
+
+/** 로그인한 사용자 id. 서버에서는 getClaims()로만 확인한다(getSession은 믿지 않는다) */
 export async function getSessionUserId(): Promise<string | null> {
-  const id = (await cookies()).get(SESSION_COOKIE)?.value ?? null;
-  return id && store().profiles.some(p => p.id === id) ? id : null;
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  return data?.claims?.sub ?? null;
 }
 
-export async function setSession(userId: string | null) {
-  const jar = await cookies();
-  if (userId) jar.set(SESSION_COOKIE, userId, { httpOnly: true, sameSite: 'lax', path: '/' });
-  else jar.delete(SESSION_COOKIE);
+/** 성공하면 로그인 쿠키를 심고 true */
+export async function signInWithPassword(email: string, password: string): Promise<boolean> {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  return !error;
 }
 
-export async function verifyCredentials(email: string, password: string): Promise<string | null> {
-  const acc = store().accounts.find(a => a.email === email);
-  return acc && acc.password === password ? acc.userId : null;
+export async function signOutSession() {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
 }
 
-export async function emailExists(email: string) {
-  return store().accounts.some(a => a.email === email);
+/** 이메일 확인이 끝난 상태로 사용자를 만든다(spec 8.3). 이미 있는 이메일이면 'taken' */
+export async function createAuthUser(email: string, password: string): Promise<{ id: string } | 'taken'> {
+  const { data, error } = await createAdminClient().auth.admin.createUser({ email, password, email_confirm: true });
+  if (error) {
+    if (error.code === 'email_exists' || error.status === 422) return 'taken';
+    throw error;
+  }
+  return { id: data.user.id };
+}
+
+export async function deleteAuthUser(id: string) {
+  await createAdminClient().auth.admin.deleteUser(id);
 }
 
 /* ---------- 읽기 ---------- */
 
-// fixtures에는 시즌 전체 기록이 들어 있으므로, 서버의 지금보다 뒤의 기록은 아직 없는 것으로 본다
-const visible = (r: Attendance, today: string, now: string): Attendance | null => {
-  if (r.workDate > today) return null;
-  if (r.workDate < today) return r;
-  if (r.checkInAt && r.checkInAt > now) return null;
-  return r.checkOutAt && r.checkOutAt > now ? { ...r, checkOutAt: null } : r;
-};
-const visibleAll = (rows: Attendance[]) => {
-  const today = serverToday();
-  const now = serverNow();
-  return rows.map(r => visible(r, today, now)).filter((r): r is Attendance => r !== null);
-};
-const visibleProfile = (p: Profile): Profile =>
-  p.harvestedAt && p.harvestedAt > serverNow() ? { ...p, harvestedAt: null } : p;
-
 export async function getProfile(id: string): Promise<Profile | null> {
-  const p = store().profiles.find(x => x.id === id);
-  return p ? visibleProfile(p) : null;
+  const supabase = await createClient();
+  const row = must(await supabase.from('profiles').select(PROFILE_COLS).eq('id', id).maybeSingle<ProfileRow>());
+  return row ? toProfile(row) : null;
 }
 
 export async function listProfiles(): Promise<Profile[]> {
-  return store().profiles.map(visibleProfile);
+  const supabase = await createClient();
+  const rows: ProfileRow[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const page = must(await supabase.from('profiles').select(PROFILE_COLS).order('id').range(from, from + PAGE - 1).returns<ProfileRow[]>());
+    rows.push(...page);
+    if (page.length < PAGE) break;
+  }
+  return rows.map(toProfile);
 }
 
 /** 한 사람의 출근 기록 전체, 날짜 오름차순 */
 export async function listAttendanceOf(userId: string): Promise<Attendance[]> {
-  return visibleAll(store().attendance.filter(r => r.userId === userId)).sort((a, b) => a.workDate.localeCompare(b.workDate));
+  const supabase = await createClient();
+  return must(await supabase.from('attendance').select(ATTENDANCE_COLS).eq('user_id', userId).order('work_date').returns<AttendanceRow[]>())
+    .map(toAttendance);
 }
 
 /** 그날의 출근 기록 전체 */
 export async function listAttendanceOn(date: string): Promise<Attendance[]> {
-  return visibleAll(store().attendance.filter(r => r.workDate === date));
+  const supabase = await createClient();
+  return must(await supabase.from('attendance').select(ATTENDANCE_COLS).eq('work_date', date).returns<AttendanceRow[]>()).map(toAttendance);
 }
 
-/** 모든 구성원의 출근 기록 전체 */
+/** 모든 구성원의 출근 기록 전체. 1,000행씩 나눠 끝까지 읽는다(spec 6.5) */
 export async function listAllAttendance(): Promise<Attendance[]> {
-  return visibleAll(store().attendance);
+  const supabase = await createClient();
+  const rows: AttendanceRow[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const page = must(await supabase.from('attendance').select(ATTENDANCE_COLS)
+      .order('work_date').order('user_id').range(from, from + PAGE - 1).returns<AttendanceRow[]>());
+    rows.push(...page);
+    if (page.length < PAGE) break;
+  }
+  return rows.map(toAttendance);
 }
 
 /* ---------- 쓰기 (서버 액션만 부른다) ---------- */
 
-export async function createMember(input: { name: string; email: string; password: string; plan: PlanKey; seed: SeedKey; joinDate: string }) {
-  const id = `u${Date.now().toString(36)}`;
-  store().accounts.push({ email: input.email, password: input.password, userId: id });
-  store().profiles.push({ id, name: input.name, plan: input.plan, seed: input.seed, joinDate: input.joinDate, harvestedAt: null });
-  return id;
+export async function insertProfile(p: Omit<Profile, 'harvestedAt'>) {
+  must(await createAdminClient().from('profiles').insert({ id: p.id, name: p.name, plan: p.plan, seed: p.seed, join_date: p.joinDate }));
 }
 
-/** 오늘 기록이 이미 있으면 아무것도 바꾸지 않고 false */
+/** 오늘 기록이 이미 있으면 아무것도 바꾸지 않고 false. 두 기기에서 동시에 눌러도 1건만 남는다 */
 export async function insertCheckIn(userId: string, date: string, at: string): Promise<boolean> {
-  const s = store();
-  // 미래 fixtures 기록이 남아 있으면 지운다(3단계 전용)
-  const i = s.attendance.findIndex(r => r.userId === userId && r.workDate === date);
-  if (i >= 0) {
-    if (visible(s.attendance[i], date, at)) return false;
-    s.attendance.splice(i, 1);
-  }
-  s.attendance.push({ userId, workDate: date, checkInAt: at, checkOutAt: null });
-  return true;
+  const rows = must(await createAdminClient().from('attendance')
+    .upsert({ user_id: userId, work_date: date, check_in_at: at }, { onConflict: 'user_id,work_date', ignoreDuplicates: true })
+    .select('user_id'));
+  return rows.length > 0;
 }
 
 export async function updateCheckOut(userId: string, date: string, at: string) {
-  const r = store().attendance.find(x => x.userId === userId && x.workDate === date);
-  if (r) r.checkOutAt = at;
+  must(await createAdminClient().from('attendance').update({ check_out_at: at }).eq('user_id', userId).eq('work_date', date));
 }
 
-/** 이미 수확했으면 그 시각을 그대로 돌려준다 */
+/** 이미 수확했으면 먼저 저장된 시각을 그대로 돌려준다 */
 export async function markHarvested(userId: string, at: string): Promise<string> {
-  const p = store().profiles.find(x => x.id === userId)!;
-  const cur = visibleProfile(p).harvestedAt;
-  if (cur) return cur;
-  p.harvestedAt = at;
-  return at;
+  const admin = createAdminClient();
+  const updated = must(await admin.from('profiles').update({ harvested_at: at }).eq('id', userId).is('harvested_at', null).select('harvested_at'));
+  if (updated.length) return updated[0].harvested_at as string;
+  const row = must(await admin.from('profiles').select('harvested_at').eq('id', userId).single<{ harvested_at: string }>());
+  return row.harvested_at;
 }
 
 export async function updateProfileRow(id: string, patch: Partial<Pick<Profile, 'name' | 'plan' | 'seed'>>) {
-  const p = store().profiles.find(x => x.id === id);
-  if (p) Object.assign(p, patch);
+  must(await createAdminClient().from('profiles').update(patch).eq('id', id));
 }

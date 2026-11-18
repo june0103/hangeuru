@@ -879,6 +879,12 @@ revoke all on public.profiles, public.attendance from anon;
 grant select on public.profiles, public.attendance to authenticated;
 ```
 
+새 Supabase 프로젝트는 public 스키마의 새 테이블에 `service_role` 권한을 자동으로 주지 않는다. secret key 클라이언트가 7.3대로 읽고 쓸 수 있게 `supabase/migrations/0002_service_role.sql`을 이어서 실행한다.
+
+```sql
+grant select, insert, update, delete on public.profiles, public.attendance to service_role;
+```
+
 ### 7.2 필드 뜻
 
 | 테이블.필드 | 뜻 | 쓰는 곳 |
@@ -1156,7 +1162,7 @@ grant select on public.profiles, public.attendance to authenticated;
 ### 11.1 배포 절차
 
 1. Supabase에서 프로젝트를 만든다. 리전은 서울(ap-northeast-2)로 한다
-2. SQL Editor에서 7.1의 `0001_init.sql`을 실행한다
+2. SQL Editor에서 7.1의 `0001_init.sql`과 `0002_service_role.sql`을 차례로 실행한다
 3. Authentication 설정을 7.4 표대로 맞춘다
 4. API 키 화면에서 프로젝트 URL, publishable key, secret key를 복사한다
 5. 코드를 GitHub 저장소에 올리고 Vercel에서 그 저장소로 프로젝트를 만든다. Root Directory는 apps/web, Production Branch는 `main`으로 지정한다. `main`에 푸시되면 운영 배포, `develop`과 PR은 미리보기 배포가 된다(12.2)

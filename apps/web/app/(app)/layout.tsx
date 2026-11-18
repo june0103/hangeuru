@@ -8,7 +8,7 @@ import { getProfile, getSessionUserId } from '@/lib/data';
 export default async function AppLayout({ children }: PropsWithChildren) {
   const id = await getSessionUserId();
   const me = id ? await getProfile(id) : null;
-  if (!me) redirect('/login');
+  if (!me) redirect(id ? '/auth/signout' : '/login');
   return (
     <AppShell me={{ name: me.name, seed: me.seed, plan: me.plan, harvested: !!me.harvestedAt }}>
       {children}
