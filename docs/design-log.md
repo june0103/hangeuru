@@ -85,3 +85,9 @@
 - 서비스 이름을 "커리어캠프"로 바꿨다(spec 11.3 확정). `lib/copy.ts`의 `APP_NAME` 하나로 헤더, 탭 제목, 매니페스트, 수확 카드가 바뀐다
 - 로고는 캠프 배너 분위기를 참고해 새로 그린 유리 큐브(`design/handoff/2026-11-18-logo`, Claude Code 초안). 캠프 공식 로고(AI Native Frontiers)는 쓰지 않는다(spec 5.2)
 - 헤더는 `public/brand/mark.svg` + "커리어캠프", 파비콘은 `app/icon.svg`, 홈 화면 아이콘은 `public/brand/icon.svg`를 PNG로 바꿔 낸다. 사과 브랜드 마크 코드(`brandMarkSvg`)는 지웠다. 나무·열매 그림은 그대로다
+
+### 2026-11-18 이름 "커리어캠프 출근부", 헤더 마크 32px
+
+- 서비스 이름을 "커리어캠프 출근부"로 바꿨다. 홈 화면 아이콘 아래처럼 좁은 곳은 짧은 이름 "커리어캠프"(`APP_SHORT_NAME`)
+- 헤더 마크를 24px에서 32px로 키우고, `public/brand/mark.svg`의 viewBox를 큐브에 맞춰 여백을 줄였다(핸드오프 폴더 원본은 그대로)
+- 이름이 길어져 768px 미만에서 6글자 이상 이름이 브랜드와 겹쳤다. 모바일 헤더는 "{이름}님" 대신 사람 아이콘 버튼(44px)만 둔다(spec 3.2)

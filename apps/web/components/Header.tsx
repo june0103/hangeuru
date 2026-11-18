@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Button, FlexBox, Tab, TabList, TabListItem, TextButton, addOpacity, containerStyle } from '@montage-ui/core';
+import { Box, Button, FlexBox, IconButton, Tab, TabList, TabListItem, TextButton, addOpacity, containerStyle } from '@montage-ui/core';
 import type { Theme } from '@montage-ui/core';
 import { IconPerson } from '@montage-ui/icon';
 import Link from 'next/link';
@@ -64,15 +64,23 @@ export default function Header({ userName, onOpenSettings, onSignOut, signingOut
               </Tab>
             </Box>
             <FlexBox alignItems="center" gap={USER_GAP} sx={{ marginLeft: 'auto' }}>
-              <TextButton
-                size="small"
-                color="assistive"
-                aria-label={HEADER.openSettings}
-                leadingContent={<IconPerson width={ICON} height={ICON} />}
-                onClick={onOpenSettings}
-              >
-                {HEADER.userName(userName)}
-              </TextButton>
+              {/* 768px 미만은 이름이 길면 브랜드와 겹쳐서 아이콘 버튼만 둔다 (spec 3.2) */}
+              <Box sx={{ display: 'none', '@media (min-width: 768px)': { display: 'block' } }}>
+                <TextButton
+                  size="small"
+                  color="assistive"
+                  aria-label={HEADER.openSettings}
+                  leadingContent={<IconPerson width={ICON} height={ICON} />}
+                  onClick={onOpenSettings}
+                >
+                  {HEADER.userName(userName)}
+                </TextButton>
+              </Box>
+              <Box sx={{ '@media (min-width: 768px)': { display: 'none' } }}>
+                <IconButton size={44} aria-label={HEADER.openSettings} color="semantic.foreground.neutral.secondary" onClick={onOpenSettings}>
+                  <IconPerson />
+                </IconButton>
+              </Box>
               <Button variant="outlined" color="assistive" size="small" onClick={onSignOut} loading={signingOut}>
                 {HEADER.signOut}
               </Button>

@@ -8,7 +8,7 @@ import { APP_NAME } from '@/lib/copy';
 
 // 헤더 왼쪽 브랜드: 유리 큐브 마크 + 서비스 이름. 누르면 홈 (spec 3.2, 4.6)
 const GAP = 8;
-const MARK = 24;
+const MARK = 32;
 
 export default function BrandMark({ href }: { href: string }) {
   return (

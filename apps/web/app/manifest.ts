@@ -1,12 +1,12 @@
 import type { MetadataRoute } from 'next';
 
-import { APP_NAME } from '@/lib/copy';
+import { APP_NAME, APP_SHORT_NAME } from '@/lib/copy';
 
 // 홈 화면에 추가 (spec 3.10)
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: APP_NAME,
-    short_name: APP_NAME,
+    short_name: APP_SHORT_NAME,
     start_url: '/',
     display: 'standalone',
     icons: [

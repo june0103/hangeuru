@@ -22,7 +22,9 @@ export const koDuration = (min: number) => {
 export const DASH = '–';
 
 /* ---------- 공통 ---------- */
-export const APP_NAME = '커리어캠프';
+export const APP_NAME = '커리어캠프 출근부';
+/** 홈 화면 아이콘 아래처럼 좁은 곳에 쓰는 이름 */
+export const APP_SHORT_NAME = '커리어캠프';
 export const NAV = {
   home: '내 나무',
   calendar: '캘린더',
