@@ -255,6 +255,7 @@ export function growth(days: number) {
 | 하단 탭 바 | 768px 미만에서만. `BottomNavigation` 높이 56px에 아래 안전 영역을 더한다. 항목은 IconHome "내 나무", IconCalendar "캘린더", IconPersons "과수원". 현재 화면은 브랜드색, 나머지는 `foreground.inactive.primary` |
 | 로그인·가입 화면 | 헤더에 브랜드만 보이고 하단 탭 바는 없다 |
 | 브레이크포인트 | 몽타주 값 그대로 sm 768px, md 992px |
+| 줄바꿈 | 모든 글자는 어절(띄어쓰기) 단위로 줄을 바꾼다(`word-break: keep-all`). 이메일처럼 띄어쓰기 없이 긴 글자만 칸을 넘을 때 글자 단위로 끊는다(`overflow-wrap: anywhere`) |
 
 ### 3.3 로그인 (`/login`)
 
