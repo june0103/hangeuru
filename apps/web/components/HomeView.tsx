@@ -88,7 +88,7 @@ export default function HomeView({ today, week, tree, camp, card, welcome }: Pro
 
   return (
     <>
-      {/* 992px 이상은 두 단, 미만은 한 단에 오늘, 내 나무, 이번 주, 오늘 캠프 순서 */}
+      {/* 992px 이상은 두 단, 미만은 한 단에 오늘, 내 나무, 이번 주, 오늘 그라운드 순서 */}
       <FlexBox
         gap={GAP}
         alignItems="flex-start"

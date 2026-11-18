@@ -94,7 +94,7 @@ describe('workdaysLeft (2.4)', () => {
 });
 
 describe('위치 확인 (2.8)', () => {
-  it('캠프 위치는 반경 안이다', async () => {
+  it('그라운드 위치는 반경 안이다', async () => {
     const { CAMP, campCheck } = await import('./rules');
     expect(campCheck(CAMP)).toEqual({ distance: 0, inside: true });
   });

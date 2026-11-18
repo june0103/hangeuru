@@ -9,7 +9,7 @@ import type { CampView } from '@/lib/view';
 
 import Panel from './Panel';
 
-// spec 3.5 오늘 캠프 패널
+// spec 3.5 오늘 그라운드 패널
 const TEXT_TOP = 8;
 const CHIPS_TOP = 12;
 const CHIP_GAP = 6;

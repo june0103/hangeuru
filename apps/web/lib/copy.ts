@@ -95,7 +95,7 @@ export const TODAY = {
   noTime: '미기록',
   states: {
     before: { badge: '출근 전', button: '출근하기', hint: '출근하면 나무가 자라요.' },
-    inCamp: { badge: '캠프에 있어요', button: '퇴근하기', hint: '퇴근은 누르지 않아도 출근 기록은 그대로예요.' },
+    inCamp: { badge: '그라운드에 있어요', button: '퇴근하기', hint: '퇴근은 누르지 않아도 출근 기록은 그대로예요.' },
     left: { badge: '퇴근했어요', button: '퇴근 시간 다시 기록', hint: '오늘 출근을 기록했어요.' },
     rest: { badge: '쉬는 날', button: '오늘은 쉬는 날이에요', hint: '주말과 공휴일에는 출근을 기록하지 않아요.' },
     over: {
@@ -164,14 +164,14 @@ export const TREE = {
   harvestButton: (seed: SeedKey) => `${SEEDS[seed].fruit} 수확하기`,
 } as const;
 
-/* ---------- 홈: 오늘 캠프 (3.5) ---------- */
+/* ---------- 홈: 오늘 그라운드 (3.5) ---------- */
 export const CAMP = {
-  title: '오늘 캠프',
+  title: '오늘 그라운드',
   over: '시즌이 끝나서 오늘 출근 기록은 없어요.',
   rest: '오늘은 쉬는 날이라 출근 기록이 없어요.',
   empty: '아직 아무도 출근하지 않았어요. 오늘 첫 출근을 기록해 보세요.',
-  summary: (came: number, here: number) => `오늘 ${came}명이 출근했고, 지금 ${here}명이 캠프에 있어요.`,
-  inCampSr: ' 캠프에 있음',
+  summary: (came: number, here: number) => `오늘 ${came}명이 출근했고, 지금 ${here}명이 그라운드에 있어요.`,
+  inCampSr: ' 그라운드에 있음',
   toGarden: '모두의 과수원 보기',
 } as const;
 
@@ -197,7 +197,7 @@ export const GARDEN = {
   over: (hv: string) => `시즌이 끝났어요. ${hv}`,
   me: '나',
   harvested: '수확 완료',
-  inCamp: '캠프에 있어요',
+  inCamp: '그라운드에 있어요',
   left: '퇴근했어요',
   count: (days: number, stage: string) => `출근 ${days}일, ${stage} 단계`,
   countHarvested: (days: number) => `출근 ${days}일, 수확 완료`,
@@ -262,7 +262,7 @@ const meters = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)}km` : `${Mat
 export const LOCATION = {
   denied: '위치 권한을 허용해야 출근과 퇴근을 기록할 수 있어요. 브라우저 설정에서 위치를 허용해 주세요.',
   unavailable: '지금 위치를 확인하지 못했어요. 잠시 후 다시 시도해 주세요.',
-  outside: (distance: number, radius: number) => `캠프에서 ${meters(distance)} 떨어져 있어요. 캠프 ${radius}m 안에서 기록할 수 있어요.`,
+  outside: (distance: number, radius: number) => `그라운드에서 ${meters(distance)} 떨어져 있어요. 그라운드 ${radius}m 안에서 기록할 수 있어요.`,
 } as const;
 
 /* ---------- 불러오기와 오류 화면 (9.4) ---------- */
