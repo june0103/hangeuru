@@ -49,11 +49,11 @@ export function Shapes({ list }: { list: Shape[] }) {
   );
 }
 
-/** 씨앗 선택과 브랜드 마크에 쓰는 열매 하나 */
-export function FruitIcon({ seed, variant }: { seed: SeedKey; variant: 'seedPicker' | 'brand' }) {
+/** 씨앗 선택에 쓰는 열매 하나 */
+export function FruitIcon({ seed, variant }: { seed: SeedKey; variant: 'seedPicker' }) {
   const s = SIZES[variant];
   const w = s.w;
-  const h = 'h' in s ? s.h : +(w * 1.2).toFixed(1);
+  const h = +(w * 1.2).toFixed(1);
   return (
     <svg width={w} height={h} viewBox={s.viewBox} aria-hidden="true" style={{ display: 'block', flexShrink: 0 }}>
       <Shapes list={fruitShapes(seed, s.r)} />

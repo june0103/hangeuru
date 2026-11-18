@@ -22,7 +22,7 @@ export const koDuration = (min: number) => {
 export const DASH = '–';
 
 /* ---------- 공통 ---------- */
-export const APP_NAME = '열매 출근부';
+export const APP_NAME = '커리어캠프';
 export const NAV = {
   home: '내 나무',
   calendar: '캘린더',
