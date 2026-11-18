@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>열매 출근부</title>
+<!-- 참고용 프로토타입. 정식 구현의 기준은 docs/spec.md 이고, 이 파일은 모양과 동작을 비교하는 용도다. -->
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+/* Design tokens: Montage (Wanted Design System) v4.3.2, MIT, (c) Wanted Lab, Inc.
+   Values copied from @montage-ui/theme semantic/atomic tokens. */
+
+:root{
+  color-scheme:light;
+  /* foreground */
+  --fg-primary:#171719;
+  --fg-strong:#000000;
+  --fg-secondary:rgba(46,47,51,.88);
+  --fg-tertiary:rgba(55,56,60,.61);
+  --fg-quaternary:rgba(55,56,60,.28);
+  --fg-disable:rgba(55,56,60,.16);
+  --fg-inactive:#989BA2;
+  --fg-brand:#0066FF;
+  --fg-positive:#00BF40;
+  --fg-cautionary:#FF9200;
+  --fg-negative:#FF4242;
+  --fg-violet:#5B37ED;
+  --fg-lime:#429E00;
+  /* background / surface */
+  --bg-primary:#ffffff;
+  --bg-secondary:#F7F7F8;
+  --surface-elevated:#ffffff;
+  --surface-secondary:rgba(112,115,124,.08);
+  --surface-tertiary:rgba(112,115,124,.05);
+  --surface-strong:rgba(112,115,124,.16);
+  --surface-brand:#0066FF;
+  --surface-brand-subtle:rgba(0,102,255,.05);
+  --surface-brand-badge:rgba(0,102,255,.08);
+  --surface-positive:rgba(0,191,64,.08);
+  --surface-disable:#F4F4F5;
+  --surface-violet:rgba(101,65,242,.08);
+  --surface-lime:rgba(88,207,4,.08);
+  --transparent-primary:rgba(255,255,255,.08);
+  /* line */
+  --line-primary:rgba(112,115,124,.22);
+  --line-secondary:rgba(112,115,124,.16);
+  --line-secondary-opaque:#EAEBEC;
+  --line-tertiary:rgba(112,115,124,.08);
+  --line-brand-strong:rgba(0,102,255,.43);
+  --line-brand-focus:rgba(0,102,255,.12);
+  --line-negative:rgba(255,66,66,.43);
+  --line-negative-strong:rgba(255,66,66,.52);
+  --line-negative-focus:rgba(255,66,66,.12);
+  --line-violet:rgba(91,55,237,.43);
+  /* effect */
+  --dimmer:rgba(23,23,25,.52);
+  --toast-bg:rgba(27,28,30,.52);
+  --shadow-xsmall:0px 1px 2px -1px rgba(23,23,23,.1);
+  --shadow-xlarge:0px 10px 15px -5px rgba(23,23,23,.1),0px 24px 38px -10px rgba(23,23,23,.12);
+  /* 주간 달성: violet / 나무: Montage atomic green, orange */
+  --done:#6541F2;
+  --leaf:#00BF40;
+  --leaf2:#009632;
+  --trunk:#9C5800;
+  --soil:#663A00;
+  --seed:#D47800;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --fg-primary:#F7F7F8;
+    --fg-strong:#ffffff;
+    --fg-secondary:rgba(194,196,200,.88);
+    --fg-tertiary:rgba(174,176,182,.61);
+    --fg-quaternary:rgba(174,176,182,.28);
+    --fg-disable:rgba(152,155,162,.16);
+    --fg-inactive:#5A5C63;
+    --fg-brand:#3385FF;
+    --fg-positive:#1ED45A;
+    --fg-cautionary:#FFA938;
+    --fg-negative:#FF6363;
+    --fg-violet:#9E86FC;
+    --fg-lime:#58CF04;
+    --bg-primary:#1B1C1E;
+    --bg-secondary:#0F0F10;
+    --surface-elevated:#212225;
+    --surface-secondary:rgba(112,115,124,.22);
+    --surface-tertiary:rgba(112,115,124,.12);
+    --surface-strong:rgba(112,115,124,.28);
+    --surface-brand:#3385FF;
+    --surface-brand-subtle:rgba(51,133,255,.05);
+    --surface-brand-badge:rgba(51,133,255,.08);
+    --surface-positive:rgba(30,212,90,.08);
+    --surface-disable:#2E2F33;
+    --surface-violet:rgba(125,94,247,.08);
+    --surface-lime:rgba(107,224,22,.08);
+    --transparent-primary:rgba(33,34,37,.61);
+    --line-primary:rgba(112,115,124,.32);
+    --line-secondary:rgba(112,115,124,.28);
+    --line-secondary-opaque:#333438;
+    --line-tertiary:rgba(112,115,124,.22);
+    --line-brand-strong:rgba(51,133,255,.43);
+    --line-brand-focus:rgba(51,133,255,.12);
+    --line-negative:rgba(255,99,99,.43);
+    --line-negative-strong:rgba(255,99,99,.52);
+    --line-negative-focus:rgba(255,99,99,.12);
+    --line-violet:rgba(158,134,252,.43);
+    --dimmer:rgba(23,23,25,.74);
+    --toast-bg:rgba(70,71,76,.88);
+    --done:#7D5EF7;
+    --leaf:#1ED45A;
+    --leaf2:#00BF40;
+    --trunk:#D47800;
+    --soil:#9C5800;
+    --seed:#FFA938;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --fg-primary:#F7F7F8;
+  --fg-strong:#ffffff;
+  --fg-secondary:rgba(194,196,200,.88);
+  --fg-tertiary:rgba(174,176,182,.61);
+  --fg-quaternary:rgba(174,176,182,.28);
+  --fg-disable:rgba(152,155,162,.16);
+  --fg-inactive:#5A5C63;
+  --fg-brand:#3385FF;
+  --fg-positive:#1ED45A;
+  --fg-cautionary:#FFA938;
+  --fg-negative:#FF6363;
+  --fg-violet:#9E86FC;
+  --fg-lime:#58CF04;
+  --bg-primary:#1B1C1E;
+  --bg-secondary:#0F0F10;
+  --surface-elevated:#212225;
+  --surface-secondary:rgba(112,115,124,.22);
+  --surface-tertiary:rgba(112,115,124,.12);
+  --surface-strong:rgba(112,115,124,.28);
+  --surface-brand:#3385FF;
+  --surface-brand-subtle:rgba(51,133,255,.05);
+  --surface-brand-badge:rgba(51,133,255,.08);
+  --surface-positive:rgba(30,212,90,.08);
+  --surface-disable:#2E2F33;
+  --surface-violet:rgba(125,94,247,.08);
+  --surface-lime:rgba(107,224,22,.08);
+  --transparent-primary:rgba(33,34,37,.61);
+  --line-primary:rgba(112,115,124,.32);
+  --line-secondary:rgba(112,115,124,.28);
+  --line-secondary-opaque:#333438;
+  --line-tertiary:rgba(112,115,124,.22);
+  --line-brand-strong:rgba(51,133,255,.43);
+  --line-brand-focus:rgba(51,133,255,.12);
+  --line-negative:rgba(255,99,99,.43);
+  --line-negative-strong:rgba(255,99,99,.52);
+  --line-negative-focus:rgba(255,99,99,.12);
+  --line-violet:rgba(158,134,252,.43);
+  --dimmer:rgba(23,23,25,.74);
+  --toast-bg:rgba(70,71,76,.88);
+  --done:#7D5EF7;
+  --leaf:#1ED45A;
+  --leaf2:#00BF40;
+  --trunk:#D47800;
+  --soil:#9C5800;
+  --seed:#FFA938;
+}
+
+/* ---------- base ---------- */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;height:100%;scroll-padding-top:calc(76px + env(safe-area-inset-top,0px))}
+@media (max-width:767px){html{scroll-padding-top:calc(116px + env(safe-area-inset-top,0px))}}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{
+  margin:0;min-height:100%;
+  background:var(--bg-secondary);color:var(--fg-primary);
+  font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,Roboto,"Helvetica Neue","Segoe UI","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol",sans-serif;
+  font-size:1rem;line-height:1.5rem;letter-spacing:.0057em;
+  word-break:keep-all;overflow-wrap:anywhere;
+}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg-secondary)}
+h1,h2,h3,p,ul,ol,dl,dd,figure{margin:0;padding:0}
+ul,ol{list-style:none}
+a{color:inherit;text-decoration:none}
+button,input{font:inherit;color:inherit;letter-spacing:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid var(--fg-brand);outline-offset:2px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.ic{flex-shrink:0;display:block}
+.tnum{font-feature-settings:"tnum" 1}
+
+/* typography (Montage variants) */
+.t-title3{font-size:1.5rem;line-height:2rem;letter-spacing:-.023em;font-weight:700}
+.t-heading1{font-size:1.375rem;line-height:1.875rem;letter-spacing:-.0194em;font-weight:600}
+.t-heading2{font-size:1.25rem;line-height:1.75rem;letter-spacing:-.012em;font-weight:600}
+.t-headline1{font-size:1.125rem;line-height:1.625rem;letter-spacing:-.002em;font-weight:600}
+.t-headline2{font-size:1.0625rem;line-height:1.5rem;letter-spacing:0;font-weight:600}
+.t-body1{font-size:1rem;line-height:1.5rem;letter-spacing:.0057em}
+.t-body2{font-size:.9375rem;line-height:1.375rem;letter-spacing:.0096em}
+.t-label1{font-size:.875rem;line-height:1.25rem;letter-spacing:.0145em}
+.t-label1r{font-size:.875rem;line-height:1.375rem;letter-spacing:.0145em}
+.t-label2{font-size:.8125rem;line-height:1.125rem;letter-spacing:.0194em}
+.t-caption1{font-size:.75rem;line-height:1rem;letter-spacing:.0252em}
+.w-regular{font-weight:400}.w-medium{font-weight:500}.w-bold{font-weight:600}
+.c-secondary{color:var(--fg-secondary)}.c-tertiary{color:var(--fg-tertiary)}
+
+/* layout: containerStyle() */
+.container{width:100%;margin:0 auto;padding:0 20px}
+@media (min-width:768px){.container{width:90%;max-width:1060px;padding:0}}
+
+/* ---------- Button ---------- */
+.m-btn{
+  display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;
+  white-space:nowrap;position:relative;border:0;margin:0;width:fit-content;height:fit-content;
+  font-weight:600;overflow:hidden;
+}
+.m-btn::after{content:"";position:absolute;inset:0;border-radius:inherit;background:var(--fg-primary);opacity:0;transition:opacity .15s ease;pointer-events:none}
+@media (pointer:fine){.m-btn:hover::after{opacity:.05}}
+.m-btn:active::after{opacity:.12}
+.m-btn--lg{border-radius:14px;min-height:48px;padding:13px 20px;gap:6px;font-size:.9375rem;line-height:1.375rem;letter-spacing:.0096em}
+.m-btn--md{border-radius:12px;min-height:40px;padding:10px 16px;gap:4px;font-size:.875rem;line-height:1.25rem;letter-spacing:.0145em}
+.m-btn--sm{border-radius:10px;min-height:32px;padding:8px 12px;gap:4px;font-size:.75rem;line-height:1rem;letter-spacing:.0252em}
+.m-btn--solid-primary{color:#fff;background:var(--surface-brand)}
+.m-btn--solid-assistive{color:var(--fg-secondary);background:var(--surface-secondary)}
+.m-btn--outlined-assistive{color:var(--fg-primary);background:transparent;box-shadow:inset 0 0 0 1px var(--line-secondary)}
+.m-btn--outlined-primary{color:var(--fg-brand);background:transparent;box-shadow:inset 0 0 0 1px var(--line-secondary)}
+.m-btn:disabled{color:var(--fg-disable);background:var(--surface-disable);box-shadow:none;pointer-events:none;cursor:initial}
+.m-btn--full{width:100%}
+
+/* TextButton */
+.m-text-btn{display:inline-flex;align-items:center;gap:4px;background:transparent;border:0;padding:5px 0;font-weight:600;font-size:.9375rem;line-height:1.375rem;letter-spacing:.0096em;border-radius:6px}
+.m-text-btn--sm{padding:4px 0;font-size:.875rem;line-height:1.25rem;letter-spacing:.0145em}
+.m-text-btn--primary{color:var(--fg-brand)}
+.m-text-btn--assistive{color:var(--fg-secondary)}
+@media (pointer:fine){.m-text-btn:hover{opacity:.74}}
+
+/* IconButton (normal) */
+.m-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9999px;border:0;background:transparent;color:var(--fg-primary);position:relative}
+.m-icon-btn::after{content:"";position:absolute;inset:0;border-radius:inherit;background:var(--fg-primary);opacity:0;transition:opacity .15s ease}
+@media (pointer:fine){.m-icon-btn:hover::after{opacity:.05}}
+.m-icon-btn:active::after{opacity:.12}
+.m-icon-btn:disabled{color:var(--fg-disable);pointer-events:none}
+
+/* ---------- FormControl / TextField ---------- */
+.m-form{display:flex;flex-direction:column;gap:16px}
+.m-control{display:flex;flex-direction:column;gap:8px}
+.m-label{font-size:.875rem;line-height:1.25rem;letter-spacing:.0145em;font-weight:600;color:var(--fg-secondary)}
+.m-msg{font-size:.75rem;line-height:1rem;letter-spacing:.0252em;color:var(--fg-tertiary)}
+.m-msg--negative{color:var(--fg-negative)}
+.m-msg:empty{display:none}
+.m-field{
+  display:flex;align-items:center;background:var(--transparent-primary);
+  box-shadow:inset 0 0 0 1px var(--line-secondary);transition:box-shadow .2s ease;
+  border-radius:14px;padding:12px 8px;cursor:text;
+  font-size:.9375rem;line-height:1.375rem;letter-spacing:.0096em;font-weight:400;
+}
+.m-field input{width:100%;min-width:0;background:transparent;border:0;outline:0;box-shadow:none;padding:1px 4px;color:var(--fg-primary);caret-color:var(--fg-brand)}
+.m-field input::placeholder{color:var(--fg-tertiary)}
+.m-field:has(input:focus){box-shadow:inset 0 0 0 1px var(--line-brand-strong),0 0 0 4px var(--line-brand-focus)}
+.m-control.is-negative .m-field{box-shadow:inset 0 0 0 1px var(--line-negative)}
+.m-control.is-negative .m-field:has(input:focus){box-shadow:inset 0 0 0 1px var(--line-negative-strong),0 0 0 4px var(--line-negative-focus)}
+
+/* framedStyle({size:'large'}) + Radio */
+.plan-group{display:flex;flex-direction:column;gap:8px}
+.m-framed{position:relative;display:flex;align-items:center;gap:12px;padding:14px 20px;border-radius:16px;background:transparent;cursor:pointer}
+.m-framed::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;transition:box-shadow .2s ease;box-shadow:var(--shadow-xsmall),inset 0 0 0 1px var(--line-secondary)}
+.m-framed:has(input:checked)::before{box-shadow:var(--shadow-xsmall),inset 0 0 0 2px var(--line-brand-strong)}
+.m-framed:has(input:focus-visible){outline:2px solid var(--fg-brand);outline-offset:2px}
+.plan-text,.m-radio{position:relative}
+.plan-text{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.plan-name{font-size:1rem;line-height:1.5rem;font-weight:600}
+.plan-desc{font-size:.875rem;line-height:1.25rem;letter-spacing:.0145em;color:var(--fg-tertiary)}
+.m-radio{width:20px;height:20px;border-radius:9999px;flex-shrink:0;background:var(--bg-primary);box-shadow:inset 0 0 0 1.5px var(--line-primary);display:flex;align-items:center;justify-content:center;color:transparent}
+.m-framed:has(input:checked) .m-radio{background:var(--surface-brand);box-shadow:none;color:#fff}
+.m-radio::after{content:"";width:8px;height:8px;border-radius:9999px;background:currentColor}
+
+/* ---------- ContentBadge ---------- */
+.m-badge{display:inline-flex;align-items:center;justify-content:center;width:fit-content;flex-shrink:0;white-space:nowrap;font-weight:500;border-radius:8px;padding:4px 6px;gap:4px;font-size:.75rem;line-height:1rem;letter-spacing:.0252em}
+.m-badge--md{border-radius:10px;padding:5px 8px;font-size:.8125rem;line-height:1.125rem;letter-spacing:.0194em}
+.m-badge--neutral{background:var(--surface-secondary);color:var(--fg-secondary)}
+.m-badge--violet{background:var(--surface-violet);color:var(--fg-violet)}
+.m-badge--lime{background:var(--surface-lime);color:var(--fg-lime)}
+.m-badge--brand{background:var(--surface-brand-badge);color:var(--fg-brand)}
+.m-badge--outlined{background:transparent;color:var(--fg-secondary);box-shadow:inset 0 0 0 1px var(--line-primary)}
+
+/* ---------- SectionMessage ---------- */
+.m-secmsg{display:flex;gap:8px;align-items:flex-start;width:100%;border-radius:12px;padding:12px;font-size:.9375rem;line-height:1.375rem;letter-spacing:.0096em;font-weight:500;color:var(--fg-primary)}
+.m-secmsg .ic{margin-top:1px}
+.m-secmsg--info{background:var(--surface-brand-subtle)}
+.m-secmsg--info .ic{color:var(--fg-brand)}
+.m-secmsg--positive{background:color-mix(in srgb,var(--fg-positive) 5%,transparent)}
+.m-secmsg--positive .ic{color:var(--fg-positive)}
+.m-secmsg-desc{display:block;font-size:.875rem;line-height:1.375rem;letter-spacing:.0145em;font-weight:400;color:var(--fg-secondary)}
+
+/* ---------- Table ---------- */
+.m-table{border-radius:12px;overflow:hidden;border:1px solid var(--line-secondary-opaque)}
+.m-table-scroll{overflow-x:auto}
+.m-table table{width:100%;border-collapse:separate;border-spacing:0}
+.m-table thead{background:var(--surface-tertiary)}
+.m-table th{padding:8px 0 8px 20px;height:44px;text-align:left;vertical-align:middle;border-bottom:1px solid var(--line-secondary-opaque);font-size:.8125rem;line-height:1.125rem;letter-spacing:.0194em;font-weight:600;color:var(--fg-secondary);white-space:nowrap}
+.m-table td{padding:16px 0 16px 20px;height:44px;vertical-align:middle;border-bottom:1px solid var(--line-secondary-opaque);font-size:1rem;line-height:1.5rem;color:var(--fg-primary);white-space:nowrap}
+.m-table th:last-child,.m-table td:last-child{padding-right:20px}
+.m-table tbody tr:last-child td{border-bottom:0}
+
+/* ---------- Toast ---------- */
+.toast-region{position:fixed;left:0;right:0;bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:1400;display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 20px;pointer-events:none}
+.m-toast{display:flex;align-items:center;gap:12px;padding:11px 16px;border-radius:12px;background:var(--toast-bg);-webkit-backdrop-filter:blur(32px);backdrop-filter:blur(32px);color:#fff;font-size:.9375rem;line-height:1.375rem;letter-spacing:.0096em;font-weight:600;width:100%;animation:toast-in .2s ease}
+.m-toast span{padding:5px 2px;opacity:.88}
+.m-toast .ic{color:var(--fg-positive);background:radial-gradient(circle,#fff 0 38%,transparent 40%)}
+.m-toast.is-out{opacity:0;transition:opacity .2s ease}
+@media (min-width:768px){.m-toast{width:auto;min-width:356px;max-width:420px}}
+@keyframes toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ---------- Alert / Modal ---------- */
+.overlay{position:fixed;inset:0;z-index:1300;display:flex;align-items:center;justify-content:center;padding:20px}
+.overlay-dim{position:absolute;inset:0;background:var(--dimmer)}
+.m-alert{position:relative;background:var(--surface-elevated);border-radius:12px;width:100%;min-width:0;max-width:400px;display:flex;flex-direction:column;box-shadow:var(--shadow-xlarge)}
+.m-alert-content{padding:20px;display:flex;flex-direction:column;gap:6px}
+.m-alert-body{font-size:.9375rem;line-height:1.375rem;letter-spacing:.0096em;color:var(--fg-tertiary)}
+.m-alert-actions{padding:0 20px 12px;display:flex;justify-content:flex-end;gap:24px}
+.m-modal{position:relative;background:var(--surface-elevated);border-radius:24px;width:480px;max-width:100%;max-height:100%;display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--shadow-xlarge)}
+.m-modal-nav{display:flex;align-items:center;justify-content:space-between;padding:24px 24px 16px}
+.m-modal-content{padding:0 24px 8px;overflow-y:auto}
+.m-modal-actions{display:flex;gap:8px;padding:16px 24px 24px}
+.m-modal-actions .m-btn{flex:1}
+@media (max-width:767px){
+  .overlay--modal{padding:0;align-items:flex-end}
+  .m-modal{width:100%;border-radius:24px 24px 0 0;padding-bottom:env(safe-area-inset-bottom,0px)}
+}
+
+/* ---------- demo bar (예시 전용) ---------- */
+.demo-bar{background:var(--surface-brand-subtle);border-bottom:1px solid var(--line-tertiary)}
+.demo-in{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;padding-top:10px;padding-bottom:10px}
+.demo-in p{font-size:.875rem;line-height:1.25rem;letter-spacing:.0145em;color:var(--fg-secondary)}
+.demo-in p b{color:var(--fg-primary);font-weight:600}
+.demo-ctl{display:flex;gap:6px;flex-wrap:wrap}
+
+/* ---------- header ---------- */
+.gnb{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--bg-primary) 88%,transparent);-webkit-backdrop-filter:blur(32px);backdrop-filter:blur(32px);border-bottom:1px solid var(--line-tertiary)}
+.gnb-in{display:flex;align-items:center;gap:32px;min-height:56px}
+.brand{display:inline-flex;align-items:center;gap:8px;font-size:1.0625rem;line-height:1.5rem;font-weight:700;letter-spacing:-.01em;white-space:nowrap;border-radius:6px}
+.gnb-user{margin-left:auto;display:flex;align-items:center;gap:12px}
+.m-tablist{display:flex;gap:24px;align-self:flex-end}
+.m-tab{position:relative;padding:9px 0;white-space:nowrap;font-size:.9375rem;line-height:1.375rem;letter-spacing:.0096em;font-weight:600;color:var(--fg-quaternary);transition:color .2s ease;border-radius:4px}
+@media (pointer:fine){.m-tab:hover{color:var(--fg-tertiary)}}
+.m-tab[aria-current="page"]{color:var(--fg-strong)}
+.m-tab[aria-current="page"]::after{content:"";position:absolute;left:0;right:0;bottom:-8px;height:2px;background:var(--fg-strong)}
+.gnb-in .m-tablist{padding-bottom:8px}
+@media (max-width:767px){
+  .gnb-in{gap:12px}
+  .gnb .m-tablist{display:none}
+}
+
+/* ---------- 모바일 하단 탭과 출근 버튼 ---------- */
+.bnav,.action-bar{display:none}
+@media (max-width:767px){
+  .bnav:not([hidden]){display:flex;position:fixed;left:0;right:0;bottom:0;z-index:6;height:calc(56px + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);background:color-mix(in srgb,var(--surface-elevated) 88%,transparent);-webkit-backdrop-filter:blur(32px);backdrop-filter:blur(32px);border-top:1px solid var(--line-tertiary)}
+  .bnav a{flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 0;color:var(--fg-inactive);font-size:.6875rem;line-height:.875rem;letter-spacing:.0311em;font-weight:500}
+  .bnav a[aria-current="page"]{color:var(--fg-brand)}
+  .action-bar:not([hidden]){display:block;position:fixed;left:0;right:0;bottom:calc(56px + env(safe-area-inset-bottom,0px));z-index:6;padding:16px 20px 12px;background:linear-gradient(to top,var(--bg-secondary) 72%,transparent)}
+  .has-action .p-today #main-action{display:none}
+  .has-bnav main{padding-bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+  .has-action main{padding-bottom:calc(164px + env(safe-area-inset-bottom,0px))}
+  .has-bnav .toast-region{bottom:calc(72px + env(safe-area-inset-bottom,0px))}
+  .has-action .toast-region{bottom:calc(148px + env(safe-area-inset-bottom,0px))}
+}
+
+/* ---------- page ---------- */
+main{padding:24px 0 96px}
+.panel{background:var(--bg-primary);border:1px solid var(--line-secondary);border-radius:20px;padding:24px}
+@media (max-width:767px){main{padding-top:16px}.panel{padding:20px;border-radius:16px}.p-today .hint{margin-top:16px}}
+
+/* home */
+.home{display:flex;gap:24px;align-items:flex-start}
+.home-col{display:flex;flex-direction:column;gap:24px;min-width:0}
+.home-col--side{flex:0 0 340px}
+.home-col--main{flex:1}
+@media (max-width:991px){
+  .home{flex-direction:column;align-items:stretch;gap:16px}
+  .home-col{display:contents}
+  .p-today{order:1}.p-tree{order:2}.p-week{order:3}.p-camp{order:4}
+}
+.today-meta{display:flex;align-items:center;gap:8px;margin-top:4px;color:var(--fg-tertiary);font-size:.875rem;line-height:1.25rem;letter-spacing:.0145em}
+.p-today .m-btn{margin-top:20px}
+.hint{margin-top:10px;font-size:.8125rem;line-height:1.125rem;letter-spacing:.0194em;color:var(--fg-tertiary)}
+.times{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px;padding-top:20px;border-top:1px solid var(--line-tertiary)}
+.times dt{font-size:.8125rem;line-height:1.125rem;letter-spacing:.0194em;color:var(--fg-tertiary)}
+.times dd{margin-top:4px;font-size:1.25rem;line-height:1.75rem;letter-spacing:-.012em;font-weight:600}
+.times dd.is-empty{color:var(--fg-quaternary)}
+
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.weekdots{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:16px}
+.weekdots li{display:flex;flex-direction:column;align-items:center;gap:6px}
+.wd-name{font-size:.75rem;line-height:1rem;letter-spacing:.0252em;color:var(--fg-tertiary);font-weight:500}
+.wd-dot{width:36px;height:36px;border-radius:9999px;display:flex;align-items:center;justify-content:center;background:var(--surface-tertiary);box-shadow:inset 0 0 0 1.5px var(--line-primary);color:var(--fg-quaternary);font-size:.75rem;font-weight:600}
+.wd-num{font-size:.75rem;line-height:1rem;letter-spacing:.0252em;color:var(--fg-quaternary);font-feature-settings:"tnum" 1}
+.is-done .wd-dot{background:var(--done);box-shadow:none;color:#fff}
+.is-today .wd-dot{background:var(--surface-violet);box-shadow:inset 0 0 0 2px var(--line-violet);color:var(--fg-violet)}
+.is-today .wd-name,.is-today .wd-num{color:var(--fg-primary);font-weight:600}
+.is-rest .wd-dot{background:transparent;box-shadow:none}
+.week-text{margin-top:16px;font-size:.875rem;line-height:1.375rem;letter-spacing:.0145em;color:var(--fg-secondary)}
+.streak{display:flex;align-items:center;gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line-tertiary);font-size:.875rem;line-height:1.25rem;letter-spacing:.0145em;font-weight:600}
+.streak .ic{color:var(--fg-cautionary)}
+
+/* tree */
+.head-group{display:flex;align-items:center;gap:8px}
+.tree-title{margin-top:8px}
+.tree-body{display:flex;align-items:flex-start;gap:24px;margin-top:12px}
+.tree-fig{flex:0 0 240px;max-width:100%}
+.tree-fig svg{display:block;width:100%;height:auto}
+.tree-side{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:16px;padding-top:28px}
+.tree-side p{font-size:.9375rem;line-height:1.5rem;letter-spacing:.0096em;color:var(--fg-secondary)}
+.tree-side p.c-tertiary{color:var(--fg-tertiary)}
+@media (max-width:767px){
+  .tree-body{flex-direction:column;align-items:center;gap:8px}
+  .tree-fig{flex-basis:auto;width:220px}
+  .tree-side{padding-top:0;width:100%}
+}
+.tr-soil{fill:var(--soil)}
+.tr-seed{fill:var(--seed)}
+.tr-stem{fill:none;stroke:var(--leaf2);stroke-linecap:round}
+.tr-trunk{fill:none;stroke:var(--trunk);stroke-linecap:round}
+.tr-leaf{fill:var(--leaf)}
+.tr-leaf2{fill:var(--leaf2)}
+.tr-basket{fill:var(--seed);stroke:var(--trunk);stroke-width:1.5;stroke-linejoin:round}
+.tr-basket-h{fill:none;stroke:var(--trunk);stroke-width:2.5;stroke-linecap:round}
+.fruit-btn{cursor:pointer;outline:none}
+.fruit-hit{fill:transparent}
+.fruit-ring{fill:none;stroke:var(--fg-brand);stroke-width:2;transform-box:fill-box;transform-origin:center;animation:fruit-ring 1.6s ease-out infinite}
+.fruit-btn:focus-visible .fruit-ring{animation:none;stroke-width:3}
+@keyframes fruit-ring{0%{transform:scale(.7);opacity:.9}100%{transform:scale(1.35);opacity:0}}
+.pop-target{transform-box:fill-box;transform-origin:center}
+.is-pop .pop-target{animation:pop .45s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes pop{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.12);opacity:1}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.is-pop .pop-target,.m-toast{animation:none}.fruit-ring{animation:none;opacity:.6}}
+
+/* growth track */
+.track{width:100%;padding:0 14px}
+.track-bar{position:relative;height:8px;border-radius:9999px;background:var(--surface-strong)}
+.track-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:9999px;background:var(--leaf)}
+.track-bar b{position:absolute;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:9999px;background:var(--bg-primary);box-shadow:inset 0 0 0 2px var(--line-primary)}
+.track-bar b.is-on{background:var(--leaf2);box-shadow:none}
+.track-steps{position:relative;height:38px;margin-top:8px}
+.track-steps li{position:absolute;top:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;white-space:nowrap;color:var(--fg-tertiary)}
+.track-steps span{font-size:.75rem;line-height:1rem;letter-spacing:.0252em;font-weight:500}
+.track-steps em{font-style:normal;font-size:.6875rem;line-height:.875rem;letter-spacing:.0311em;color:var(--fg-quaternary);font-feature-settings:"tnum" 1}
+.track-steps li.is-on{color:var(--fg-primary)}
+.track-steps li.is-on span{font-weight:600}
+
+/* seed picker */
+.seed-group{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.seed-opt{flex-direction:column;gap:4px;padding:12px 4px 10px;align-items:center}
+.seed-opt svg{position:relative}
+.seed-name{position:relative;font-size:.875rem;line-height:1.25rem;letter-spacing:.0145em;font-weight:600}
+.seed-opt:has(input:disabled){cursor:default;opacity:.43}
+.seed-opt:has(input:disabled):has(input:checked){opacity:1}
+
+/* harvest card */
+.hv-img{display:block;width:100%;max-width:360px;height:auto;margin:0 auto;border-radius:16px;-webkit-touch-callout:default;user-select:auto}
+.hv-help{margin:12px 0 4px;text-align:center;font-size:.875rem;line-height:1.375rem;letter-spacing:.0145em;color:var(--fg-secondary)}
+.m-toast--info .ic{color:#fff;background:none}
+
+/* camp today */
+.camp-text{margin-top:8px;font-size:.9375rem;line-height:1.375rem;letter-spacing:.0096em;color:var(--fg-secondary)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.chip-dot{width:6px;height:6px;border-radius:9999px;background:var(--fg-lime)}
+.p-camp .m-text-btn{margin-top:12px}
+
+/* calendar */
+.cal-nav{display:flex;align-items:center;gap:4px}
+.cal-nav .t-headline2{min-width:7.5em;text-align:center}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-top:20px}
+.cal-wd{text-align:center;font-size:.8125rem;line-height:1.125rem;letter-spacing:.0194em;font-weight:500;color:var(--fg-tertiary);padding:4px 0}
+.cal-cell{min-height:88px;border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:4px;box-shadow:inset 0 0 0 1px var(--line-secondary);min-width:0}
+.cal-cell.is-blank{box-shadow:none}
+.cal-cell.is-off{background:var(--surface-tertiary);box-shadow:none}
+.cal-cell.is-off .cal-num{color:var(--fg-quaternary)}
+.cal-cell.is-today{box-shadow:inset 0 0 0 2px var(--line-brand-strong)}
+.cal-num{font-size:.875rem;line-height:1.25rem;letter-spacing:.0145em;font-weight:500;font-feature-settings:"tnum" 1}
+.cal-mark{width:14px;height:14px;border-radius:9999px;background:var(--leaf);flex-shrink:0}
+.cal-time{font-size:.75rem;line-height:1rem;letter-spacing:.0252em;color:var(--fg-secondary);font-feature-settings:"tnum" 1}
+.cal-note{font-size:.75rem;line-height:1rem;letter-spacing:.0252em;color:var(--fg-tertiary)}
+.cal-table{margin-top:24px}
+.empty{padding:32px 20px;text-align:center;color:var(--fg-tertiary);font-size:.9375rem;line-height:1.375rem}
+@media (max-width:767px){
+  .cal-grid{gap:4px}
+  .cal-cell{min-height:56px;padding:6px 4px;align-items:center;border-radius:10px}
+  .cal-time,.cal-note{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+}
+
+/* garden */
+.lead{margin-top:8px;font-size:1rem;line-height:1.625rem;color:var(--fg-secondary);max-width:38em}
+.garden{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:24px}
+@media (max-width:991px){.garden{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:599px){.garden{grid-template-columns:1fr}}
+.member{display:flex;gap:16px;align-items:flex-start;padding:20px}
+.member-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.member-name{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.member-badges{display:flex;flex-wrap:wrap;gap:4px}
+.member-count{font-size:.875rem;line-height:1.25rem;letter-spacing:.0145em;color:var(--fg-secondary)}
+.member-streak{display:flex;align-items:center;gap:4px;font-size:.8125rem;line-height:1.125rem;letter-spacing:.0194em;color:var(--fg-tertiary)}
+.member-streak .ic{color:var(--fg-cautionary)}
+.member-fig{flex:0 0 72px;display:flex;justify-content:center}
+.member-fig svg{display:block}
+
+/* auth */
+.auth{max-width:420px;margin:24px auto 0}
+.auth .lead{margin-bottom:24px}
+.auth .m-secmsg{margin-bottom:20px}
+.auth-foot{margin-top:20px;display:flex;flex-direction:column;gap:12px;align-items:center}
+.auth-foot p{font-size:.875rem;line-height:1.25rem;letter-spacing:.0145em;color:var(--fg-tertiary)}
+.auth-foot a{color:var(--fg-brand);font-weight:600}
+
+</style>
+</head>
+<body>
+<div id="demo-bar" class="demo-bar"></div>
+<header id="gnb" class="gnb"></header>
+<main><div id="app" class="container"></div></main>
+<div id="action-bar" class="action-bar" hidden></div>
+<nav id="bnav" class="bnav" aria-label="주요 화면" hidden></nav>
+<div id="toast-region" class="toast-region" role="status" aria-live="polite"></div>
+<div id="overlay-root"></div>
+<script>
+(() => {
+'use strict';
+
+/* ================= 설정 ================= */
+const SEASON = { open: '2026-11-18', start: '2026-11-23', end: '2026-12-25' };
+const HOLIDAYS = { '2026-12-25': '성탄절' };
+const PLANS = {
+  light:  { label: '주 1~2일', goal: 1, desc: '일주일에 하루 이틀 나와요.' },
+  steady: { label: '주 3~4일', goal: 3, desc: '일주일에 사나흘 나와요.' },
+  daily:  { label: '평일 매일', goal: 5, desc: '평일은 빠짐없이 나와요.' },
+};
+const PLAN_ORDER = ['light', 'steady', 'daily'];
+const SEEDS = {
+  apple:     { label: '사과',   fruit: '사과',      obj: '를' },
+  tangerine: { label: '귤',     fruit: '귤',        obj: '을' },
+  peach:     { label: '복숭아', fruit: '복숭아',    obj: '를' },
+  coffee:    { label: '커피',   fruit: '커피 열매', obj: '를' },
+};
+const SEED_ORDER = ['apple', 'tangerine', 'peach', 'coffee'];
+const FRUIT_DAYS = 20;
+const STAGES = [
+  { key: 'seed', label: '씨앗', from: 0 }, { key: 'sprout', label: '새싹', from: 1 }, { key: 'sapling', label: '묘목', from: 5 },
+  { key: 'tree', label: '나무', from: 10 }, { key: 'flower', label: '꽃', from: 15 }, { key: 'fruit', label: '열매', from: FRUIT_DAYS },
+];
+
+/* 예시 전용 값 */
+const DEMO_BASE = '2026-12-17';
+const DEMO_MIN = SEASON.open;
+const DEMO_MAX = '2026-12-26';
+const KEY = 'yeolmae-demo-v1';
+const ICONS = {
+ "check-thick": "<path d=\"M19.6699 6.58096C20.1776 7.08864 20.1776 7.91175 19.6699 8.41943L10.6699 17.4194C10.1622 17.9271 9.33913 17.9271 8.83144 17.4194L4.33144 12.9194C3.82376 12.4118 3.82376 11.5886 4.33144 11.081C4.83913 10.5733 5.66224 10.5733 6.16992 11.081L9.75068 14.6617L17.8314 6.58096C18.3391 6.07327 19.1622 6.07327 19.6699 6.58096Z\"/>",
+ "clock": "<path d=\"M11.4999 6.59971C11.997 6.59971 12.3999 7.00265 12.3999 7.49971V12.127L14.6111 14.3382C14.9625 14.6897 14.9625 15.2595 14.6111 15.611C14.2596 15.9624 13.6897 15.9624 13.3383 15.611L10.8634 13.1361C10.6839 12.9566 10.596 12.7201 10.5999 12.4848V7.49971C10.5999 7.00265 11.0029 6.59971 11.4999 6.59971Z\"/><path d=\"M12.0001 2.1001C6.53246 2.1001 2.1001 6.53248 2.1001 12.0001C2.1001 17.4677 6.53246 21.9001 12.0001 21.9001C17.4677 21.9001 21.9 17.4677 21.9 12.0001C21.9 6.53248 17.4677 2.1001 12.0001 2.1001ZM3.90009 12.0001C3.90009 7.52659 7.52657 3.9001 12.0001 3.9001C16.4735 3.9001 20.1 7.52659 20.1 12.0001C20.1 16.4736 16.4735 20.1001 12.0001 20.1001C7.52657 20.1001 3.90009 16.4736 3.90009 12.0001Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\"/>",
+ "chevron-left": "<path d=\"M16.1365 3.36297C16.488 3.71444 16.488 4.28429 16.1365 4.63576L8.77289 11.9994L16.1365 19.363C16.488 19.7144 16.488 20.2843 16.1365 20.6358C15.785 20.9872 15.2152 20.9872 14.8637 20.6358L6.8637 12.6358C6.51223 12.2843 6.51223 11.7144 6.8637 11.363L14.8637 3.36297C15.2152 3.0115 15.785 3.0115 16.1365 3.36297Z\"/>",
+ "chevron-right": "<path d=\"M7.86321 3.36272C7.51174 3.7142 7.51174 4.28405 7.86321 4.63552L15.2268 11.9991L7.86321 19.3627C7.51174 19.7142 7.51174 20.284 7.86321 20.6355C8.21469 20.987 8.78453 20.987 9.13601 20.6355L17.136 12.6355C17.4875 12.284 17.4875 11.7142 17.136 11.3627L9.13601 3.36272C8.78453 3.01125 8.21469 3.01125 7.86321 3.36272Z\"/>",
+ "setting": "<path d=\"M8.04981 12C8.04981 9.81848 9.81827 8.05 11.9998 8.05C14.1813 8.05 15.9498 9.81848 15.9498 12C15.9498 14.1815 14.1813 15.95 11.9998 15.95C9.81827 15.95 8.04981 14.1815 8.04981 12ZM11.9998 9.95C10.8676 9.95 9.9498 10.8678 9.9498 12C9.9498 13.1322 10.8676 14.05 11.9998 14.05C13.132 14.05 14.0498 13.1322 14.0498 12C14.0498 10.8678 13.132 9.95 11.9998 9.95Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\"/><path d=\"M10.131 1.97079C10.7376 1.85842 11.3623 1.7998 11.9998 1.7998C12.6373 1.7998 13.262 1.85841 13.8686 1.97079C14.91 2.16373 15.3502 3.11319 15.4926 3.70446C15.589 4.10473 15.8415 4.46312 16.2246 4.68433C16.6075 4.90536 17.0437 4.94495 17.4382 4.82865C18.0215 4.65674 19.0614 4.56445 19.7491 5.36716C20.559 6.31261 21.1993 7.40878 21.6222 8.60855C21.9736 9.60576 21.3725 10.4599 20.9322 10.8783C20.6338 11.1619 20.4496 11.5597 20.4496 12.0022C20.4496 12.4444 20.6335 12.842 20.9317 13.1256C21.3718 13.5442 21.9725 14.3986 21.6206 15.3956C21.1964 16.5973 20.554 17.695 19.7415 18.6412C19.055 19.4408 18.0185 19.3502 17.4362 19.1795C17.0422 19.064 16.607 19.1039 16.2249 19.3245C15.8429 19.545 15.5908 19.9019 15.4938 20.3007C15.3503 20.8905 14.9095 21.8357 13.8712 22.0283C13.2639 22.141 12.6383 22.1998 11.9998 22.1998C11.3615 22.1998 10.7361 22.1411 10.1289 22.0284C9.09019 21.8358 8.6495 20.89 8.50612 20.3001C8.40915 19.9012 8.15701 19.5441 7.77488 19.3235C7.39269 19.1028 6.95733 19.063 6.5633 19.1786C5.98085 19.3494 4.94396 19.4403 4.25729 18.6403C3.44572 17.6949 2.80385 16.5983 2.37982 15.3978C2.02769 14.4009 2.62808 13.5464 3.06804 13.1277C3.36599 12.8442 3.54977 12.4467 3.54977 12.0046C3.54977 11.5621 3.36555 11.1641 3.06695 10.8805C2.6266 10.4623 2.02538 9.60831 2.37653 8.61109C2.79913 7.41098 3.43938 6.31446 4.24923 5.36869C4.93698 4.56551 5.97745 4.658 6.56082 4.83006C6.95546 4.94645 7.39177 4.90689 7.77468 4.68582C8.15801 4.4645 8.41057 4.10587 8.50684 3.70537C8.64903 3.11389 9.08917 2.16382 10.131 1.97079ZM10.4987 3.83504C10.4943 3.83949 10.4882 3.84629 10.4804 3.85628C10.4386 3.91001 10.3876 4.01039 10.3542 4.14947C10.1412 5.03543 9.57763 5.83881 8.72468 6.33126C7.87267 6.82317 6.89634 6.90993 6.02333 6.65245C5.88635 6.61205 5.77408 6.60604 5.70657 6.61545C5.69371 6.61725 5.68461 6.61918 5.67851 6.62077C5.02986 7.38223 4.51685 8.26159 4.17596 9.22152C4.17763 9.2275 4.18047 9.23613 4.18521 9.2478C4.21075 9.31067 4.27201 9.40465 4.37546 9.50291C5.03599 10.1303 5.44976 11.0199 5.44976 12.0046C5.44976 12.9881 5.03699 13.8768 4.37787 14.5041C4.27451 14.6024 4.21335 14.6965 4.18787 14.7594C4.18314 14.771 4.18032 14.7797 4.17865 14.7856C4.5207 15.7459 5.03504 16.6253 5.6851 17.3866C5.69117 17.3881 5.70023 17.3901 5.71303 17.3919C5.78019 17.4013 5.89196 17.3954 6.02857 17.3554C6.90029 17.0997 7.87452 17.1871 8.72488 17.678C9.57511 18.1689 10.1378 18.9688 10.3524 19.8514C10.386 19.9899 10.437 20.0897 10.4787 20.1431C10.4865 20.1531 10.4925 20.1598 10.4969 20.1642C10.9836 20.2532 11.4859 20.2998 11.9998 20.2998C12.5139 20.2998 13.0162 20.2532 13.5031 20.1642C13.5075 20.1597 13.5135 20.153 13.5213 20.1431C13.563 20.0897 13.614 19.99 13.6476 19.8515C13.8623 18.9692 14.425 18.1697 15.2749 17.679C16.1251 17.1882 17.099 17.1007 17.9706 17.3562C18.1071 17.3962 18.2188 17.402 18.286 17.3926C18.2988 17.3908 18.3078 17.3889 18.3139 17.3873C18.9646 16.6254 19.4794 15.7451 19.8216 14.7839C19.8199 14.7779 19.8171 14.7692 19.8124 14.7576C19.7869 14.6947 19.7257 14.6007 19.6223 14.5023C18.9627 13.875 18.5496 12.986 18.5496 12.0022C18.5496 11.0177 18.9632 10.1283 19.6235 9.50092C19.7269 9.40263 19.7881 9.30862 19.8137 9.24574C19.8184 9.23408 19.8212 9.22544 19.8229 9.21946C19.4818 8.2598 18.9687 7.38071 18.32 6.61951C18.3139 6.61792 18.3048 6.61599 18.292 6.6142C18.2245 6.60479 18.1123 6.61078 17.9754 6.65113C17.1025 6.90841 16.1264 6.82157 15.2746 6.32978C14.4221 5.83756 13.8586 5.0347 13.6454 4.14925C13.6119 4.01024 13.561 3.90995 13.5191 3.85626C13.5114 3.84628 13.5053 3.83949 13.5009 3.83504C13.0147 3.74629 12.5131 3.6998 11.9998 3.6998C11.4865 3.6998 10.9849 3.74629 10.4987 3.83504ZM19.8252 9.2087L19.8249 9.21084ZM19.8239 14.7946L19.8236 14.7925ZM4.17639 14.7964L4.17663 14.7943ZM4.17369 9.21077L4.17393 9.21292Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\"/>",
+ "logout": "<path d=\"M7.7624 2.59961C6.95435 2.5996 6.29349 2.59959 5.75642 2.64347C5.2005 2.68889 4.69842 2.78577 4.22954 3.02468C3.4957 3.39859 2.89908 3.99522 2.52517 4.72905C2.28626 5.19794 2.18938 5.70001 2.14396 6.25593C2.10008 6.793 2.10009 7.45384 2.1001 8.26189V15.7373C2.10009 16.5454 2.10008 17.2062 2.14396 17.7433C2.18938 18.2992 2.28626 18.8013 2.52517 19.2702C2.89908 20.004 3.4957 20.6006 4.22954 20.9745C4.69842 21.2134 5.2005 21.3103 5.75642 21.3557C6.29349 21.3996 6.95434 21.3996 7.76239 21.3996H8.7501C9.24716 21.3996 9.6501 20.9967 9.6501 20.4996C9.6501 20.0026 9.24716 19.5996 8.7501 19.5996H7.8001C6.94517 19.5996 6.3581 19.5989 5.90299 19.5617C5.45839 19.5254 5.21956 19.4588 5.04672 19.3707C4.65158 19.1694 4.33032 18.8481 4.12898 18.453C4.04092 18.2801 3.97431 18.0413 3.93798 17.5967C3.9008 17.1416 3.9001 16.5545 3.9001 15.6996V8.29961C3.9001 7.44468 3.9008 6.85761 3.93798 6.4025C3.97431 5.95791 4.04092 5.71908 4.12898 5.54623C4.33032 5.15109 4.65158 4.82983 5.04672 4.6285C5.21956 4.54043 5.45839 4.47382 5.90299 4.43749C6.3581 4.40031 6.94517 4.39961 7.8001 4.39961H8.7501C9.24716 4.39961 9.6501 3.99667 9.6501 3.49961C9.6501 3.00255 9.24716 2.59961 8.7501 2.59961H7.7624Z\"/><path d=\"M16.3865 17.1352L20.8865 12.6352C21.238 12.2837 21.238 11.7139 20.8865 11.3624L16.3865 6.86238C16.035 6.51091 15.4652 6.51091 15.1137 6.86238C14.7622 7.21385 14.7622 7.7837 15.1137 8.13517L18.0773 11.0988H8.75015C8.25309 11.0988 7.85015 11.5017 7.85015 11.9988C7.85015 12.4958 8.25309 12.8988 8.75015 12.8988H18.0773L15.1137 15.8624C14.7622 16.2139 14.7622 16.7837 15.1137 17.1352C15.4652 17.4866 16.035 17.4866 16.3865 17.1352Z\"/>",
+ "fire-fill": "<path d=\"M11.6089 2.41218C12.2339 1.42782 13.61 1.22151 14.4835 2.03486C18.5799 5.84912 21.1496 9.50889 21.1496 13.6009C21.1496 18.5163 17.3281 22.4009 11.9996 22.4009C9.36702 22.4009 7.07319 21.5024 5.43211 19.9247C3.78893 18.345 2.84961 16.1309 2.84961 13.6009C2.84961 10.8753 3.96102 8.26353 5.85953 6.26287C6.48774 5.60085 7.48794 5.6296 8.11081 6.19018L8.8104 6.81981L11.6089 2.41218ZM8.49959 15.6005C8.49959 17.5005 10.0496 19.0005 11.9996 19.0005C13.9496 19.0005 15.4996 17.5005 15.4996 15.6005C15.4996 13.7005 13.9496 12.2005 11.9996 10.5005C10.0496 12.2005 8.49959 13.7005 8.49959 15.6005Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\"/>",
+ "persons": "<path d=\"M11.0999 7.99961C11.0999 5.8457 12.846 4.09961 14.9999 4.09961C17.1538 4.09961 18.8999 5.8457 18.8999 7.99961C18.8999 10.1535 17.1538 11.8996 14.9999 11.8996C12.846 11.8996 11.0999 10.1535 11.0999 7.99961ZM14.9999 5.89961C13.8401 5.89961 12.8999 6.83981 12.8999 7.99961C12.8999 9.15941 13.8401 10.0996 14.9999 10.0996C16.1597 10.0996 17.0999 9.15941 17.0999 7.99961C17.0999 6.83981 16.1597 5.89961 14.9999 5.89961Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\"/><path d=\"M9.57833 14.4471C11.0214 13.5587 12.946 13.099 14.9999 13.099C17.0537 13.099 18.9783 13.5587 20.4214 14.4471C21.8782 15.3439 22.8998 16.7259 22.8998 18.499L22.8998 18.8259C22.8999 19.0126 22.8999 19.2026 22.8866 19.365C22.8719 19.5457 22.8363 19.7699 22.72 19.9982C22.5618 20.3086 22.3094 20.561 21.999 20.7192C21.7708 20.8355 21.5466 20.8711 21.3658 20.8859C21.2034 20.8992 21.0134 20.8992 20.8268 20.8991L9.17323 20.8999C8.98658 20.9 8.79656 20.9 8.63412 20.8867C8.45339 20.872 8.22914 20.8364 8.00088 20.7201C7.69039 20.562 7.43796 20.3095 7.27975 19.9991C7.16345 19.7708 7.12787 19.5466 7.11311 19.3658C7.09983 19.2034 7.09987 19.0134 7.0999 18.8267L7.0999 18.499C7.0999 16.7259 8.12151 15.3439 9.57833 14.4471ZM10.522 15.9799C9.44528 16.6427 8.89989 17.5107 8.89989 18.499L8.90171 19.0981L21.098 19.0973L21.0998 18.499C21.0998 17.5107 20.5545 16.6427 19.4778 15.9799C18.3874 15.3086 16.812 14.899 14.9999 14.899C13.1878 14.899 11.6124 15.3086 10.522 15.9799Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\"/><path d=\"M2.97439 15.6309C3.99267 14.97 5.30791 14.6454 6.68993 14.6036C6.23547 15.1659 5.86626 15.8057 5.62287 16.5194C4.9587 16.643 4.39162 16.8569 3.95433 17.1408C3.27192 17.5837 2.8999 18.1904 2.8999 18.9983L2.9 19.0988L5.30113 19.0987C5.30307 19.2293 5.30779 19.3744 5.31905 19.5123C5.34291 19.8044 5.40876 20.2919 5.67592 20.8162C5.69004 20.8439 5.70452 20.8714 5.71935 20.8986L3.00058 20.8988L2.94929 20.899C2.77646 20.8997 2.53888 20.9006 2.32207 20.8424C1.75334 20.6897 1.3091 20.2455 1.15637 19.6768C1.09814 19.46 1.09908 19.2224 1.09977 19.0496L1.0999 18.9983C1.0999 17.5054 1.84717 16.3625 2.97439 15.6309Z\"/><path d=\"M6.49982 7.09951C4.8982 7.09951 3.59983 8.39789 3.59983 9.99951C3.59983 11.6011 4.8982 12.8995 6.49982 12.8995C8.10144 12.8995 9.39981 11.6011 9.39981 9.99951C9.39981 8.39789 8.10144 7.09951 6.49982 7.09951ZM5.39983 9.99951C5.39983 9.392 5.89231 8.89951 6.49982 8.89951C7.10733 8.89951 7.59982 9.392 7.59982 9.99951C7.59982 10.607 7.10733 11.0995 6.49982 11.0995C5.89231 11.0995 5.39983 10.607 5.39983 9.99951Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\"/>",
+ "calendar": "<path d=\"M9.39985 2.4C9.39985 1.90294 8.99691 1.5 8.49986 1.5C8.0028 1.5 7.59986 1.90294 7.59986 2.4V3.49978H6.91468C6.38483 3.49977 5.93363 3.49975 5.56321 3.53002C5.17405 3.56182 4.79545 3.63145 4.43352 3.81586C3.88785 4.0939 3.44421 4.53754 3.16618 5.08321C2.98177 5.44514 2.91213 5.82374 2.88034 6.2129C2.85007 6.58331 2.85009 7.03446 2.8501 7.5643V17.7352C2.85009 18.265 2.85007 18.7163 2.88034 19.0867C2.91213 19.4758 2.98177 19.8544 3.16618 20.2164C3.44421 20.762 3.88785 21.2057 4.43352 21.4837C4.79545 21.6681 5.17405 21.7377 5.56321 21.7695C5.93361 21.7998 6.38476 21.7998 6.91459 21.7998H17.0855C17.6153 21.7998 18.0665 21.7998 18.4369 21.7695C18.8261 21.7377 19.2047 21.6681 19.5666 21.4837C20.1123 21.2057 20.5559 20.762 20.834 20.2164C21.0184 19.8544 21.088 19.4758 21.1198 19.0867C21.1501 18.7163 21.15 18.2651 21.15 17.7353V7.56438C21.15 7.03455 21.1501 6.58331 21.1198 6.2129C21.088 5.82374 21.0184 5.44514 20.834 5.08321C20.5559 4.53754 20.1123 4.0939 19.5666 3.81586C19.2047 3.63145 18.8261 3.56182 18.4369 3.53002C18.0665 3.49975 17.6153 3.49977 17.0855 3.49978H16.3998V2.40002C16.3998 1.90297 15.9969 1.50002 15.4998 1.50002C15.0028 1.50002 14.5998 1.90297 14.5998 2.40002V3.49978H9.39985V2.4ZM14.5998 6.40002V5.29978H9.39985V6.4C9.39985 6.89706 8.99691 7.3 8.49986 7.3C8.0028 7.3 7.59986 6.89706 7.59986 6.4V5.29978H6.55011C5.73555 5.29978 5.54172 5.31088 5.41019 5.35361C5.07531 5.46242 4.81276 5.72498 4.70395 6.05986C4.66122 6.19138 4.65011 6.38521 4.65011 7.19978V9.24976H19.3501V7.19978C19.3501 6.38521 19.339 6.19138 19.2962 6.05986C19.1874 5.72498 18.9249 5.46242 18.59 5.35361C18.4585 5.31088 18.2646 5.29978 17.4501 5.29978H16.3998V6.40002C16.3998 6.89708 15.9969 7.30002 15.4998 7.30002C15.0028 7.30002 14.5998 6.89708 14.5998 6.40002ZM19.3501 11.0498H4.65011V18.0998C4.65011 18.9143 4.66122 19.1082 4.70395 19.2397C4.81276 19.5746 5.07531 19.8371 5.41019 19.9459C5.54172 19.9887 5.73555 19.9998 6.55011 19.9998H17.4501C18.2646 19.9998 18.4585 19.9887 18.59 19.9459C18.9249 19.8371 19.1874 19.5746 19.2962 19.2397C19.339 19.1082 19.3501 18.9143 19.3501 18.0998V11.0498Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\"/>",
+ "circle-check-fill": "<path d=\"M2.10004 11.9996C2.10004 6.53199 6.5324 2.09961 12 2.09961C17.4676 2.09961 21.9 6.53199 21.9 11.9996C21.9 17.4672 17.4676 21.8996 12 21.8996C6.5324 21.8996 2.10004 17.4672 2.10004 11.9996ZM16.6467 9.87545C16.9924 9.51829 16.9831 8.94852 16.6259 8.60283C16.2688 8.25713 15.699 8.26642 15.3533 8.62357L10.6774 13.4545L8.64757 11.3517C8.30236 10.9941 7.73261 10.984 7.37498 11.3292C7.01736 11.6745 7.0073 12.2442 7.3525 12.6018L10.029 15.3746C10.1984 15.5501 10.4319 15.6493 10.6759 15.6495C10.9199 15.6497 11.1535 15.5508 11.3232 15.3754L16.6467 9.87545Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\"/>",
+ "circle-info-fill": "<path d=\"M2.09998 11.9996C2.09998 6.53199 6.53234 2.09961 11.9999 2.09961C17.4675 2.09961 21.8999 6.53199 21.8999 11.9996C21.8999 17.4672 17.4675 21.8996 11.9999 21.8996C6.53234 21.8996 2.09998 17.4672 2.09998 11.9996ZM12.9999 7.99951C12.9999 8.5518 12.5522 8.99951 11.9999 8.99951C11.4476 8.99951 10.9999 8.5518 10.9999 7.99951C10.9999 7.44723 11.4476 6.99951 11.9999 6.99951C12.5522 6.99951 12.9999 7.44723 12.9999 7.99951ZM12 10.5995C12.4971 10.5995 12.9 11.0025 12.9 11.4995V15.9995C12.9 16.4966 12.4971 16.8995 12 16.8995C11.503 16.8995 11.1 16.4966 11.1 15.9995V11.4995C11.1 11.0025 11.503 10.5995 12 10.5995Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\"/>",
+ "circle-close-fill": "<path d=\"M2.10004 11.9996C2.10004 6.53199 6.5324 2.09961 12 2.09961C17.4676 2.09961 21.9 6.53199 21.9 11.9996C21.9 17.4672 17.4676 21.8996 12 21.8996C6.5324 21.8996 2.10004 17.4672 2.10004 11.9996ZM9.1364 7.86324C8.78493 7.51177 8.21508 7.51177 7.86361 7.86324C7.51214 8.21471 7.51214 8.78456 7.86361 9.13603L10.7272 11.9996L7.86361 14.8632C7.51214 15.2147 7.51214 15.7846 7.86361 16.136C8.21508 16.4875 8.78493 16.4875 9.1364 16.136L12 13.2724L14.8636 16.136C15.2151 16.4875 15.7849 16.4875 16.1364 16.136C16.4878 15.7846 16.4878 15.2147 16.1364 14.8632L13.2728 11.9996L16.1364 9.13603C16.4878 8.78456 16.4878 8.21471 16.1364 7.86324C15.7849 7.51177 15.2151 7.51177 14.8636 7.86324L12 10.7268L9.1364 7.86324Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\"/>",
+ "close": "<path d=\"M4.8637 4.86346C5.21517 4.51199 5.78502 4.51199 6.13649 4.86346L12.0001 10.7271L17.8637 4.86346C18.2151 4.51199 18.785 4.51199 19.1364 4.86346C19.4879 5.21493 19.4879 5.78478 19.1365 6.13625L13.2729 11.9999L19.1365 17.8635C19.4879 18.2149 19.4879 18.7848 19.1364 19.1363C18.785 19.4877 18.2151 19.4877 17.8637 19.1363L12.0001 13.2727L6.13649 19.1363C5.78502 19.4877 5.21517 19.4877 4.8637 19.1363C4.51223 18.7848 4.51223 18.2149 4.8637 17.8635L10.7273 11.9999L4.8637 6.13625C4.51223 5.78478 4.51223 5.21493 4.8637 4.86346Z\"/>",
+ "plus": "<path d=\"M11.9996 3.10254C12.4966 3.10254 12.8996 3.50548 12.8996 4.00254V11.1025H19.9995C20.4966 11.1025 20.8995 11.5055 20.8995 12.0025C20.8995 12.4996 20.4966 12.9025 19.9995 12.9025H12.8996V20.0025C12.8996 20.4996 12.4966 20.9025 11.9996 20.9025C11.5025 20.9025 11.0996 20.4996 11.0996 20.0025V12.9025H3.99961C3.50255 12.9025 3.09961 12.4996 3.09961 12.0025C3.09961 11.5055 3.50255 11.1025 3.99961 11.1025H11.0996V4.00254C11.0996 3.50548 11.5025 3.10254 11.9996 3.10254Z\"/>",
+ "person": "<path d=\"M12.0002 2.60059C9.29398 2.60059 7.10018 4.79439 7.10018 7.50059C7.10018 10.2068 9.29398 12.4006 12.0002 12.4006C14.7064 12.4006 16.9002 10.2068 16.9002 7.50059C16.9002 4.79439 14.7064 2.60059 12.0002 2.60059ZM8.90017 7.50059C8.90017 5.7885 10.2881 4.40059 12.0002 4.40059C13.7122 4.40059 15.1002 5.7885 15.1002 7.50059C15.1002 9.21267 13.7122 10.6006 12.0002 10.6006C10.2881 10.6006 8.90017 9.21267 8.90017 7.50059Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\"/><path d=\"M12.0001 13.599C9.68814 13.599 7.53071 14.0516 5.91643 14.9211C4.3033 15.7901 3.1001 17.1652 3.1001 18.999L3.1001 19.3267C3.10007 19.5134 3.10004 19.7034 3.11331 19.8658C3.12808 20.0466 3.16365 20.2708 3.27996 20.4991C3.43816 20.8095 3.69059 21.062 4.00108 21.2201C4.22933 21.3364 4.45358 21.372 4.63431 21.3868C4.79675 21.4 4.98678 21.4 5.17343 21.3999L18.827 21.3991C19.0136 21.3991 19.2036 21.3992 19.366 21.3859C19.5468 21.3711 19.771 21.3355 19.9992 21.2192C20.3096 21.061 20.562 20.8086 20.7202 20.4982C20.8365 20.2699 20.8721 20.0457 20.8868 19.865C20.9001 19.7026 20.9001 19.5125 20.9001 19.3259L20.9001 18.999C20.9001 17.1652 19.6969 15.7901 18.0837 14.9211C16.4694 14.0516 14.312 13.599 12.0001 13.599ZM4.9001 18.999C4.9001 18.0714 5.48775 17.1966 6.77005 16.5058C8.0512 15.8157 9.89375 15.399 12.0001 15.399C14.1064 15.399 15.949 15.8157 17.2301 16.5058C18.5124 17.1966 19.1001 18.0714 19.1001 18.999L19.0982 19.5973L4.90191 19.5981L4.9001 18.999Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\"/>",
+ "triangle-exclamation-fill": "<path d=\"M10.8203 3.10033C11.5711 2.76604 12.4285 2.76604 13.1793 3.10033C13.7027 3.33333 14.0805 3.76043 14.4088 4.22516C14.7343 4.68589 15.0924 5.30622 15.5282 6.06096L20.639 14.9133C21.0748 15.668 21.4329 16.2883 21.6692 16.8006C21.9075 17.3173 22.0885 17.858 22.0286 18.4277C21.9427 19.2451 21.514 19.9877 20.8491 20.4708C20.3856 20.8075 19.8268 20.9211 19.2602 20.9731C18.6984 21.0246 17.9821 21.0246 17.1106 21.0246H6.88896C6.01747 21.0246 5.30117 21.0246 4.73942 20.9731C4.17278 20.9211 3.614 20.8075 3.15055 20.4708C2.48563 19.9877 2.05693 19.2451 1.97102 18.4277C1.91114 17.858 2.09211 17.3173 2.33041 16.8006C2.56666 16.2883 2.92482 15.668 3.36057 14.9132L8.47142 6.06097C8.90715 5.30622 9.26529 4.68589 9.5908 4.22516C9.91914 3.76043 10.2969 3.33333 10.8203 3.10033ZM12 8.09961C12.497 8.09961 12.9 8.50255 12.9 8.99961V12.9996C12.9 13.4967 12.497 13.8996 12 13.8996C11.5029 13.8996 11.1 13.4967 11.1 12.9996V8.99961C11.1 8.50255 11.5029 8.09961 12 8.09961ZM12.9998 16.4996C12.9998 17.0519 12.5521 17.4996 11.9998 17.4996C11.4476 17.4996 10.9998 17.0519 10.9998 16.4996C10.9998 15.9473 11.4476 15.4996 11.9998 15.4996C12.5521 15.4996 12.9998 15.9473 12.9998 16.4996Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\"/>",
+ "home": "<path d=\"M12.3616 2.27647C12.1248 2.21318 11.8755 2.21318 11.6387 2.27647C11.358 2.3515 11.1252 2.5333 11.0026 2.62905L10.9675 2.65625L4.13433 7.88153C3.74752 8.17676 3.42134 8.42572 3.17859 8.75002C2.96529 9.03498 2.80627 9.35676 2.70948 9.69929C2.59933 10.0891 2.59971 10.4995 2.60015 10.9861L2.60021 17.335C2.6002 17.8648 2.60018 18.316 2.63045 18.6865C2.66224 19.0756 2.73188 19.4542 2.91629 19.8161C3.19432 20.3618 3.63796 20.8055 4.18363 21.0835C4.54556 21.2679 4.92416 21.3375 5.31332 21.3693C5.68373 21.3996 6.13489 21.3996 6.66473 21.3996H11.9899C11.9934 21.3996 11.9969 21.3996 12.0005 21.3996C12.004 21.3996 12.0075 21.3996 12.0111 21.3996H17.3356C17.8654 21.3996 18.3166 21.3996 18.687 21.3693C19.0762 21.3375 19.4548 21.2679 19.8167 21.0835C20.3624 20.8055 20.806 20.3618 21.0841 19.8161C21.2685 19.4542 21.3381 19.0756 21.3699 18.6865C21.4002 18.316 21.4002 17.8649 21.4001 17.335L21.4002 10.9861C21.4006 10.4994 21.401 10.0891 21.2909 9.69929C21.1941 9.35676 21.0351 9.03498 20.8218 8.75002C20.579 8.42572 20.2528 8.17677 19.866 7.88153L13.0328 2.65625L12.9978 2.62905C12.8752 2.5333 12.6424 2.3515 12.3616 2.27647ZM12.9005 19.5994H17.7002C18.5147 19.5994 18.7086 19.5883 18.8401 19.5456C19.175 19.4368 19.4375 19.1742 19.5463 18.8393C19.5891 18.7078 19.6002 18.514 19.6002 17.6994V10.883C19.6002 10.4628 19.5966 10.3673 19.5817 10.2869C19.5446 10.0871 19.4528 9.90143 19.3166 9.75057C19.2618 9.68986 19.1881 9.62903 18.8543 9.37376L12.0002 4.1324L5.14606 9.37376C4.81224 9.62903 4.73855 9.68986 4.68373 9.75057C4.54754 9.90143 4.4558 10.0871 4.4187 10.2869C4.40377 10.3673 4.40021 10.4628 4.40021 10.883V17.6994C4.40021 18.514 4.41132 18.7078 4.45405 18.8393C4.56286 19.1742 4.82541 19.4368 5.16029 19.5456C5.29181 19.5883 5.48565 19.5994 6.30021 19.5994H11.1005V13.9996C11.1005 13.5026 11.5034 13.0996 12.0005 13.0996C12.4975 13.0996 12.9005 13.5026 12.9005 13.9996V19.5994Z\" fill-rule=\"evenodd\" clip-rule=\"evenodd\"/>"
+};
+
+/* ================= 날짜 ================= */
+const WD = ['일', '월', '화', '수', '목', '금', '토'];
+const toDate = s => { const [y, m, d] = s.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)); };
+const fmt = dt => dt.toISOString().slice(0, 10);
+const addDays = (s, n) => { const d = toDate(s); d.setUTCDate(d.getUTCDate() + n); return fmt(d); };
+const dow = s => toDate(s).getUTCDay();
+const weekStart = s => addDays(s, -((dow(s) + 6) % 7));
+const inSeason = s => s >= SEASON.open && s <= SEASON.end;
+const isWorkday = s => inSeason(s) && dow(s) >= 1 && dow(s) <= 5 && !HOLIDAYS[s];
+const koDate = s => `${+s.slice(5, 7)}월 ${+s.slice(8, 10)}일 ${WD[dow(s)]}요일`;
+const koDay = s => `${+s.slice(5, 7)}월 ${+s.slice(8, 10)}일`;
+const pad = n => String(n).padStart(2, '0');
+const hm = min => pad(Math.floor(min / 60)) + ':' + pad(min % 60);
+const nowHM = () => { const d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+
+const SEASON_WEEKS = (() => { const out = []; for (let w = weekStart(SEASON.start); w <= SEASON.end; w = addDays(w, 7)) out.push(w); return out; })();
+const OPEN_WEEKS = (() => { const out = []; for (let w = weekStart(SEASON.open); w < weekStart(SEASON.start); w = addDays(w, 7)) out.push(w); return out; })();
+const ALL_WORKDAYS = (() => { const out = []; for (let d = SEASON.open; d <= SEASON.end; d = addDays(d, 1)) if (isWorkday(d)) out.push(d); return out; })();
+const workdaysOfWeek = (w, from) => { const out = []; for (let i = 0; i < 5; i++) { const d = addDays(w, i); if (isWorkday(d) && d >= from) out.push(d); } return out; };
+const nextWorkday = s => { for (let d = addDays(s, 1); d <= SEASON.end; d = addDays(d, 1)) if (isWorkday(d)) return d; return null; };
+const workdaysLeft = (today, hasToday) => ALL_WORKDAYS.filter(d => d > today || (d === today && !hasToday)).length;
+
+/* ================= 규칙 계산 ================= */
+function memberStart(m) { return m.joinDate > SEASON.start ? m.joinDate : SEASON.start; }
+
+function computeStats(m, recs, today) {
+  const start = memberStart(m);
+  const goal = PLANS[m.plan].goal;
+  const asOf = today > SEASON.end ? SEASON.end : today;
+  const dates = Object.keys(recs).filter(d => d <= today && isWorkday(d)).sort();
+  const weeks = SEASON_WEEKS.filter(w => addDays(w, 6) >= start).map(w => {
+    const days = workdaysOfWeek(w, start);
+    const g = Math.min(goal, days.length);
+    const count = dates.filter(d => d >= w && d <= addDays(w, 6)).length;
+    return { w, days, goal: g, count, done: g > 0 && count >= g };
+  });
+  const cw = weekStart(asOf);
+  const cur = weeks.find(x => x.w === cw) || null;
+  let streak = 0;
+  for (let i = weeks.length - 1; i >= 0; i--) {
+    const x = weeks[i];
+    if (x.w > cw || x.goal === 0) continue;
+    if (x.w === cw && !x.done && today <= SEASON.end) continue;
+    if (x.done) streak++; else break;
+  }
+  return { start, dates, days: dates.length, weeks, cur, streak };
+}
+
+function growth(days) {
+  let i = 0;
+  STAGES.forEach((s, k) => { if (days >= s.from) i = k; });
+  return { index: i, cur: STAGES[i], next: STAGES[i + 1] || null };
+}
+
+function stay(r) {
+  if (!r.in || !r.out) return '–';
+  const [a, b] = r.in.split(':').map(Number), [c, d] = r.out.split(':').map(Number);
+  const m = (c * 60 + d) - (a * 60 + b);
+  if (m <= 0) return '–';
+  const h = Math.floor(m / 60), mm = m % 60;
+  return (h ? h + '시간 ' : '') + mm + '분';
+}
+
+/* ================= 예시 데이터 ================= */
+const SEED_MEMBERS = [
+  ['s01', '김서연', 'daily', 0, .15, 'peach'], ['s02', '이도윤', 'steady', .5, .1, 'coffee'], ['s03', '박지호', 'light', .5, .15, 'apple'],
+  ['s04', '최유진', 'steady', .3, .2, 'tangerine'], ['s05', '정하람', 'daily', 0, .3, 'apple'], ['s06', '강민서', 'light', .6, .1, 'peach'],
+  ['s07', '윤태오', 'steady', .6, .05, 'apple'], ['s08', '임수아', 'daily', 0, .05, 'coffee'], ['s09', '한지우', 'light', .3, .3, 'tangerine'],
+  ['s10', '오세린', 'steady', .4, .25, 'peach'], ['s11', '신예준', 'steady', .2, .4, 'coffee'], ['s12', '문가은', 'light', .7, .05, 'coffee'],
+  ['s13', '배현우', 'daily', 0, .2, 'tangerine'],
+].map(([id, name, plan, extra, miss, seed]) => ({
+  id, name, plan, extra, miss, seed, demo: true, joinDate: SEASON.open,
+  early: ['s01', 's04', 's05', 's07', 's08', 's12', 's13'].includes(id), keeper: ['s05'].includes(id),
+}));
+
+const DEMO_HISTORY = {};
+[['2026-11-18', '09:48', '18:32'], ['2026-11-19', '09:51', '19:02'], ['2026-11-20', '10:02', '17:45'],
+ ['2026-11-23', '09:50', '19:00'], ['2026-11-24', '09:46', '19:03'], ['2026-11-25', '09:55', '18:40'], ['2026-11-26', '09:58', '18:21'], ['2026-11-27', '10:00', '19:02'],
+ ['2026-11-30', '09:52', '19:04'], ['2026-12-01', '09:43', '18:50'], ['2026-12-02', '09:49', '18:12'], ['2026-12-04', '10:05', '17:58'],
+ ['2026-12-07', '09:47', '19:01'], ['2026-12-08', '09:53', '18:44'], ['2026-12-10', '09:41', '18:59'], ['2026-12-11', '09:56', '17:30'],
+ ['2026-12-14', '09:50', '18:47'], ['2026-12-15', '09:44', '19:05'], ['2026-12-16', '09:52', '18:36'],
+].forEach(([d, i, o]) => { DEMO_HISTORY[d] = { in: i, out: o }; });
+
+function hash(str) { let h = 1779033703 ^ str.length; for (let i = 0; i < str.length; i++) { h = Math.imul(h ^ str.charCodeAt(i), 3432918353); h = h << 13 | h >>> 19; } h = Math.imul(h ^ (h >>> 16), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); return (h ^= h >>> 16) >>> 0; }
+function mulberry32(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const demoCache = {};
+function demoWeek(m, w) {
+  const key = m.id + '|' + w;
+  if (demoCache[key]) return demoCache[key];
+  const rng = mulberry32(hash(key));
+  const pre = w < weekStart(SEASON.start);
+  const days = workdaysOfWeek(w, pre ? SEASON.open : SEASON.start);
+  let k = pre ? (m.early ? 1 + Math.floor(rng() * days.length) : 0)
+    : PLANS[m.plan].goal + (rng() < m.extra ? 1 : 0) - (rng() < m.miss ? 1 : 0);
+  k = Math.max(0, Math.min(days.length, k));
+  const order = days.map(d => [rng(), d]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+  const out = {};
+  order.slice(0, k).forEach(d => {
+    const i = 560 + Math.floor(rng() * 70);
+    const o = rng() < .12 ? null : 1060 + Math.floor(rng() * 110);
+    out[d] = { in: hm(i), out: o == null ? null : hm(o) };
+  });
+  return (demoCache[key] = out);
+}
+
+/* ================= 저장 (예시: 이 브라우저에만) ================= */
+function fresh() {
+  return { v: 1, accounts: [{ id: 'demo', name: '고준', email: 'demo@yeolmae.example', plan: 'steady', seed: 'apple', joinDate: SEASON.open, harvestedAt: null }], session: null, records: {}, demoDate: DEMO_BASE };
+}
+function load() { try { const raw = localStorage.getItem(KEY); if (raw) { const s = JSON.parse(raw); if (s && s.v === 1 && Array.isArray(s.accounts)) return s; } } catch (e) {} return null; }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
+let store = load() || fresh();
+const ui = { route: '', calMonth: null, pop: false, card: null };
+
+const currentUser = () => store.accounts.find(a => a.id === store.session) || null;
+const allMembers = () => [...store.accounts, ...SEED_MEMBERS];
+
+function getRecs(m) {
+  const today = store.demoDate, clock = nowHM();
+  const recs = {};
+  if (m.demo) {
+    [...OPEN_WEEKS, ...SEASON_WEEKS].forEach(w => { if (w <= today) Object.assign(recs, demoWeek(m, w)); });
+    Object.keys(recs).forEach(d => {
+      if (d > today) delete recs[d];
+      else if (d === today) {
+        const r = recs[d];
+        if (r.in > clock) delete recs[d];
+        else if (r.out && r.out > clock) recs[d] = { in: r.in, out: null };
+      }
+    });
+  } else {
+    if (m.id === 'demo') Object.assign(recs, DEMO_HISTORY);
+    Object.assign(recs, store.records[m.id] || {});
+    Object.keys(recs).forEach(d => { if (d > today) delete recs[d]; });
+  }
+  return recs;
+}
+function harvestedAt(m, st) {
+  if (!m.demo) return m.harvestedAt && m.harvestedAt <= store.demoDate ? m.harvestedAt : null;
+  return st.days >= FRUIT_DAYS && !m.keeper ? st.dates[FRUIT_DAYS - 1] : null;
+}
+
+/* ================= 그리기 도구 ================= */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const icon = (name, size = 20) => `<svg class="ic" width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${ICONS[name]}</svg>`;
+const badge = (text, kind = 'neutral', extra = '') => `<span class="m-badge m-badge--${kind} ${extra}">${text}</span>`;
+const n1 = v => +v.toFixed(1);
+
+/* 열매: 테마와 무관한 고정색(몽타주 atomic). SVG와 캔버스가 같은 도형 목록을 쓴다 */
+const FC = { apple: '#FF4242', tangerine: '#FF9200', peach: '#FF9B61', coffee: '#E52222', leaf: '#00BF40', stalk: '#9C5800', crease: '#F55A00', white: '#FFFFFF' };
+const BLOSSOM = { apple: '#FED3F7', tangerine: '#FFFFFF', peach: '#FF94ED', coffee: '#FFFFFF' };
+const circ = (cx, cy, rx, ry = rx) => `M${n1(cx - rx)} ${n1(cy)}a${n1(rx)} ${n1(ry)} 0 1 0 ${n1(rx * 2)} 0a${n1(rx)} ${n1(ry)} 0 1 0 ${n1(-rx * 2)} 0Z`;
+function fruitShapes(seed, r) {
+  const hl = { d: circ(-r * .38, -r * .42, r * .24, r * .15), fill: FC.white, o: .32 };
+  const stalk = { d: `M0 ${n1(-r * .8)}Q${n1(r * .05)} ${n1(-r * 1.15)} ${n1(r * .3)} ${n1(-r * 1.3)}`, stroke: FC.stalk, sw: n1(Math.max(1.5, r * .12)) };
+  const leaf = { d: `M${n1(r * .12)} ${n1(-r * 1.05)}Q${n1(r * .5)} ${n1(-r * 1.5)} ${n1(r * .95)} ${n1(-r * 1.15)}Q${n1(r * .55)} ${n1(-r * .8)} ${n1(r * .12)} ${n1(-r * 1.05)}Z`, fill: FC.leaf };
+  if (seed === 'apple') return [stalk, leaf, { d: circ(0, 0, r), fill: FC.apple }, hl];
+  if (seed === 'tangerine') return [leaf, { d: circ(0, 0, r, r * .9), fill: FC.tangerine }, { d: circ(0, -r * .8, r * .15), fill: FC.leaf }, hl];
+  if (seed === 'peach') return [stalk, leaf, { d: circ(0, 0, r), fill: FC.peach }, { d: `M${n1(r * .05)} ${n1(-r * .92)}Q${n1(r * .5)} ${n1(-r * .1)} ${n1(r * .1)} ${n1(r * .92)}`, stroke: FC.crease, sw: n1(Math.max(1.2, r * .09)), o: .7 }, hl];
+  const c = r * .54;
+  return [stalk, leaf, { d: circ(-r * .5, -r * .05, c), fill: FC.coffee }, { d: circ(r * .5, -r * .05, c), fill: FC.coffee }, { d: circ(0, r * .5, c), fill: FC.apple }, { d: circ(-r * .66, -r * .26, c * .3, c * .2), fill: FC.white, o: .32 }];
+}
+const shapesSVG = list => list.map(s => `<path d="${s.d}" fill="${s.fill || 'none'}"${s.stroke ? ` stroke="${s.stroke}" stroke-width="${s.sw}" stroke-linecap="round"` : ''}${s.o ? ` opacity="${s.o}"` : ''}/>`).join('');
+function drawShapes(ctx, list, x, y) {
+  ctx.save(); ctx.translate(x, y);
+  list.forEach(s => {
+    const p = new Path2D(s.d); ctx.globalAlpha = s.o || 1;
+    if (s.fill) { ctx.fillStyle = s.fill; ctx.fill(p); }
+    if (s.stroke) { ctx.strokeStyle = s.stroke; ctx.lineWidth = s.sw; ctx.lineCap = 'round'; ctx.stroke(p); }
+  });
+  ctx.restore();
+}
+const fruitIcon = (seed, size = 40) => `<svg width="${size}" height="${n1(size * 1.2)}" viewBox="-20 -28 40 48" aria-hidden="true">${shapesSVG(fruitShapes(seed, 15))}</svg>`;
+
+/* 나무 */
+const BLOBS = [[0, 0, 38], [-32, 9, 30], [32, 9, 30], [-18, -27, 30], [18, -27, 30], [-50, -9, 25], [50, -9, 25], [0, -48, 28], [-39, -41, 23], [39, -41, 23], [-14, 25, 25], [14, 25, 25], [0, -11, 34]];
+const FLOWERS = [[-25, -7], [23, -21], [2, 16], [-9, -39], [44, -5]];
+function treeSVG(seed, days, o = {}) {
+  const mini = !!o.mini, n = Math.min(days, FRUIT_DAYS);
+  const W = 240, VH = 260, GX = 120, GY = 232;
+  const H = n === 0 ? 0 : 16 + n * 5.2, topY = n1(GY - H), cy = n1(topY - 4);
+  const pop = (isNew, inner) => `<g class="${isNew && o.pop ? 'is-pop' : ''}"><g class="pop-target">${inner}</g></g>`;
+  let s = `<ellipse class="tr-soil" cx="${GX}" cy="${GY + 4}" rx="72" ry="12"/>`;
+  if (n === 0) {
+    s += `<ellipse class="tr-seed" cx="${GX}" cy="${GY - 6}" rx="9" ry="6.5" transform="rotate(-20 ${GX} ${GY - 6})"/><path class="tr-soil" d="M${GX - 20} ${GY + 3}Q${GX} ${GY - 5} ${GX + 20} ${GY + 3}Z"/>`;
+  } else {
+    s += `<path class="${n < 5 ? 'tr-stem' : 'tr-trunk'}" d="M${GX} ${GY}V${topY}" stroke-width="${n1(3 + n * .55)}"/>`;
+    if (n < 10) {
+      const rx = 10 + n * .6, ry = rx * .5;
+      for (let i = n; i >= 1; i--) {
+        const side = i % 2 ? 1 : -1, y = GY - H * (1 - Math.floor((i - 1) / 2) * .2) - 3, x = GX + side * rx * .9;
+        s += pop(i === n, `<ellipse class="${i % 3 ? 'tr-leaf' : 'tr-leaf2'}" cx="${n1(x)}" cy="${n1(y)}" rx="${n1(rx)}" ry="${n1(ry)}" transform="rotate(${-28 * side} ${n1(x)} ${n1(y)})"/>`);
+      }
+    } else {
+      const k = n - 7;
+      BLOBS.slice(0, k).forEach(([dx, dy, r], i) => { s += pop(i === k - 1 && n < 15, `<circle class="${i % 2 ? 'tr-leaf2' : 'tr-leaf'}" cx="${GX + dx}" cy="${n1(cy + dy)}" r="${r}"/>`); });
+      if (n >= 15 && n < FRUIT_DAYS) {
+        FLOWERS.slice(0, n - 14).forEach(([dx, dy], i) => {
+          let f = '';
+          for (let p = 0; p < 5; p++) { const a = p * 72 * Math.PI / 180; f += `<circle cx="${n1(GX + dx + Math.sin(a) * 4.2)}" cy="${n1(cy + dy - Math.cos(a) * 4.2)}" r="3.2" fill="${BLOSSOM[seed]}"/>`; }
+          s += pop(i === n - 15, f + `<circle cx="${GX + dx}" cy="${n1(cy + dy)}" r="2.2" fill="#FFC06E"/>`);
+        });
+      }
+      if (n >= FRUIT_DAYS && !o.harvested) {
+        const fx = GX + 30, fy = n1(cy + 28), fr = shapesSVG(fruitShapes(seed, 18));
+        s += mini ? `<g transform="translate(${fx} ${fy})">${fr}</g>`
+          : `<g transform="translate(${fx} ${fy})" class="fruit-btn" role="button" tabindex="0" data-action="harvest" aria-label="${SEEDS[seed].fruit} 수확하기"><circle class="fruit-ring" r="28"/><circle class="fruit-hit" r="32"/>${pop(true, fr)}</g>`;
+      }
+    }
+  }
+  if (o.harvested) {
+    const bx = GX + 52, by = GY - 4;
+    s += pop(true, `<g transform="translate(${bx} ${by})"><path class="tr-basket-h" d="M-13 -8Q0 -32 13 -8"/><g transform="translate(0 -11)">${shapesSVG(fruitShapes(seed, 9))}</g><path class="tr-basket" d="M-17 -8H17L13 10H-13Z"/></g>`);
+  }
+  const scale = mini ? .3 : 1;
+  return `<svg${mini ? ' class="mini"' : ''} width="${W * scale}" height="${VH * scale}" viewBox="0 0 ${W} ${VH}" role="img" aria-label="${esc(o.label || '')}">${s}</svg>`;
+}
+
+/* ================= 화면: 공통 ================= */
+function renderDemoBar() {
+  const t = store.demoDate;
+  $('#demo-bar').innerHTML = `<div class="container demo-in">
+    <p>예시 화면이에요. 가상의 오늘은 <b>${koDate(t)}</b>이고, 날짜를 옮기며 나무가 자라는 걸 볼 수 있어요.</p>
+    <div class="demo-ctl">
+      <button class="m-btn m-btn--sm m-btn--outlined-assistive" data-action="demo-prev" ${t <= DEMO_MIN ? 'disabled' : ''}>하루 전</button>
+      <button class="m-btn m-btn--sm m-btn--outlined-assistive" data-action="demo-next" ${t >= DEMO_MAX ? 'disabled' : ''}>하루 뒤</button>
+      <button class="m-btn m-btn--sm m-btn--outlined-assistive" data-action="demo-reset">처음 상태로</button>
+    </div></div>`;
+}
+
+const BRAND_MARK = `<svg width="24" height="26" viewBox="-12 -15 24 26" aria-hidden="true">${shapesSVG(fruitShapes('apple', 9))}</svg>`;
+const TABS = [['home', '내 나무', 'home'], ['calendar', '캘린더', 'calendar'], ['garden', '모두의 과수원', 'persons']];
+
+function renderChrome(me, route) {
+  $('#gnb').innerHTML = `<div class="container gnb-in">
+    <a class="brand" href="#${me ? 'home' : 'login'}">${BRAND_MARK}<span>열매 출근부</span></a>
+    ${me ? `<nav class="m-tablist" aria-label="주요 화면">${TABS.map(([k, l]) => `<a class="m-tab" href="#${k}" ${route === k ? 'aria-current="page"' : ''}>${l}</a>`).join('')}</nav>
+    <div class="gnb-user">
+      <button class="m-text-btn m-text-btn--sm m-text-btn--assistive" data-action="settings" aria-label="내 설정 열기">${icon('person', 18)}<span>${esc(me.name)}님</span></button>
+      <button class="m-btn m-btn--sm m-btn--outlined-assistive" data-action="logout">로그아웃</button>
+    </div>` : ''}
+  </div>`;
+  $('#bnav').innerHTML = me ? TABS.map(([k, l, ic]) => `<a href="#${k}" ${route === k ? 'aria-current="page"' : ''}>${icon(ic, 24)}<span>${l === '모두의 과수원' ? '과수원' : l}</span></a>`).join('') : '';
+  $('#bnav').hidden = !me;
+  const bar = $('#action-bar');
+  bar.innerHTML = me && route === 'home' ? homeAction(me).button('main-action-m') : '';
+  bar.hidden = !bar.innerHTML;
+  document.body.classList.toggle('has-bnav', !!me);
+  document.body.classList.toggle('has-action', !bar.hidden);
+}
+
+function planGroup(selected) {
+  return `<div class="plan-group" role="radiogroup" aria-labelledby="plan-label">${PLAN_ORDER.map(k => `
+    <label class="m-framed">
+      <input class="sr-only" type="radio" name="plan" value="${k}" ${selected === k ? 'checked' : ''}>
+      <span class="plan-text"><span class="plan-name">${PLANS[k].label}</span><span class="plan-desc">${PLANS[k].desc} 주간 목표는 ${PLANS[k].goal}일이에요.</span></span>
+      <span class="m-radio" aria-hidden="true"></span>
+    </label>`).join('')}</div>`;
+}
+function seedGroup(selected, locked) {
+  return `<div class="seed-group" role="radiogroup" aria-labelledby="seed-label">${SEED_ORDER.map(k => `
+    <label class="m-framed seed-opt">
+      <input class="sr-only" type="radio" name="seed" value="${k}" ${selected === k ? 'checked' : ''} ${locked ? 'disabled' : ''}>
+      ${fruitIcon(k, 36)}<span class="seed-name">${SEEDS[k].label}</span>
+    </label>`).join('')}</div>`;
+}
+const control = (name, label, input, msg = '') => `<div class="m-control" data-field="${name}">
+  <label class="m-label" for="f-${name}">${label}</label>
+  <div class="m-field">${input}</div>
+  <p class="m-msg" data-msg data-default="${esc(msg)}">${msg}</p></div>`;
+
+/* ================= 화면: 로그인 · 가입 ================= */
+function viewLogin() {
+  return `<section class="panel auth">
+    <h1 class="t-title3">로그인</h1>
+    <p class="lead">출근한 날만큼 나무가 자라고, 20일을 채우면 열매가 열려요.</p>
+    <div class="m-secmsg m-secmsg--info">${icon('circle-info-fill')}<div>예시 사이트예요<span class="m-secmsg-desc">가입 정보는 이 브라우저에만 저장돼요. 비밀번호는 확인하지도 저장하지도 않아요.</span></div></div>
+    <form class="m-form" data-form="login" novalidate>
+      ${control('email', '이메일', `<input id="f-email" name="email" type="email" autocomplete="username" placeholder="name@example.com">`)}
+      ${control('password', '비밀번호', `<input id="f-password" name="password" type="password" autocomplete="off" placeholder="비밀번호">`)}
+      <button class="m-btn m-btn--lg m-btn--solid-primary m-btn--full" type="submit">로그인</button>
+    </form>
+    <div class="auth-foot">
+      <button class="m-btn m-btn--md m-btn--outlined-assistive m-btn--full" data-action="demo-login">예시 계정으로 둘러보기</button>
+      <p>처음이라면 <a href="#signup">가입하기</a></p>
+    </div>
+  </section>`;
+}
+function viewSignup() {
+  if (store.demoDate > SEASON.end) {
+    return `<section class="panel auth">
+      <h1 class="t-title3">가입하기</h1>
+      <p class="lead">${koDay(SEASON.end)}로 시즌이 끝나 새로 가입할 수 없어요.</p>
+      <div class="auth-foot"><p>이미 가입했다면 <a href="#login">로그인</a></p></div>
+    </section>`;
+  }
+  return `<section class="panel auth">
+    <h1 class="t-title3">가입하기</h1>
+    <p class="lead">씨앗을 하나 골라 심어요. 출근한 날만큼 자라요.</p>
+    <form class="m-form" data-form="signup" novalidate>
+      ${control('name', '이름', `<input id="f-name" name="name" type="text" autocomplete="name" maxlength="20" placeholder="캠프에서 쓰는 이름">`)}
+      ${control('email', '이메일', `<input id="f-email" name="email" type="email" autocomplete="username" placeholder="name@example.com">`)}
+      ${control('password', '비밀번호', `<input id="f-password" name="password" type="password" autocomplete="off" placeholder="8자 이상">`)}
+      <div class="m-control" data-field="seed">
+        <span class="m-label" id="seed-label">씨앗</span>
+        ${seedGroup('', false)}
+        <p class="m-msg" data-msg data-default="20일을 출근하면 이 열매가 열려요.">20일을 출근하면 이 열매가 열려요.</p>
+      </div>
+      <div class="m-control" data-field="plan">
+        <span class="m-label" id="plan-label">출근 플랜</span>
+        ${planGroup('')}
+        <p class="m-msg" data-msg data-default="나중에 내 설정에서 바꿀 수 있어요.">나중에 내 설정에서 바꿀 수 있어요.</p>
+      </div>
+      <button class="m-btn m-btn--lg m-btn--solid-primary m-btn--full" type="submit">가입하고 씨앗 심기</button>
+    </form>
+    <div class="auth-foot"><p>이미 가입했다면 <a href="#login">로그인</a></p></div>
+  </section>`;
+}
+
+/* ================= 화면: 홈 ================= */
+function homeAction(me) {
+  const today = store.demoDate, rec = getRecs(me)[today] || null;
+  const over = today > SEASON.end, work = isWorkday(today);
+  const b = (cls, action, label) => id => `<button id="${id}" class="m-btn m-btn--lg m-btn--${cls} m-btn--full" ${action ? `data-action="${action}"` : 'disabled'}>${label}</button>`;
+  if (over) return { status: badge('시즌 종료'), button: b('solid-primary', '', '시즌이 끝났어요'), hint: `${koDay(SEASON.open)}부터 ${koDay(SEASON.end)}까지의 기록은 캘린더에서 볼 수 있어요.` };
+  if (!work) { const nx = nextWorkday(today); return { status: badge('쉬는 날'), button: b('solid-primary', '', '오늘은 쉬는 날이에요'), hint: '주말과 공휴일에는 출근을 기록하지 않아요.' + (nx ? ` 다음 출근일은 ${koDate(nx)}이에요.` : '') }; }
+  if (!rec) return { status: badge('출근 전'), button: b('solid-primary', 'checkin', '출근하기'), hint: '출근하면 나무가 자라요.' };
+  if (!rec.out) return { status: badge('캠프에 있어요', 'lime'), button: b('solid-assistive', 'checkout', '퇴근하기'), hint: '퇴근은 누르지 않아도 출근 기록은 그대로예요.' };
+  return { status: badge('퇴근했어요'), button: b('outlined-assistive', 'checkout', '퇴근 시간 다시 기록'), hint: '오늘 출근을 기록했어요.' };
+}
+
+function viewHome(me) {
+  const today = store.demoDate, recs = getRecs(me), st = computeStats(me, recs, today), rec = recs[today] || null;
+  const over = today > SEASON.end, act = homeAction(me);
+  const time = v => v ? `<dd class="tnum">${v}</dd>` : `<dd class="is-empty">미기록</dd>`;
+  return `<div class="home">
+    <div class="home-col home-col--side">
+      <section class="panel p-today" aria-labelledby="h-today">
+        <h1 class="t-heading2" id="h-today">안녕하세요, ${esc(me.name)}님</h1>
+        <p class="today-meta"><span>${koDate(today)}</span>${act.status}</p>
+        ${act.button('main-action')}
+        <p class="hint">${act.hint}</p>
+        <dl class="times"><div><dt>출근 시간</dt>${time(rec && rec.in)}</div><div><dt>퇴근 시간</dt>${time(rec && rec.out)}</div></dl>
+      </section>
+      ${weekPanel(me, st, recs, today, over)}
+    </div>
+    <div class="home-col home-col--main">
+      ${treePanel(me, st, rec, today, over)}
+      ${campPanel(today, over)}
+    </div>
+  </div>`;
+}
+
+function weekPanel(me, st, recs, today, over) {
+  const pre = today < SEASON.start;
+  const cur = st.cur || (pre ? { w: weekStart(today), days: workdaysOfWeek(weekStart(today), SEASON.open), goal: 0, count: 0, done: false } : null);
+  if (!cur) return '';
+  const dots = [];
+  for (let i = 0; i < 5; i++) {
+    const d = addDays(cur.w, i);
+    const usable = cur.days.includes(d);
+    let cls = '', inner = '', say = '';
+    if (recs[d]) { cls = 'is-done'; inner = icon('check-thick', 18); say = '출근함'; }
+    else if (!usable) { cls = 'is-rest'; inner = '–'; say = HOLIDAYS[d] || '출근일 아님'; }
+    else if (d === today && !over) { cls = 'is-today'; inner = '오늘'; say = '오늘, 아직 출근 전'; }
+    else { inner = ''; say = d < today ? '출근 안 함' : '아직 오지 않은 날'; }
+    dots.push(`<li class="${cls}" aria-label="${WD[dow(d)]}요일 ${+d.slice(8, 10)}일, ${say}"><span class="wd-name" aria-hidden="true">${WD[dow(d)]}</span><span class="wd-dot" aria-hidden="true">${inner}</span><span class="wd-num" aria-hidden="true">${+d.slice(8, 10)}</span></li>`);
+  }
+  const left = cur.days.filter(d => d > today || (d === today && !recs[d])).length;
+  const need = cur.goal - cur.count;
+  let text;
+  if (pre) text = `정식 시작은 ${koDate(SEASON.start)}이에요. 주간 목표는 그때부터 세요.`;
+  else if (over) text = cur.done ? `마지막 주 목표 ${cur.goal}일을 채웠어요.` : `마지막 주에는 ${cur.count}일 출근했어요.`;
+  else if (cur.goal === 0) text = '이번 주에는 출근할 수 있는 날이 없어요.';
+  else if (cur.count > cur.goal) text = `이번 주 ${cur.count}일 출근했어요. 목표 ${cur.goal}일을 넘겼어요.`;
+  else if (cur.done) text = `이번 주 목표 ${cur.goal}일을 채웠어요.`;
+  else if (need > left) text = '이번 주 목표는 놓쳤어요. 그래도 나온 날만큼 나무는 자라요.';
+  else if (cur.count === 0) text = `이번 주 목표는 ${cur.goal}일이에요. 아직 출근한 날이 없어요.`;
+  else text = `이번 주 ${cur.count}일 출근했어요. ${need}일 더 나오면 목표 ${cur.goal}일을 채워요.`;
+  return `<section class="panel p-week" aria-labelledby="h-week">
+    <div class="panel-head"><div class="head-group"><h2 class="t-headline2" id="h-week">${over ? '마지막 주' : '이번 주'}</h2>${badge(PLANS[me.plan].label)}</div>${cur.done ? badge('목표 달성', 'violet') : ''}</div>
+    <ol class="weekdots">${dots.join('')}</ol>
+    <p class="week-text">${text}</p>
+    ${st.streak > 0 ? `<p class="streak">${icon('fire-fill', 18)}<span>${st.streak}주 연속으로 목표를 채웠어요</span></p>` : ''}
+  </section>`;
+}
+
+const NEXT_TEXT = {
+  sprout: () => '하루 나오면 새싹이 나요.',
+  sapling: n => `${n}일 더 나오면 묘목으로 자라요.`,
+  tree: n => `${n}일 더 나오면 나무가 돼요.`,
+  flower: n => `${n}일 더 나오면 꽃이 펴요.`,
+  fruit: n => `${n}일 더 나오면 열매가 열려요.`,
+};
+function trackHTML(days) {
+  const n = Math.min(days, FRUIT_DAYS);
+  return `<div class="track" role="img" aria-label="열매까지 ${FRUIT_DAYS}일 중 ${n}일">
+    <div class="track-bar"><i style="width:${n / FRUIT_DAYS * 100}%"></i>${STAGES.slice(1).map(s => `<b class="${days >= s.from ? 'is-on' : ''}" style="left:${s.from / FRUIT_DAYS * 100}%"></b>`).join('')}</div>
+    <ol class="track-steps" aria-hidden="true">${STAGES.slice(1).map(s => `<li class="${days >= s.from ? 'is-on' : ''}" style="left:${s.from / FRUIT_DAYS * 100}%"><span>${s.label}</span><em>${s.from}일</em></li>`).join('')}</ol>
+  </div>`;
+}
+function treePanel(me, st, rec, today, over) {
+  const days = st.days, g = growth(days), harvested = !!harvestedAt(me, st);
+  const canHarvest = days >= FRUIT_DAYS && !harvested;
+  const left = over ? 0 : workdaysLeft(today, !!rec);
+  let title;
+  if (harvested) title = `${SEEDS[me.seed].fruit}${SEEDS[me.seed].obj} 수확했어요`;
+  else if (canHarvest) title = '열매가 열렸어요';
+  else if (days === 0) title = '씨앗을 심었어요';
+  else title = `열매까지 ${FRUIT_DAYS - days}일 남았어요`;
+  const svg = treeSVG(me.seed, days, { harvested, pop: ui.pop, label: `내 ${SEEDS[me.seed].label}나무. 출근 ${days}일, ${harvested ? '수확 완료' : g.cur.label + ' 단계'}.` });
+  let side = '';
+  if (harvested) {
+    side += `<p>수확 카드를 운영진에게 DM으로 보내면 커피 쿠폰으로 바꿔 드려요.</p>
+      <button class="m-btn m-btn--md m-btn--outlined-assistive" data-action="card-open">수확 카드 보기</button>`;
+  } else if (canHarvest) {
+    side += `<div class="m-secmsg m-secmsg--positive">${icon('circle-check-fill')}<div>수확할 수 있어요<span class="m-secmsg-desc">나무의 열매를 눌러 수확하세요. 커피 쿠폰으로 바꿀 수 있는 수확 카드가 나와요.</span></div></div>`;
+  } else {
+    side += `<p>${days === 0 ? '아직 출근한 날이 없어요.' : `지금까지 ${days}일 출근했고, 지금은 ${g.cur.label} 단계예요.`} ${over ? `${koDay(SEASON.end)}로 시즌이 끝났어요.` : NEXT_TEXT[g.next.key](g.next.from - days)}</p>`;
+    if (!over && days + left < FRUIT_DAYS) side += `<p class="c-tertiary">남은 출근일을 모두 나와도 열매까지는 ${FRUIT_DAYS - days - left}일이 모자라요. 그래도 나무는 계속 자라요.</p>`;
+  }
+  side += trackHTML(days);
+  if (!harvested && !canHarvest) side += `<p class="c-tertiary">열매는 출근 ${FRUIT_DAYS}일에 열리고, 수확하면 커피 쿠폰으로 바꿀 수 있어요.</p>`;
+  return `<section class="panel p-tree" aria-labelledby="h-tree">
+    <div class="panel-head"><h2 class="t-headline2" id="h-tree">내 나무</h2>${badge(SEEDS[me.seed].label, 'neutral', 'm-badge--md')}</div>
+    <p class="t-heading1 tree-title">${title}</p>
+    <div class="tree-body"><div class="tree-fig">${svg}</div><div class="tree-side">${side}</div></div>
+  </section>`;
+}
+
+function todayAttendees(today) {
+  return allMembers().map(m => ({ m, r: getRecs(m)[today] })).filter(x => x.r).sort((a, b) => (a.r.in || '').localeCompare(b.r.in || ''));
+}
+function campPanel(today, over) {
+  let body;
+  if (over) body = `<p class="camp-text">시즌이 끝나서 오늘 출근 기록은 없어요.</p>`;
+  else if (!isWorkday(today)) body = `<p class="camp-text">오늘은 쉬는 날이라 출근 기록이 없어요.</p>`;
+  else {
+    const list = todayAttendees(today);
+    const here = list.filter(x => !x.r.out).length;
+    body = list.length === 0
+      ? `<p class="camp-text">아직 아무도 출근하지 않았어요. 오늘 첫 출근을 기록해 보세요.</p>`
+      : `<p class="camp-text">오늘 ${list.length}명이 출근했고, 지금 ${here}명이 캠프에 있어요.</p>
+         <ul class="chips">${list.map(x => `<li>${badge((x.r.out ? '' : '<i class="chip-dot" aria-hidden="true"></i>') + esc(x.m.name) + (x.r.out ? '' : '<span class="sr-only"> 캠프에 있음</span>'), 'outlined', 'm-badge--md')}</li>`).join('')}</ul>`;
+  }
+  return `<section class="panel p-camp" aria-labelledby="h-camp">
+    <h2 class="t-headline2" id="h-camp">오늘 캠프</h2>${body}
+    <a class="m-text-btn m-text-btn--sm m-text-btn--primary" href="#garden">모두의 과수원 보기</a>
+  </section>`;
+}
+
+/* ================= 화면: 캘린더 ================= */
+const MONTHS = ['2026-11', '2026-12'];
+function viewCalendar(me) {
+  const today = store.demoDate, recs = getRecs(me);
+  if (!ui.calMonth) ui.calMonth = MONTHS.includes(today.slice(0, 7)) ? today.slice(0, 7) : MONTHS[MONTHS.length - 1];
+  const ym = ui.calMonth, [y, mo] = ym.split('-').map(Number);
+  const first = `${ym}-01`, daysIn = new Date(Date.UTC(y, mo, 0)).getUTCDate();
+  let cells = WD.map(w => `<div class="cal-wd" role="columnheader">${w}</div>`).join('');
+  for (let i = 0; i < dow(first); i++) cells += `<div class="cal-cell is-blank" aria-hidden="true"></div>`;
+  for (let n = 1; n <= daysIn; n++) {
+    const d = `${ym}-${pad(n)}`, r = recs[d], work = isWorkday(d);
+    let cls = 'cal-cell', body = '';
+    if (!work) cls += ' is-off';
+    if (d === today) cls += ' is-today';
+    if (HOLIDAYS[d]) body += `<span class="cal-note">${HOLIDAYS[d]}</span>`;
+    if (r) body += `<span class="cal-mark" role="img" aria-label="출근함"></span><span class="cal-time">${r.in ? `${r.in} ~ ${r.out || ''}` : ''}</span>`;
+    else if (d === today && work) body += `<span class="cal-note">오늘</span>`;
+    cells += `<div class="${cls}"><span class="cal-num">${n}</span>${body}</div>`;
+  }
+  const rows = Object.keys(recs).filter(d => d.startsWith(ym)).sort().reverse();
+  const table = rows.length ? `<div class="m-table cal-table"><div class="m-table-scroll"><table>
+      <thead><tr><th scope="col">날짜</th><th scope="col">출근</th><th scope="col">퇴근</th><th scope="col">머문 시간</th></tr></thead>
+      <tbody>${rows.map(d => { const r = recs[d]; return `<tr><td>${koDate(d)}</td><td class="tnum">${r.in || '–'}</td><td class="tnum">${r.out || '–'}</td><td>${stay(r)}</td></tr>`; }).join('')}</tbody>
+    </table></div></div>`
+    : `<p class="empty">이 달에는 아직 출근 기록이 없어요. 출근하면 여기에 쌓여요.</p>`;
+  const idx = MONTHS.indexOf(ym);
+  return `<section class="panel" aria-labelledby="h-cal">
+    <div class="panel-head">
+      <h1 class="t-heading2" id="h-cal">출근 캘린더</h1>
+      <div class="cal-nav">
+        <button class="m-icon-btn" data-action="cal-prev" aria-label="이전 달" ${idx <= 0 ? 'disabled' : ''}>${icon('chevron-left')}</button>
+        <span class="t-headline2 tnum" aria-live="polite">${y}년 ${mo}월</span>
+        <button class="m-icon-btn" data-action="cal-next" aria-label="다음 달" ${idx >= MONTHS.length - 1 ? 'disabled' : ''}>${icon('chevron-right')}</button>
+      </div>
+    </div>
+    <div class="cal-grid">${cells}</div>
+    ${table}
+  </section>`;
+}
+
+/* ================= 화면: 모두의 과수원 ================= */
+function viewGarden(me) {
+  const today = store.demoDate, over = today > SEASON.end;
+  const list = allMembers().map(m => { const recs = getRecs(m), st = computeStats(m, recs, today); return { m, st, r: recs[today] || null, hv: harvestedAt(m, st) }; });
+  list.sort((a, b) => {
+    if (a.m.id === me.id) return -1; if (b.m.id === me.id) return 1;
+    if (!!a.r !== !!b.r) return a.r ? -1 : 1;
+    if (a.r && b.r) return (a.r.in || '').localeCompare(b.r.in || '');
+    return a.m.name.localeCompare(b.m.name, 'ko');
+  });
+  const came = list.filter(x => x.r).length, hvCount = list.filter(x => x.hv).length;
+  const hvText = hvCount ? `지금까지 ${hvCount}명이 열매를 수확했어요.` : '아직 열매를 수확한 사람은 없어요.';
+  const lead = over ? `시즌이 끝났어요. ${hvText}` : !isWorkday(today) ? `오늘은 쉬는 날이에요. ${hvText}` : `오늘 ${list.length}명 중 ${came}명이 출근했어요. ${hvText}`;
+  return `<h1 class="t-title3">모두의 과수원</h1>
+    <p class="lead">${lead}</p>
+    <ul class="garden">${list.map(({ m, st, r, hv }) => { const g = growth(st.days); return `
+      <li class="panel member">
+        <div class="member-info">
+          <div class="member-name"><span class="t-headline2">${esc(m.name)}</span>${m.id === me.id ? badge('나', 'brand') : ''}</div>
+          <div class="member-badges">${badge(PLANS[m.plan].label)}${hv ? badge('수확 완료', 'violet') : ''}${r ? (r.out ? badge('퇴근했어요') : badge('캠프에 있어요', 'lime')) : ''}</div>
+          <p class="member-count">출근 ${st.days}일, ${hv ? '수확 완료' : g.cur.label + ' 단계'}</p>
+          ${st.streak > 0 ? `<p class="member-streak">${icon('fire-fill', 14)}${st.streak}주 연속 달성</p>` : ''}
+        </div>
+        <div class="member-fig">${treeSVG(m.seed, st.days, { mini: true, harvested: !!hv, label: `${m.name}님의 ${SEEDS[m.seed].label}나무. 출근 ${st.days}일.` })}</div>
+      </li>`; }).join('')}</ul>`;
+}
+
+/* ================= 수확 카드 (이미지) ================= */
+async function buildCard(me) {
+  const today = store.demoDate, recs = getRecs(me), st = computeStats(me, recs, today);
+  if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch (e) {} }
+  const S = 2, W = 360, H = 480;
+  const c = document.createElement('canvas'); c.width = W * S; c.height = H * S;
+  const x = c.getContext('2d'); x.scale(S, S);
+  const F = (w, size) => `${w} ${size}px "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif`;
+  const INK = '#171719', SUB = 'rgba(46,47,51,.88)', MUTE = 'rgba(55,56,60,.61)', FILL = '#F7F7F8', LINE = 'rgba(112,115,124,.22)';
+  const rr = (px, py, w, h, r) => { x.beginPath(); x.moveTo(px + r, py); x.arcTo(px + w, py, px + w, py + h, r); x.arcTo(px + w, py + h, px, py + h, r); x.arcTo(px, py + h, px, py, r); x.arcTo(px, py, px + w, py, r); x.closePath(); };
+  x.fillStyle = '#EAEBEC'; x.fillRect(0, 0, W, H);
+  x.fillStyle = '#FFFFFF'; rr(8, 8, W - 16, H - 16, 20); x.fill();
+  x.textBaseline = 'alphabetic';
+  x.fillStyle = INK; x.font = F(700, 15); x.textAlign = 'left'; x.fillText('열매 출근부', 24, 40);
+  x.fillStyle = MUTE; x.font = F(500, 13); x.textAlign = 'right'; x.fillText('수확 카드', W - 24, 40);
+  x.fillStyle = FILL; x.beginPath(); x.arc(W / 2, 118, 54, 0, Math.PI * 2); x.fill();
+  drawShapes(x, fruitShapes(me.seed, 30), W / 2, 126);
+  x.textAlign = 'center';
+  x.fillStyle = INK; x.font = F(700, 22); x.fillText(`${me.name}님의 ${SEEDS[me.seed].fruit}`, W / 2, 214);
+  x.fillStyle = SUB; x.font = F(400, 14); x.fillText(`${st.days}일 출근해서 열매를 수확했어요`, W / 2, 238);
+  const cells = [['총 출근', `${st.days}일`], ['출근 플랜', PLANS[me.plan].label], ['첫 출근', st.dates[0] ? koDay(st.dates[0]) : '–'], ['수확한 날', me.harvestedAt ? koDay(me.harvestedAt) : '–']];
+  x.textAlign = 'left';
+  cells.forEach(([k, v], i) => {
+    const px = 24 + (i % 2) * 162, py = 258 + Math.floor(i / 2) * 66;
+    x.fillStyle = FILL; rr(px, py, 150, 56, 12); x.fill();
+    x.fillStyle = MUTE; x.font = F(500, 12); x.fillText(k, px + 14, py + 22);
+    x.fillStyle = INK; x.font = F(600, 16); x.fillText(v, px + 14, py + 43);
+  });
+  x.fillStyle = MUTE; x.font = F(500, 12); x.fillText(`출근 기록 (${koDay(SEASON.open)} ~ ${koDay(ALL_WORKDAYS[ALL_WORKDAYS.length - 1])})`, 24, 410);
+  let dx = 28, prevW = null;
+  ALL_WORKDAYS.forEach(d => {
+    const w = weekStart(d); if (prevW && w !== prevW) dx += 6; prevW = w;
+    x.beginPath(); x.arc(dx, 428, 4, 0, Math.PI * 2);
+    if (recs[d]) { x.fillStyle = FC.leaf; x.fill(); } else { x.strokeStyle = LINE; x.lineWidth = 1.5; x.stroke(); }
+    dx += 10.4;
+  });
+  x.textAlign = 'center'; x.fillStyle = MUTE; x.font = F(400, 12); x.fillText('이 이미지를 운영진에게 DM으로 보내 주세요', W / 2, 460);
+  const blob = await new Promise(res => c.toBlob(res, 'image/png'));
+  const alt = `${me.name}님의 수확 카드. ${SEEDS[me.seed].fruit}, 총 출근 ${st.days}일, 출근 플랜 ${PLANS[me.plan].label}, 수확한 날 ${me.harvestedAt ? koDay(me.harvestedAt) : ''}.`;
+  return { url: c.toDataURL('image/png'), blob, alt, filename: `harvest-${me.harvestedAt || today}.png` };
+}
+async function openCard(me) {
+  ui.card = await buildCard(me);
+  return openOverlay(`<div class="m-modal" role="dialog" aria-modal="true" aria-labelledby="hv-t">
+    <div class="m-modal-nav"><h2 class="t-heading2" id="hv-t">수확 카드</h2><button class="m-icon-btn" data-action="overlay-cancel" aria-label="닫기">${icon('close')}</button></div>
+    <div class="m-modal-content">
+      <img class="hv-img" src="${ui.card.url}" width="360" height="480" alt="${esc(ui.card.alt)}">
+      <p class="hv-help">이 이미지를 복사해 운영진에게 DM으로 보내면 커피 쿠폰으로 바꿔 드려요.</p>
+    </div>
+    <div class="m-modal-actions">
+      <button class="m-btn m-btn--lg m-btn--solid-assistive" data-action="card-save">이미지 저장</button>
+      <button class="m-btn m-btn--lg m-btn--solid-primary" data-action="card-copy" data-autofocus>이미지 복사</button>
+    </div></div>`, 'modal');
+}
+
+/* ================= 토스트 · 알림창 · 모달 ================= */
+function toast(msg, kind = 'positive') {
+  const el = document.createElement('div');
+  el.className = 'm-toast m-toast--' + kind;
+  el.innerHTML = `${icon(kind === 'positive' ? 'circle-check-fill' : 'circle-info-fill')}<span>${esc(msg)}</span>`;
+  $('#toast-region').appendChild(el);
+  setTimeout(() => { el.classList.add('is-out'); setTimeout(() => el.remove(), 220); }, 3200);
+}
+let overlayClose = null, lastFocus = null;
+function openOverlay(html, kind) {
+  lastFocus = document.activeElement;
+  $('#toast-region').innerHTML = '';
+  const root = $('#overlay-root');
+  root.innerHTML = `<div class="overlay overlay--${kind}"><div class="overlay-dim" data-action="overlay-dismiss"></div>${html}</div>`;
+  const box = root.querySelector('[role]');
+  const focusables = () => [...box.querySelectorAll('button,input,[href]')].filter(el => !el.disabled && el.type !== 'hidden');
+  const first = box.querySelector('[data-autofocus]') || focusables()[0];
+  if (first) first.focus();
+  const onKey = e => {
+    if (e.key === 'Escape') { e.preventDefault(); overlayClose && overlayClose('cancel'); }
+    if (e.key === 'Tab') {
+      const f = focusables(); if (!f.length) return;
+      const i = f.indexOf(document.activeElement);
+      if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }
+    }
+  };
+  document.addEventListener('keydown', onKey);
+  return new Promise(resolve => {
+    overlayClose = result => {
+      document.removeEventListener('keydown', onKey);
+      root.innerHTML = ''; overlayClose = null;
+      if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
+      resolve(result);
+    };
+  });
+}
+function settingsModal(me) {
+  const locked = !!me.harvestedAt;
+  return openOverlay(`<div class="m-modal" role="dialog" aria-modal="true" aria-labelledby="st-t">
+    <div class="m-modal-nav"><h2 class="t-heading2" id="st-t">내 설정</h2><button class="m-icon-btn" data-action="overlay-cancel" aria-label="닫기">${icon('close')}</button></div>
+    <form data-form="settings" novalidate style="display:contents">
+      <div class="m-modal-content"><div class="m-form">
+        ${control('name', '이름', `<input id="f-name" name="name" type="text" maxlength="20" value="${esc(me.name)}" data-autofocus>`)}
+        <div class="m-control" data-field="seed"><span class="m-label" id="seed-label">씨앗</span>${seedGroup(me.seed, locked)}
+          <p class="m-msg">${locked ? '수확한 뒤에는 씨앗을 바꿀 수 없어요.' : '씨앗을 바꿔도 자란 만큼은 그대로예요.'}</p></div>
+        <div class="m-control" data-field="plan"><span class="m-label" id="plan-label">출근 플랜</span>${planGroup(me.plan)}
+          <p class="m-msg">플랜을 바꾸면 주간 목표가 새 플랜 기준으로 다시 계산돼요. 나무는 그대로예요.</p></div>
+      </div></div>
+      <div class="m-modal-actions">
+        <button class="m-btn m-btn--lg m-btn--solid-assistive" type="button" data-action="overlay-cancel">취소</button>
+        <button class="m-btn m-btn--lg m-btn--solid-primary" type="submit">저장하기</button>
+      </div>
+    </form></div>`, 'modal');
+}
+
+/* ================= 폼 ================= */
+function setErrors(form, errors) {
+  let firstBad = null;
+  form.querySelectorAll('[data-field]').forEach(c => {
+    const name = c.dataset.field, msg = c.querySelector('[data-msg]'), err = errors[name];
+    c.classList.toggle('is-negative', !!err);
+    if (msg) { msg.textContent = err || msg.dataset.default || ''; msg.classList.toggle('m-msg--negative', !!err); }
+    const input = c.querySelector('input');
+    if (input) { input.setAttribute('aria-invalid', err ? 'true' : 'false'); if (err && !firstBad) firstBad = input; }
+  });
+  if (firstBad) { firstBad.focus({ preventScroll: true }); firstBad.closest('[data-field]').scrollIntoView({ block: 'center' }); }
+  return Object.keys(errors).length === 0;
+}
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const forms = {
+  login(form) {
+    const v = Object.fromEntries(new FormData(form)), e = {};
+    const email = (v.email || '').trim().toLowerCase();
+    if (!EMAIL_RE.test(email)) e.email = '이메일 형식을 확인해 주세요.';
+    if (!v.password) e.password = '비밀번호를 입력해 주세요.';
+    const acc = store.accounts.find(a => a.email === email);
+    if (!e.email && !e.password && !acc) e.password = '이메일 또는 비밀번호가 맞지 않아요.';
+    if (!setErrors(form, e)) return;
+    store.session = acc.id; save(); go('home');
+  },
+  signup(form) {
+    const v = Object.fromEntries(new FormData(form)), e = {};
+    const name = (v.name || '').trim(), email = (v.email || '').trim().toLowerCase();
+    if (name.length < 2) e.name = '이름을 2자 이상 입력해 주세요.';
+    if (!EMAIL_RE.test(email)) e.email = '이메일 형식을 확인해 주세요.';
+    else if (store.accounts.some(a => a.email === email)) e.email = '이미 가입한 이메일이에요. 로그인해 주세요.';
+    if ((v.password || '').length < 8) e.password = '비밀번호는 8자 이상이어야 해요.';
+    if (!SEEDS[v.seed]) e.seed = '씨앗을 하나 골라 주세요.';
+    if (!PLANS[v.plan]) e.plan = '출근 플랜을 하나 골라 주세요.';
+    if (!setErrors(form, e)) return;
+    const id = 'u' + Date.now().toString(36);
+    store.accounts.push({ id, name, email, plan: v.plan, seed: v.seed, joinDate: store.demoDate, harvestedAt: null });
+    store.session = id; save(); go('home');
+    toast(`${name}님, ${SEEDS[v.seed].label} 씨앗을 심었어요.`);
+  },
+  settings(form) {
+    const me = currentUser(), v = Object.fromEntries(new FormData(form)), e = {};
+    const name = (v.name || '').trim();
+    if (name.length < 2) e.name = '이름을 2자 이상 입력해 주세요.';
+    if (!setErrors(form, e)) return;
+    me.name = name; if (PLANS[v.plan]) me.plan = v.plan; if (SEEDS[v.seed] && !me.harvestedAt) me.seed = v.seed;
+    save(); overlayClose && overlayClose('saved'); render(); toast('설정을 저장했어요.');
+  },
+};
+
+/* ================= 동작 ================= */
+function myRecs(me) { return (store.records[me.id] = store.records[me.id] || {}); }
+const STAGE_TOAST = { sprout: '새싹이 났어요.', sapling: '묘목으로 자랐어요.', tree: '나무가 됐어요.', flower: '꽃이 폈어요.' };
+const actions = {
+  checkin() {
+    const me = currentUser(), today = store.demoDate;
+    if (!me || !isWorkday(today) || getRecs(me)[today]) return;
+    const before = computeStats(me, getRecs(me), today);
+    myRecs(me)[today] = { in: nowHM(), out: null };
+    save();
+    const after = computeStats(me, getRecs(me), today);
+    ui.pop = true; render(); ui.pop = false;
+    const gb = growth(before.days), ga = growth(after.days);
+    let msg = after.days > FRUIT_DAYS ? '출근을 기록했어요.' : '출근을 기록했어요. 나무가 조금 자랐어요.';
+    if (after.days === FRUIT_DAYS) msg = '열매가 열렸어요. 나무의 열매를 눌러 수확하세요.';
+    else if (ga.cur.key !== gb.cur.key) msg = STAGE_TOAST[ga.cur.key];
+    else if (after.cur && after.cur.done && !(before.cur && before.cur.done)) msg = '출근을 기록했어요. 이번 주 목표도 달성했어요.';
+    toast(msg); focusMain();
+  },
+  checkout() {
+    const me = currentUser(), today = store.demoDate, r = getRecs(me)[today];
+    if (!me || !r) return;
+    myRecs(me)[today] = { ...r, out: nowHM() };
+    save(); render(); toast('퇴근 시간을 기록했어요.'); focusMain();
+  },
+  async harvest() {
+    const me = currentUser(), today = store.demoDate;
+    if (!me || me.harvestedAt) return;
+    if (computeStats(me, getRecs(me), today).days < FRUIT_DAYS) return;
+    me.harvestedAt = today; save();
+    ui.pop = true; render(); ui.pop = false;
+    await openCard(me);
+  },
+  'card-open'() { const me = currentUser(); if (me && me.harvestedAt) openCard(me); },
+  async 'card-copy'() {
+    if (!ui.card) return;
+    try {
+      if (!navigator.clipboard || !window.ClipboardItem) throw new Error('unsupported');
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': ui.card.blob })]);
+      toast('이미지를 복사했어요. DM에 붙여 넣으세요.');
+    } catch (e) { toast('여기서는 바로 복사할 수 없어요. 이미지를 길게 누르거나 오른쪽 버튼으로 복사해 주세요.', 'info'); }
+  },
+  async 'card-save'() {
+    if (!ui.card) return;
+    try {
+      const dl = window.claude && window.claude.use ? await window.claude.use('downloads') : null;
+      if (dl) { await dl.save({ filename: ui.card.filename, data: ui.card.blob }); return; }
+      const a = document.createElement('a'); a.href = URL.createObjectURL(ui.card.blob); a.download = ui.card.filename; document.body.appendChild(a); a.click(); a.remove();
+    } catch (e) { if (!e || e.code !== 'declined') toast('저장하지 못했어요. 이미지를 길게 눌러 저장해 주세요.', 'info'); }
+  },
+  'cal-prev'() { ui.calMonth = MONTHS[Math.max(0, MONTHS.indexOf(ui.calMonth) - 1)]; render(); },
+  'cal-next'() { ui.calMonth = MONTHS[Math.min(MONTHS.length - 1, MONTHS.indexOf(ui.calMonth) + 1)]; render(); },
+  settings() { const me = currentUser(); if (me) settingsModal(me); },
+  logout() { store.session = null; save(); go('login'); },
+  'demo-login'() { store.session = 'demo'; save(); go('home'); },
+  'demo-prev'() { if (store.demoDate > DEMO_MIN) { store.demoDate = addDays(store.demoDate, -1); ui.calMonth = null; save(); render(); } },
+  'demo-next'() { if (store.demoDate < DEMO_MAX) { store.demoDate = addDays(store.demoDate, 1); ui.calMonth = null; save(); render(); } },
+  'demo-reset'() { store = fresh(); ui.calMonth = null; save(); go('login'); toast('예시를 처음 상태로 되돌렸어요.'); },
+  'overlay-cancel'() { overlayClose && overlayClose('cancel'); },
+  'overlay-dismiss'() { overlayClose && overlayClose('cancel'); },
+};
+function focusMain() {
+  const b = [$('#main-action-m'), $('#main-action')].find(el => el && !el.disabled && el.offsetParent !== null);
+  if (b) b.focus({ preventScroll: true });
+}
+
+/* ================= 라우팅 · 렌더 ================= */
+const TITLES = { login: '로그인', signup: '가입하기', home: '내 나무', calendar: '캘린더', garden: '모두의 과수원' };
+function go(name) { if (location.hash === '#' + name) render(); else location.hash = name; }
+function render() {
+  const me = currentUser();
+  let route = (location.hash || '').replace('#', '');
+  if (!me) { if (route !== 'signup') route = 'login'; }
+  else if (!['home', 'calendar', 'garden'].includes(route)) route = 'home';
+  ui.route = route;
+  renderDemoBar();
+  renderChrome(me, route);
+  $('#app').innerHTML = route === 'login' ? viewLogin() : route === 'signup' ? viewSignup()
+    : route === 'home' ? viewHome(me) : route === 'calendar' ? viewCalendar(me) : viewGarden(me);
+  document.title = `${TITLES[route]} | 열매 출근부`;
+}
+function run(t, e) { const fn = actions[t.dataset.action]; if (fn) fn(t, e); }
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-action]');
+  if (t && !t.disabled) run(t, e);
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const t = e.target.closest && e.target.closest('[role="button"][data-action]');
+  if (t) { e.preventDefault(); run(t, e); }
+});
+document.addEventListener('submit', e => {
+  const f = e.target;
+  if (f.dataset && forms[f.dataset.form]) { e.preventDefault(); forms[f.dataset.form](f); }
+});
+window.addEventListener('hashchange', () => { if (overlayClose) overlayClose('cancel'); render(); window.scrollTo(0, 0); });
+render();
+})();
+
+</script>
+</body>
+</html>
