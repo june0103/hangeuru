@@ -40,7 +40,8 @@ export default function PlanPicker({ value, onChange, labelledBy, describedBy, i
             >
               <FlexBox flexDirection="column" flex="1" sx={{ minWidth: 0 }}>
                 <Typography id={`${id}-t`} variant="body1" weight="bold" color="semantic.foreground.neutral.primary">{planLabel(k)}</Typography>
-                <Typography id={`${id}-d`} variant="label1" color="semantic.foreground.neutral.tertiary">{planOptionDesc(k)}</Typography>
+                <Typography id={`${id}-d`} variant="label1" color="semantic.foreground.neutral.tertiary"
+                  sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{planOptionDesc(k)}</Typography>
               </FlexBox>
               <RadioGroupItem id={id} value={k} size="small" ref={i === 0 ? firstRef : undefined} aria-labelledby={`${id}-t`} aria-describedby={`${id}-d`} />
             </Box>

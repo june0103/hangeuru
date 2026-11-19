@@ -29,6 +29,10 @@ const vars = (theme: Theme) => {
       '--o-black': black,
       '--o-tint': '54%',
       '--o-inset': '44%',
+      // 유리 창 안의 칸(입력 칸, 선택 상자)과 아래 버튼 줄
+      '--o-cell': addOpacity(white, 0.62),
+      '--o-cell-edge': addOpacity(s.line.neutral.primary, 0.6),
+      '--o-bar': '78%',
       '--o-edge': addOpacity(white, 0.7),
       '--o-sheen': addOpacity(white, 0.8),
       '--o-shadow': addOpacity(black, 0.24),
@@ -40,6 +44,9 @@ const vars = (theme: Theme) => {
     "html[data-theme='dark']": {
       '--o-tint': '46%',
       '--o-inset': '40%',
+      '--o-cell': addOpacity(white, 0.08),
+      '--o-cell-edge': addOpacity(white, 0.14),
+      '--o-bar': '62%',
       '--o-edge': addOpacity(white, 0.1),
       '--o-sheen': addOpacity(white, 0.1),
       '--o-shadow': addOpacity(black, 0.7),

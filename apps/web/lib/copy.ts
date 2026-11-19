@@ -38,7 +38,7 @@ export const NAV = {
 } as const;
 export const HEADER = {
   userName: (name: string) => `${name}님`,
-  openSettings: '내 설정 열기',
+  openSettings: '프로필 열기',
   signOut: '로그아웃',
   /** 헤더의 화면 테마 전환(3.2) */
   theme: '화면 테마',
@@ -107,7 +107,9 @@ export const FIELD = {
   seed: { label: '씨앗', help: '20일을 출근하면 이 열매가 열려요.' },
   plan: { label: '출근 플랜', help: '나중에 내 설정에서 바꿀 수 있어요.' },
 } as const;
-export const planOptionDesc = (p: PlanKey) => `${PLANS[p].desc} 주간 목표는 ${PLANS[p].goal}일이에요.`;
+// 플랜 상자의 설명은 한 줄로 줄인다(3.4, 3.8)
+const PLAN_SHORT: Record<PlanKey, string> = { light: '하루 이틀 나와요', steady: '사나흘 나와요', daily: '빠짐없이 나와요' };
+export const planOptionDesc = (p: PlanKey) => `${PLAN_SHORT[p]} · 주간 목표 ${PLANS[p].goal}일`;
 
 /** 비밀번호 칸의 눈 아이콘 버튼 (3.3) */
 export const PASSWORD_TOGGLE = { show: '비밀번호 보기', hide: '비밀번호 숨기기' } as const;
@@ -291,14 +293,14 @@ export const GARDEN = {
 
 /* ---------- 내 설정 (3.8) ---------- */
 export const SETTINGS = {
-  title: '내 설정',
+  title: '프로필',
   close: '닫기',
   seedHelp: '씨앗을 바꿔도 자란 만큼은 그대로예요.',
   seedLocked: '수확한 뒤에는 씨앗을 바꿀 수 없어요.',
   planHelp: '플랜을 바꾸면 주간 목표가 새 플랜 기준으로 다시 계산돼요. 나무는 그대로예요.',
   cancel: '취소',
   save: '저장하기',
-  saved: '설정을 저장했어요.',
+  saved: '프로필을 저장했어요.',
   signOut: '로그아웃',
 } as const;
 
