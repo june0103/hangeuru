@@ -167,7 +167,6 @@ export const TODAY = {
 export const WEEK = {
   title: '이번 주',
   lastTitle: '마지막 주',
-  done: '목표 달성',
   today: '오늘',
   streak: (n: number) => `${n}주 연속으로 목표를 채웠어요`,
   dotLabel: (d: string, state: string) => `${WEEKDAYS[dow(d)]}요일 ${+d.slice(8, 10)}일, ${state}`,

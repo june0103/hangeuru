@@ -367,7 +367,7 @@ export function growth(days: number) {
 
 **이번 주 패널**
 
-1. 머리줄: 왼쪽에 제목 "이번 주"(headline2 bold, 시즌 종료 뒤에는 "마지막 주")와 플랜 배지(`ContentBadge` small neutral)를 8px 간격으로. 달성했으면 오른쪽에 `ContentBadge` "목표 달성". 색은 보라가 아니라 배지 패널과 같은 파랑 유리다(브랜드색 12% 바탕, 브랜드색 24% 안쪽 테두리, 브랜드색 글자)
+1. 머리줄: 왼쪽에 제목 "이번 주"(headline2 bold, 시즌 종료 뒤에는 "마지막 주")와 플랜 배지(`ContentBadge` small neutral)를 8px 간격으로. "목표 달성" 칩은 두지 않는다(2026-11-20 사용자 지시). 달성은 아래 문장("이번 주 목표 {goal}일을 채웠어요.")과 배지 패널의 "주간 목표"로 알린다
 2. 요일 5칸(월\~금, 5열 균등, 위 16px). 칸마다 세로로 요일 글자(caption1 medium, tertiary), 지름 36px 원, 날짜 숫자(caption1, quaternary). 간격 6px
 3. 문장 (label1-reading, secondary). 위 16px
 4. `streak`이 1 이상일 때만: 위 12px에 1px 선, 그 아래 12px에 IconFireFill 18px(`foreground.cautionary.primary`) + "{n}주 연속으로 목표를 채웠어요"(label1 bold)
@@ -393,7 +393,7 @@ export function growth(days: number) {
 | 8 | count가 0 | 이번 주 목표는 {goal}일이에요. 아직 출근한 날이 없어요. |
 | 9 | 그 밖 | 이번 주 {count}일 출근했어요. {need}일 더 나오면 목표 {goal}일을 채워요. |
 
-정식 시작 전(오늘이 11-23 이전)에는 요일 원이 그 주의 출근일인 11-18, 11-19, 11-20만 쓸 수 있는 날로 보이고 월요일과 화요일은 "–"다. 목표 달성 배지와 연속 달성은 보이지 않는다. 원 상태는 표의 위에서부터 판정하므로, 기록이 있는 날은 `days(w)`에 없어도 출근함으로 보인다.
+정식 시작 전(오늘이 11-23 이전)에는 요일 원이 그 주의 출근일인 11-18, 11-19, 11-20만 쓸 수 있는 날로 보이고 월요일과 화요일은 "–"다. 목표 달성 문장과 연속 달성은 보이지 않는다. 원 상태는 표의 위에서부터 판정하므로, 기록이 있는 날은 `days(w)`에 없어도 출근함으로 보인다.
 
 **내 씨앗 패널**
 
@@ -937,7 +937,6 @@ semantic 토큰은 테마에 따라 저절로 바뀐다. atomic 값은 `html[dat
 | --- | --- |
 | 출근 전, 퇴근했어요, 쉬는 날, 시즌 종료, 플랜 이름, 씨앗 이름 | `color="neutral"`, `variant="solid"` |
 | 그라운드에 있어요 | `color="accent"`, `accentColor="semantic.foreground.accent.lime"` |
-| 목표 달성 | 브랜드색 유리(3.5의 이번 주 패널). 보라를 쓰지 않는다 |
 | 수확 완료 | `color="accent"`, `accentColor="semantic.foreground.accent.violet"` |
 | 나 | `color="accent"`, `accentColor="semantic.foreground.brand.primary"` |
 | 오늘 그라운드의 이름 칩 | `color="neutral"`, `variant="outlined"`, `size="medium"` |
@@ -1353,7 +1352,7 @@ alter table public.profiles alter column seed drop not null;
 - [ ] 퇴근하기를 누르면 퇴근 시간이 찍히고 버튼이 "퇴근 시간 다시 기록"으로 바뀐다
 - [ ] 그라운드 반경 500m 밖이거나 위치 권한이 없으면 출근·퇴근이 기록되지 않고 2.8의 안내가 뜬다. 위치는 DB에 저장되지 않는다
 - [ ] 토요일, 일요일, 12-25에는 버튼이 비활성이고 다음 출근일이 안내된다. 11-18\~11-20에는 출근할 수 있고 이번 주 패널에 정식 시작일이 안내된다
-- [ ] 주간 목표를 채운 출근에서 "목표 달성" 배지가 뜬다
+- [ ] 주간 목표를 채운 출근에서 이번 주 패널의 문장이 "이번 주 목표 {goal}일을 채웠어요."로 바뀌고, "목표 달성" 칩은 없다
 - [ ] 총 출근 0, 1, 5, 10, 15, 20일에서 나무가 씨앗, 새싹, 묘목, 나무, 꽃, 열매 모습이고 시안과 같다. 씨앗 네 종의 나무가 서로 다르다
 - [ ] 나무를 잡고 세게 흔들어도 수관이 줄기에서 떨어져 보이지 않고 살짝만 기운다
 - [ ] 내 씨앗 패널의 문장에 "단계"라는 말이 없고, 작은 줄에 "출근 {days}일 · …"이 보이며, 씨앗 칩을 누르면 말풍선이 뜬다
