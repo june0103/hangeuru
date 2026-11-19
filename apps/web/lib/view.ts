@@ -184,7 +184,7 @@ export function treeView(me: Member, st: Stats, hasToday: boolean, today: string
     lead,
     short: !harvested && !canHarvest && !over && days + left < FRUIT_DAYS ? TREE.short(FRUIT_DAYS - days - left) : null,
     count: g.canHarvest ? TREE.fruitLine(days, fruitCount(days)) : null,
-    tip: g.canHarvest ? [TREE.seedTip(me.seed)] : [TREE.seedTip(me.seed), TREE.fruitTip],
+    tip: [TREE.seedTip(me.seed), TREE.fruitTip],
     track: {
       filled: trackFilled(days),
       label: TREE.trackLabel(n),
