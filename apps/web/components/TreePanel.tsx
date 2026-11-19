@@ -19,7 +19,6 @@ const FIG = 240;
 const FIG_M = 220;
 const SIDE_TOP = 28;
 const SIDE_GAP = 16;
-const HEAD_SIDE_GAP = 8;
 const TIP_MS = 5000;
 
 /** 씨앗 칩: 누르면 어떤 씨앗을 골랐는지 툴팁처럼 알려 준다 */
@@ -69,7 +68,7 @@ export default function TreePanel({ view, harvesting, onHarvest, onOpenCard, onG
   const [levelSlot, setLevelSlot] = useState<HTMLSpanElement | null>(null);
   return (
     <Panel aria-labelledby="h-tree" order={2}>
-      {/* 머리줄: 왼쪽에 제목과 문장, 오른쪽에 씨앗 칩과 그 바로 아래 레벨 표시(spec 3.5) */}
+      {/* 머리줄: 왼쪽에 제목과 문장, 오른쪽 위에 레벨 표시(제목 줄에 맞춤, spec 3.5) */}
       <FlexBox alignItems="flex-start" justifyContent="space-between" gap={12}>
         <Box sx={{ minWidth: 0 }}>
           <Typography as="h2" id="h-tree" variant="headline2" weight="bold" color="semantic.foreground.neutral.primary">{TREE.title}</Typography>
@@ -77,17 +76,14 @@ export default function TreePanel({ view, harvesting, onHarvest, onOpenCard, onG
             {view.headline}
           </Typography>
         </Box>
-        <FlexBox flexDirection="column" alignItems="flex-end" gap={HEAD_SIDE_GAP} sx={{ flex: 'none' }}>
-          <SeedChip label={view.seedLabel} tip={view.tip} />
-          <span className="orchard-lv-slot" ref={setLevelSlot} />
-        </FlexBox>
+        <span className="orchard-lv-slot" ref={setLevelSlot} />
       </FlexBox>
       <FlexBox
         alignItems="flex-start"
         gap={BODY_GAP}
         sx={{ marginTop: BODY_TOP, '@media (max-width: 767px)': { flexDirection: 'column', alignItems: 'center', gap: 8 } }}
       >
-        <Box sx={{ flex: `0 0 ${FIG}px`, maxWidth: '100%', '@media (max-width: 767px)': { flexBasis: 'auto', width: FIG_M } }}>
+        <Box sx={{ position: 'relative', flex: `0 0 ${FIG}px`, maxWidth: '100%', '@media (max-width: 767px)': { flexBasis: 'auto', width: FIG_M } }}>
           <TreeFigure
             seed={view.seed}
             days={view.days}
@@ -101,6 +97,8 @@ export default function TreePanel({ view, harvesting, onHarvest, onOpenCard, onG
             onLevel={view.harvested ? onOpenCard : undefined}
             levelActionLabel={TREE.openCard}
           />
+          {/* 씨앗 칩: 나무 그림 오른쪽에 붙인다(spec 3.5) */}
+          <span className="orchard-chipfig"><SeedChip label={view.seedLabel} tip={view.tip} /></span>
         </Box>
         <FlexBox
           flexDirection="column"
