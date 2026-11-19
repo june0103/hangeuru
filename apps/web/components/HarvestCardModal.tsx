@@ -6,13 +6,14 @@ import { IconDownload } from '@montage-ui/icon';
 import { useEffect, useRef } from 'react';
 
 import { CARD } from '@/lib/copy';
-import { saveCard } from '@/lib/orchard/extras';
+import { saveCard, sparkleRain } from '@/lib/orchard/extras';
 import type { CardModel } from '@/lib/view';
 
 import { useOrchard, useOrchardView } from './orchard/OrchardProvider';
 
 // 수확 카드 (spec 3.9, 4.7). 창의 제목 줄과 버튼 없이, 뒤 화면을 딤 처리하고 카드만 가운데에 띄운다.
 // 카드 오른쪽 위의 저장 아이콘을 누르면 카드 모습 그대로 그림(PNG)으로 내려받는다(아이콘은 그림에 들어가지 않는다).
+// 열릴 때 전설의 카드처럼 수평으로 돌며 나타나고, 빛이 지나간 뒤 둘레에 반짝이는 조각이 조금 떨어진다.
 // 바깥(딤)을 누르거나 Esc 를 누르면 닫힌다. 모양은 app/orchard.css 의 .orchard-card, [data-orchard-modal="card"]
 
 function CardBody({ model }: { model: CardModel }) {
@@ -26,7 +27,9 @@ function CardBody({ model }: { model: CardModel }) {
   useEffect(() => {
     const dlg = card.current?.closest('[role="dialog"]');
     dlg?.setAttribute('data-orchard-modal', 'card');
-    return () => dlg?.removeAttribute('data-orchard-modal');
+    // 카드가 돌아 멈출 즈음 둘레에 반짝이는 조각이 조금 떨어진다(app/orchard.css 의 oc-reveal 1.4초)
+    const t = setTimeout(() => { if (card.current) sparkleRain(card.current.getBoundingClientRect(), 26, 0); }, 1000);
+    return () => { clearTimeout(t); dlg?.removeAttribute('data-orchard-modal'); };
   }, []);
 
   const save = () => {

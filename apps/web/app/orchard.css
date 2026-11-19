@@ -122,3 +122,10 @@ body > nav *{background-color:transparent !important}
 [data-orchard-modal="card"] div:not(.orchard-card):not(.orchard-card div){background-color:transparent !important;padding:0 !important;box-shadow:none !important}
 [data-orchard-modal="card"] .orchard-card{width:320px;max-width:calc(100vw - 32px);box-shadow:inset 0 0 0 1px var(--o-cell-edge),0 32px 64px -24px var(--o-shadow)}
 .orchard-card .oc-save{margin:-6px -8px -6px 0;flex:none}
+/* 수확 카드 등장(3.9): 전설의 카드가 나오듯 수평으로 두 바퀴 돌며 커지고, 멈출 때 빛이 한 번 비스듬히 지나가며 둘레가 잠깐 빛난다 */
+@keyframes oc-reveal{0%{opacity:0;transform:perspective(1200px) rotateY(-720deg) scale(.5)}35%{opacity:1}100%{opacity:1;transform:perspective(1200px) rotateY(0deg) scale(1)}}
+@keyframes oc-shine{from{transform:translateX(-130%) skewX(-18deg)}to{transform:translateX(130%) skewX(-18deg)}}
+@keyframes oc-halo{0%{box-shadow:inset 0 0 0 1px var(--o-cell-edge),0 0 0 0 rgba(255,236,170,0),0 32px 64px -24px var(--o-shadow)}35%{box-shadow:inset 0 0 0 1px rgba(255,255,255,.9),0 0 48px 6px rgba(255,236,170,.55),0 32px 64px -24px var(--o-shadow)}100%{box-shadow:inset 0 0 0 1px var(--o-cell-edge),0 0 0 0 rgba(255,236,170,0),0 32px 64px -24px var(--o-shadow)}}
+[data-orchard-modal="card"] .orchard-card{animation:oc-reveal 1.4s cubic-bezier(.16,1,.3,1) both,oc-halo 1.4s cubic-bezier(.2,0,0,1) 1.05s both;transform-style:preserve-3d}
+[data-orchard-modal="card"] .orchard-card::after{content:"";position:absolute;top:-20%;bottom:-20%;left:0;width:60%;z-index:3;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18) 30%,rgba(255,255,255,.7) 50%,rgba(255,255,255,.18) 70%,transparent);mix-blend-mode:overlay;transform:translateX(-130%) skewX(-18deg);animation:oc-shine .9s cubic-bezier(.4,0,.2,1) 1.05s both}
+@media (prefers-reduced-motion:reduce){[data-orchard-modal="card"] .orchard-card,[data-orchard-modal="card"] .orchard-card::after{animation:none}}
