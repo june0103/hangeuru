@@ -73,7 +73,9 @@ export default function CalendarView({ months, initial }: { months: MonthView[];
       </Box>
 
       {m.rows.length ? (
-        <Table sx={{ marginTop: TABLE_TOP, width: '100%' }}>
+        // 몽타주 표 칸은 overflow-wrap: anywhere라서 좁은 화면에서 "09:52"가 한 글자씩 끊긴다.
+        // 칸 글자를 한 줄로 두고, 넘치면 표만 가로로 스크롤한다(spec 3.6)
+        <Table sx={{ marginTop: TABLE_TOP, width: '100%', '& :is(th, td)': { whiteSpace: 'nowrap' } }}>
           <TableHead>
             <TableRow>
               <TableHeadCell scope="col">{CALENDAR.columns.date}</TableHeadCell>
@@ -85,10 +87,10 @@ export default function CalendarView({ months, initial }: { months: MonthView[];
           <TableBody>
             {m.rows.map(r => (
               <TableRow key={r.date}>
-                <TableCell sx={{ whiteSpace: 'nowrap' }}>{r.dateText}</TableCell>
+                <TableCell>{r.dateText}</TableCell>
                 <TableCell sx={{ fontVariantNumeric: 'tabular-nums' }}>{r.inText}</TableCell>
                 <TableCell sx={{ fontVariantNumeric: 'tabular-nums' }}>{r.outText}</TableCell>
-                <TableCell sx={{ whiteSpace: 'nowrap' }}>{r.stayText}</TableCell>
+                <TableCell>{r.stayText}</TableCell>
               </TableRow>
             ))}
           </TableBody>
