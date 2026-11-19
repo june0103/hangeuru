@@ -44,3 +44,5 @@ export function burst(x: number, y: number, n: number): void;
 export function floatChip(x: number, y: number, text: string): void;
 /** 화면의 수확 카드 요소를 PNG 로 그려 내려받는다. dark: 지금 다크 테마인지 */
 export function saveCard(card: HTMLElement, fileName: string, dark: boolean): HTMLCanvasElement;
+/** 수확 카드가 나올 때 카드 둘레에 반짝이는 별과 조각이 조금 떨어진다. delay 뒤에 시작(기본 900ms) */
+export function sparkleRain(rect: DOMRect, n?: number, delay?: number): void;

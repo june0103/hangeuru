@@ -143,3 +143,38 @@ function reducedMotion() { return typeof window !== 'undefined' && window.matchM
     else down(c.toDataURL('image/png'));
     return c;
   }
+
+/* ---------- 수확 카드 등장: 반짝이는 컨페티 ----------
+   카드 둘레 위쪽에서 작은 별과 조각이 조금 흩날려 떨어진다(spec 3.9). 카드가 돌아 멈춘 뒤에 시작하고 3초 안에 사라진다.
+   rect: 카드의 화면 위치(getBoundingClientRect), n: 조각 수(기본 26), delay: 시작까지 기다리는 시간(ms) */
+export function sparkleRain(rect, n, delay) {
+  if (typeof document === 'undefined' || reducedMotion() || !document.body.animate) return;
+  n = n || 26; delay = delay == null ? 900 : delay;
+  var COLORS = [A.yellow ? A.yellow[70] : A.orange[80], A.pink[80], A.lightBlue[70], A.violet[80], A.lime[80], '#FFFFFF'];
+  var STAR = 'polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%)';
+  var layer = document.createElement('div');
+  layer.setAttribute('aria-hidden', 'true');
+  layer.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:2147483600;overflow:hidden';
+  document.body.appendChild(layer);
+  var cx = rect.left + rect.width / 2, spread = rect.width * 0.75, longest = 0;
+  for (var i = 0; i < n; i++) {
+    var s = document.createElement('i'), star = i % 3 !== 2, size = star ? 7 + Math.random() * 7 : 4 + Math.random() * 3;
+    var x0 = cx + (Math.random() * 2 - 1) * spread, y0 = rect.top - 10 - Math.random() * rect.height * 0.25;
+    var fall = rect.height * (0.55 + Math.random() * 0.7), drift = (Math.random() * 2 - 1) * 40, spin = (Math.random() * 2 - 1) * 260;
+    var dur = 1800 + Math.random() * 1100, wait = delay + Math.random() * 700;
+    longest = Math.max(longest, dur + wait);
+    s.style.cssText = 'position:fixed;left:' + x0 + 'px;top:' + y0 + 'px;width:' + size + 'px;height:' + (star ? size : size * 1.8) + 'px;background:' + COLORS[i % COLORS.length] +
+      ';border-radius:' + (star ? '0' : '1px') + ';clip-path:' + (star ? STAR : 'none') + ';filter:drop-shadow(0 0 4px rgba(255,255,255,.85));opacity:0;will-change:transform,opacity';
+    layer.appendChild(s);
+    s.animate([
+      { transform: 'translate(-50%,-50%) translate(0,0) rotate(0deg) scale(.4)', opacity: 0 },
+      { transform: 'translate(-50%,-50%) translate(' + drift * 0.3 + 'px,' + fall * 0.18 + 'px) rotate(' + spin * 0.25 + 'deg) scale(1)', opacity: 1, offset: 0.15 },
+      { transform: 'translate(-50%,-50%) translate(' + drift * 0.75 + 'px,' + fall * 0.7 + 'px) rotate(' + spin * 0.75 + 'deg) scale(.9)', opacity: 0.9, offset: 0.7 },
+      { transform: 'translate(-50%,-50%) translate(' + drift + 'px,' + fall + 'px) rotate(' + spin + 'deg) scale(.6)', opacity: 0 }
+    ], { duration: dur, delay: wait, easing: 'cubic-bezier(.25,.6,.35,1)', fill: 'forwards' });
+    // 별은 떨어지는 동안 한두 번 반짝인다
+    if (star) s.animate([{ filter: 'drop-shadow(0 0 4px rgba(255,255,255,.85)) brightness(1)' }, { filter: 'drop-shadow(0 0 8px rgba(255,255,255,1)) brightness(1.8)' }, { filter: 'drop-shadow(0 0 4px rgba(255,255,255,.85)) brightness(1)' }],
+      { duration: 520, delay: wait + 200 + Math.random() * 600, iterations: 2, easing: 'ease-in-out' });
+  }
+  setTimeout(function () { layer.remove(); }, longest + 200);
+}
