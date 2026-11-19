@@ -131,7 +131,7 @@ function reducedMotion() { return typeof window !== 'undefined' && window.matchM
     if (fc) { var fb = box(fc); try { g.drawImage(fc, fb.x, fb.y, fb.w, fb.h); } catch (e) {} }
     var tr = card.querySelector('.oc-bar'), fi = tr && tr.firstElementChild;
     if (tr) { var tb = box(tr), fw = tb.w * (parseFloat(fi.style.width) || 0) / 100; /* 채워지는 움직임이 끝나기 전에도 다 찬 길이로 그린다 */ rr(tb.x, tb.y, tb.w, tb.h, tb.h / 2); g.fillStyle = 'rgba(112,115,124,.16)'; g.fill(); rr(tb.x, tb.y, fw, tb.h, tb.h / 2); g.fillStyle = getComputedStyle(fi).backgroundColor; g.fill(); }
-    [].slice.call(card.querySelectorAll('.oc-head span, .oc-title, .oc-sub, dt, dd, .oc-rec-head span, .oc-rec-head b, .oc-rec-foot, .oc-foot')).forEach(function (el) {
+    [].slice.call(card.querySelectorAll('.oc-head > span, .oc-title, .oc-sub, dt, dd, .oc-rec-head span, .oc-rec-head b, .oc-rec-foot, .oc-foot')).forEach(function (el) {
       var cs = getComputedStyle(el), b = box(el), center = cs.textAlign === 'center';
       g.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily; g.fillStyle = cs.color; g.textBaseline = 'middle'; g.textAlign = center ? 'center' : 'left';
       try { g.letterSpacing = cs.letterSpacing === 'normal' ? '0px' : cs.letterSpacing; } catch (e) {}
