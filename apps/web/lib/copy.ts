@@ -244,7 +244,7 @@ export const BADGES = {
   ten: '10일 출근',
   harvest: '첫 수확',
   locked: '잠김',
-  summary: (n: number) => `${n}개를 모았어요. 남은 배지는 모으면 열려요.`,
+  summary: (n: number) => [`${n}개를 모았어요.`, '남은 배지는 모으면 열려요.'] as const,
   summaryAll: '배지를 모두 모았어요.',
   summaryNone: '출근하면 배지가 하나씩 열려요.',
 } as const;
@@ -255,7 +255,8 @@ export const CAMP = {
   over: '시즌이 끝나서 오늘 출근 기록은 없어요.',
   rest: '오늘은 쉬는 날이라 출근 기록이 없어요.',
   empty: '아직 아무도 출근하지 않았어요. 오늘 첫 출근을 기록해 보세요.',
-  summary: (came: number, here: number) => `오늘 ${came}명이 출근했고, 지금 ${here}명이 그라운드에 있어요.`,
+  // 몇 명이 그라운드에 있는지는 칩의 점으로 보이므로 문장은 출근 인원만(2026-11-20 사용자 지시)
+  summary: (came: number) => `오늘 ${came}명이 출근했어요.`,
   inCampSr: ' 그라운드에 있음',
   toGarden: '모두의 과수원 보기',
 } as const;
