@@ -17,7 +17,7 @@ const DOT = 6;
 
 export default function CampPanel({ view }: { view: CampView }) {
   return (
-    <Panel aria-labelledby="h-camp">
+    <Panel aria-labelledby="h-camp" order={3}>
       <Typography as="h2" id="h-camp" variant="headline2" weight="bold" color="semantic.foreground.neutral.primary">{CAMP.title}</Typography>
       <Typography as="p" variant="body2" color="semantic.foreground.neutral.secondary" sx={{ marginTop: TEXT_TOP }}>{view.text}</Typography>
       {view.chips.length > 0 && (

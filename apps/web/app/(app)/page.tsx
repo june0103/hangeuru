@@ -2,12 +2,14 @@ import HomeView from '@/components/HomeView';
 import { PAGE_TITLES, SIGNUP } from '@/lib/copy';
 import { getSessionUserId, getProfile, listAttendanceOf, listAttendanceOn, listProfiles } from '@/lib/data';
 import { serverToday } from '@/lib/time';
-import { campView, cardModel, statsOf, todayView, treeView, weekView } from '@/lib/view';
+import type { Member } from '@/lib/types';
+import { badgesView, campView, cardModel, statsOf, todayView, treeView, weekView } from '@/lib/view';
 
 export const metadata = { title: PAGE_TITLES.home };
 
 export default async function HomePage({ searchParams }: PageProps<'/'>) {
-  const me = (await getProfile((await getSessionUserId())!))!;
+  // 씨앗이 없는 사람은 레이아웃이 씨앗 고르기로 보낸다
+  const me = (await getProfile((await getSessionUserId())!)) as Member;
   const today = serverToday();
   const [records, todays, profiles] = await Promise.all([listAttendanceOf(me.id), listAttendanceOn(today), listProfiles()]);
   const st = statsOf(me, records, today);
@@ -20,6 +22,7 @@ export default async function HomePage({ searchParams }: PageProps<'/'>) {
       tree={treeView(me, st, !!todayRecord, today)}
       camp={campView(today, todays, profiles)}
       card={cardModel(me, records, today)}
+      badges={badgesView(me, st, today)}
       welcome={welcome}
     />
   );

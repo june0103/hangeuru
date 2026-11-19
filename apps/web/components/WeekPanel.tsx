@@ -29,16 +29,15 @@ function Dot({ d }: { d: WeekDot }) {
         aria-hidden
         alignItems="center"
         justifyContent="center"
+        data-orchard-dot={d.state === 'done' || d.state === 'today' ? d.state : undefined}
         sx={(theme: Theme) => ({
           width: DOT, height: DOT, borderRadius: '50%',
-          ...(d.state === 'done' && { backgroundColor: theme.semantic.surface.accent.violetOpaque, color: theme.semantic.static.white }),
-          ...(d.state === 'today' && { backgroundColor: theme.semantic.surface.accent.violet, boxShadow: `inset 0 0 0 2px ${theme.semantic.line.accent.violet}` }),
           ...(d.state === 'empty' && { backgroundColor: theme.semantic.surface.neutral.tertiary, boxShadow: `inset 0 0 0 1.5px ${theme.semantic.line.neutral.primary}` }),
           ...(d.state === 'rest' && { color: theme.semantic.foreground.neutral.quaternary }),
         })}
       >
         {d.state === 'done' && <IconCheckThick width={18} height={18} />}
-        {d.state === 'today' && <Typography variant="caption1" weight="bold" color="semantic.foreground.accent.violet">{WEEK.today}</Typography>}
+        {d.state === 'today' && <Typography variant="caption1" weight="bold" color="semantic.foreground.brand.primary">{WEEK.today}</Typography>}
         {d.state === 'rest' && <Typography variant="caption1" weight="bold">{DASH}</Typography>}
       </FlexBox>
       <Typography aria-hidden variant="caption1" weight={isToday ? 'bold' : 'regular'} sx={{ fontVariantNumeric: 'tabular-nums' }}
@@ -51,13 +50,13 @@ function Dot({ d }: { d: WeekDot }) {
 
 export default function WeekPanel({ view }: { view: WeekView }) {
   return (
-    <Panel aria-labelledby="h-week">
+    <Panel aria-labelledby="h-week" order={1}>
       <FlexBox alignItems="center" justifyContent="space-between" gap={12}>
         <FlexBox alignItems="center" gap={8}>
           <Typography as="h2" id="h-week" variant="headline2" weight="bold" color="semantic.foreground.neutral.primary">{view.title}</Typography>
           <ContentBadge size="small" color="neutral" variant="solid">{view.planLabel}</ContentBadge>
         </FlexBox>
-        {view.done && <ContentBadge size="small" color="accent" accentColor="semantic.foreground.accent.violet">{WEEK.done}</ContentBadge>}
+        {view.done && <ContentBadge size="small" color="accent" accentColor="semantic.foreground.brand.primary" data-orchard-chip="accent">{WEEK.done}</ContentBadge>}
       </FlexBox>
       <Box as="ol" sx={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 4, margin: `${DOTS_TOP}px 0 0`, padding: 0, listStyle: 'none' }}>
         {view.dots.map(d => <Dot key={d.date} d={d} />)}

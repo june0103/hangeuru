@@ -11,10 +11,12 @@
 - pnpm dev, pnpm build, pnpm lint, pnpm typecheck, pnpm test (루트에서 실행)
 
 ## 지킬 것
-- UI는 @montage-ui/core, icon, nextjs 4.3.2. 몽타주에 있는 컴포넌트를 새로 만들지 않는다
+- UI는 몽타주 4.3.2(@montage-ui/core, icon, nextjs, brand). 몽타주에 있는 컴포넌트를 새로 만들지 않는다. 패키지를 더할 때는 같은 버전으로 고정한다(spec 5.1)
+- 로고는 @montage-ui/brand 의 LogoWanted 컴포넌트를 쓴다. 로고 이미지를 파일로 붙이지 않는다(spec 5.2)
 - 색은 theme 콜백의 semantic 토큰으로 쓴다. 헥스 값과 var(--semantic-…)을 쓰지 않는다
-- 몽타주 컴포넌트의 props는 추측하지 않는다. node_modules/@montage-ui/core 의 타입 정의나
-  github.com/wanteddev/montage-web 의 docs/data/components/**/web.mdx 예제로 확인한다
+- 몽타주 컴포넌트의 props는 추측하지 않는다. montage-mcp-server(MCP)가 연결되어 있으면 먼저 쓰고,
+  apps/web/node_modules/@montage-ui/*/dist 의 타입 정의를 최종 기준으로 삼는다. 예제는
+  github.com/wanteddev/montage-web 의 docs/data/components/**/web.mdx (spec 5.1)
 - 규칙 계산은 apps/web/lib/rules.ts 에만, 화면 문구는 apps/web/lib/copy.ts 에만 둔다
 - 날짜와 시각은 서버에서 KST로 만든다. 브라우저 시계를 쓰지 않는다
 - 쓰기는 서버 액션에서만 한다. 브라우저에서 Supabase에 직접 쓰지 않는다

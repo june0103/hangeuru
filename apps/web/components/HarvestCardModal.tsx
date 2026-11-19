@@ -1,48 +1,38 @@
 'use client';
 
-import {
-  ActionArea, ActionAreaButton, Box, FlexBox, IconButton, Modal, ModalContainer, ModalContent, ModalNavigation, Skeleton, Typography, useToast,
-} from '@montage-ui/core';
+import { ActionArea, ActionAreaButton, FlexBox, IconButton, Modal, ModalContainer, ModalContent, ModalNavigation, useToast } from '@montage-ui/core';
+import type { Theme } from '@montage-ui/core';
 import { IconClose } from '@montage-ui/icon';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
-import { drawHarvestCard } from '@/lib/card';
 import { CARD } from '@/lib/copy';
+import { saveCard } from '@/lib/orchard/extras';
 import type { CardModel } from '@/lib/view';
 
-// 수확 카드 모달 (spec 3.9)
-const IMG_MAX = 360;
-const IMG_RADIUS = 16;
+import { useOrchard, useOrchardView } from './orchard/OrchardProvider';
+
+// 수확 카드 모달 (spec 3.9, 4.7). 카드는 화면 요소로 그리고, 저장하기를 누르면 그 모습 그대로 그림(PNG)으로 내려받는다.
+// 꽃 색이 번진 바탕 위에 유리 칸, 과일은 3D, 출근 기록은 초록 막대 하나. 모양은 app/orchard.css 의 .orchard-card
 
 function CardBody({ model, onClose }: { model: CardModel; onClose: () => void }) {
   const toast = useToast();
-  const [img, setImg] = useState<{ blob: Blob; url: string } | null>(null);
+  const api = useOrchard();
+  const card = useRef<HTMLDivElement>(null);
+  const fruit = useRef<HTMLSpanElement>(null);
+  useOrchardView(fruit, (o, el) => o.fruit(el, model.seed), [model.seed]);
 
+  // 창 자체도 패널처럼 유리로, 카드에 맞춘 작은 크기로 한다
   useEffect(() => {
-    let alive = true;
-    drawHarvestCard(model).then(r => { if (alive) setImg(r); });
-    return () => { alive = false; };
-  }, [model]);
+    const dlg = card.current?.closest('[role="dialog"]');
+    dlg?.setAttribute('data-orchard-modal', 'glass');
+    return () => dlg?.removeAttribute('data-orchard-modal');
+  }, []);
 
-  const copy = async () => {
-    try {
-      if (!img || !navigator.clipboard || typeof ClipboardItem === 'undefined') throw new Error('unsupported');
-      await navigator.clipboard.write([new ClipboardItem({ 'image/png': img.blob })]);
-      toast({ content: CARD.copied, variant: 'positive' });
-    } catch {
-      toast({ content: CARD.copyFailed, variant: 'normal' });
-    }
-  };
   const save = () => {
     try {
-      if (!img) throw new Error('not ready');
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(img.blob);
-      a.download = model.fileName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      if (!card.current) throw new Error('not ready');
+      saveCard(card.current, model.fileName, !!api?.isDark());
+      toast({ content: CARD.saved, variant: 'positive' });
     } catch {
       toast({ content: CARD.saveFailed, variant: 'normal' });
     }
@@ -54,21 +44,28 @@ function CardBody({ model, onClose }: { model: CardModel; onClose: () => void })
         {CARD.title}
       </ModalNavigation>
       <ModalContent>
-        <FlexBox flexDirection="column" alignItems="center" gap={12}>
-          {img ? (
-            // 길게 누르거나 오른쪽 버튼으로 복사·저장할 수 있게 <img>로 보인다
-             
-            <Box as="img" src={img.url} alt={model.alt} width={IMG_MAX} height={480}
-              sx={{ display: 'block', width: '100%', maxWidth: IMG_MAX, height: 'auto', borderRadius: IMG_RADIUS, WebkitTouchCallout: 'default', userSelect: 'auto' }} />
-          ) : (
-            <Skeleton variant="rectangle" width="100%" height={480} radius={IMG_RADIUS} sx={{ maxWidth: IMG_MAX }} />
-          )}
-          <Typography as="p" variant="label1-reading" align="center" color="semantic.foreground.neutral.secondary">{CARD.help}</Typography>
+        <FlexBox flexDirection="column" alignItems="center">
+          <div className="orchard-card" ref={card} role="img" aria-label={model.alt}>
+            <div className="oc-head"><span>{CARD.brand}</span><span>{CARD.tag}</span></div>
+            <div className="oc-fruit"><span ref={fruit} /></div>
+            <p className="oc-title">{model.heading}</p>
+            <p className="oc-sub">{model.sub}</p>
+            <dl className="oc-cells">
+              {model.cells.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}
+            </dl>
+            <div className="oc-rec">
+              <div className="oc-rec-head"><span>{model.record.label}</span><b>{model.record.percentText}</b></div>
+              <FlexBox className="oc-bar">
+                <FlexBox as="i" style={{ width: `${model.record.ratio * 100}%` }} sx={(theme: Theme) => ({ backgroundColor: theme.semantic.foreground.positive.primary })} />
+              </FlexBox>
+            </div>
+            <p className="oc-foot">{CARD.foot}</p>
+          </div>
         </FlexBox>
       </ModalContent>
       <ActionArea variant="neutral">
-        <ActionAreaButton variant="alternative" buttonVariant="solid" buttonColor="assistive" onClick={save} disabled={!img}>{CARD.save}</ActionAreaButton>
-        <ActionAreaButton onClick={copy} disabled={!img} autoFocus>{CARD.copy}</ActionAreaButton>
+        <ActionAreaButton variant="alternative" buttonVariant="solid" buttonColor="assistive" onClick={onClose}>{CARD.close}</ActionAreaButton>
+        <ActionAreaButton onClick={save} autoFocus>{CARD.save}</ActionAreaButton>
       </ActionArea>
     </FlexBox>
   );

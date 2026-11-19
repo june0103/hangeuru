@@ -114,3 +114,10 @@ describe('위치 확인 (2.8)', () => {
     expect(c.distance).toBeGreaterThan(12000);
   });
 });
+
+describe('열매 수 (2.3)', () => {
+  it('20일 전에는 0, 20일에 다섯 개, 그 뒤로 하루에 하나씩', async () => {
+    const { fruitCount } = await import('./rules');
+    expect([0, 19, 20, 21, 27].map(fruitCount)).toEqual([0, 0, 5, 6, 12]);
+  });
+});

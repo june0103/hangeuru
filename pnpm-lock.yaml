@@ -25,6 +25,9 @@ importers:
       '@emotion/utils':
         specifier: ^1.4.2
         version: 1.4.2
+      '@montage-ui/brand':
+        specifier: 4.3.2
+        version: 4.3.2(@emotion/cache@11.14.0)(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.0))(@emotion/serialize@1.3.3)(@emotion/server@11.11.0)(@emotion/utils@1.4.2)(@types/react@19.3.0)(react@19.3.0)
       '@montage-ui/core':
         specifier: 4.3.2
         version: 4.3.2(@emotion/cache@11.14.0)(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.0))(@emotion/serialize@1.3.3)(@emotion/server@11.11.0)(@emotion/utils@1.4.2)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -52,7 +55,13 @@ importers:
       server-only:
         specifier: ^0.0.1
         version: 0.0.1
+      three:
+        specifier: 0.128.0
+        version: 0.128.0
     devDependencies:
+      '@montage-ui/eslint-plugin':
+        specifier: 4.3.2
+        version: 4.3.2(eslint@9.39.5)
       '@types/node':
         specifier: ^24.19.2
         version: 24.19.2
@@ -475,6 +484,15 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
+  '@montage-ui/brand@4.3.2':
+    resolution: {integrity: sha512-oWjyfQrxJkUN9MfGmweSiMFNoO85H0/iuJL/bxdIwwq1nFQXyiRCtSgEtphhaFuuc7grIX9Wl5O5hlCONitwrQ==}
+    peerDependencies:
+      '@types/react': ^18.0.0 || ^19.0.0
+      react: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
   '@montage-ui/core@4.3.2':
     resolution: {integrity: sha512-l9GlqeFRgUwfJSUsjElguqGjpRKIrT/P/PObfjS7b6F+9X0WZ6ofAL4pvyhS3ztM59m+D5hXwbq1weYL6cK97A==}
     peerDependencies:
@@ -511,6 +529,11 @@ packages:
         optional: true
       '@types/react':
         optional: true
+
+  '@montage-ui/eslint-plugin@4.3.2':
+    resolution: {integrity: sha512-SgoUWZ22w14XNZun8f6wYwbHVvd312oBHGT6BhxbC1q3hgygYRC9tgw2dqN84sJ6xf4bKTp+Z4CaFx7jlW2Opw==}
+    peerDependencies:
+      eslint: ^6 || ^7 || ^8 || ^9
 
   '@montage-ui/icon@4.3.2':
     resolution: {integrity: sha512-uaQp/9t9ThKygUdGAqUHliMr6DvNqhMhbj7+U0rP2TPWQpZTi9qDh7dE+qWidDslzZO/xv05OLTMC2+u5GDUWA==}
@@ -2650,6 +2673,9 @@ packages:
   tabbable@6.5.2:
     resolution: {integrity: sha512-XgdnB1nGU6KU4VgMnZPaZCx7M1hBrLyEiZYau2G2gq9UT0d7d4FUBlNX7vvPlm/B1vk1PjrzJBx9Lbv4fsqS9g==}
 
+  three@0.128.0:
+    resolution: {integrity: sha512-i0ap/E+OaSfzw7bD1TtYnPo3VEplkl70WX5fZqZnfZsE3k3aSFudqrrC9ldFZfYFkn1zwDmBcdGfiIm/hnbyZA==}
+
   through2@0.4.2:
     resolution: {integrity: sha512-45Llu+EwHKtAZYTPPVn3XZHBgakWMN3rokhEv5hu596XP+cNgplMg+Gj+1nmAvj+L0K7+N49zBKx5rah5u0QIQ==}
 
@@ -3333,6 +3359,19 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.3
       '@jridgewell/sourcemap-codec': 1.6.0
 
+  '@montage-ui/brand@4.3.2(@emotion/cache@11.14.0)(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.0))(@emotion/serialize@1.3.3)(@emotion/server@11.11.0)(@emotion/utils@1.4.2)(@types/react@19.3.0)(react@19.3.0)':
+    dependencies:
+      '@montage-ui/engine': 4.3.2(@emotion/cache@11.14.0)(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.0))(@emotion/serialize@1.3.3)(@emotion/server@11.11.0)(@emotion/utils@1.4.2)(@types/react@19.3.0)(react@19.3.0)
+      react: 19.3.0
+    optionalDependencies:
+      '@types/react': 19.3.0
+    transitivePeerDependencies:
+      - '@emotion/cache'
+      - '@emotion/react'
+      - '@emotion/serialize'
+      - '@emotion/server'
+      - '@emotion/utils'
+
   '@montage-ui/core@4.3.2(@emotion/cache@11.14.0)(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.0))(@emotion/serialize@1.3.3)(@emotion/server@11.11.0)(@emotion/utils@1.4.2)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
     dependencies:
       '@floating-ui/react': 0.27.20(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -3382,6 +3421,11 @@ snapshots:
       '@emotion/server': 11.11.0
       '@emotion/utils': 1.4.2
       '@types/react': 19.3.0
+
+  '@montage-ui/eslint-plugin@4.3.2(eslint@9.39.5)':
+    dependencies:
+      eslint: 9.39.5
+      jsx-ast-utils: 3.3.5
 
   '@montage-ui/icon@4.3.2(@emotion/cache@11.14.0)(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.0))(@emotion/serialize@1.3.3)(@emotion/server@11.11.0)(@emotion/utils@1.4.2)(@types/react@19.3.0)(react@19.3.0)':
     dependencies:
@@ -5585,6 +5629,8 @@ snapshots:
   supports-preserve-symlinks-flag@1.0.0: {}
 
   tabbable@6.5.2: {}
+
+  three@0.128.0: {}
 
   through2@0.4.2:
     dependencies:
