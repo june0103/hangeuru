@@ -814,20 +814,150 @@ function boot(options) {
       _m.makeBasis(_x, _y, _z); obj.quaternion.setFromRotationMatrix(_m);
       return obj;
     }
-    // 흙바닥: 가장자리에 풀이 돋아 있고 돌이 두 개 있다
+    // 흙바닥: 흙 덩어리와 돌 두 개. 그 위의 풀·새싹·꽃·떨어진 열매는 dress() 가 단계와 씨앗에 맞춰 놓는다
     function ground() {
-      var q = treeKit(), g = new THREE.Group(), o = new THREE.Object3D(), n = 110, i;
+      var q = treeKit(), g = new THREE.Group();
       g.add(at(new THREE.Mesh(q.soilGeo, q.soil), 0, -0.05, 0));
-      var blades = new THREE.InstancedMesh(q.bladeGeo, q.blade, n); blades.frustumCulled = false;
-      for (i = 0; i < n; i++) {
-        var a = h3(i, 1, 2) * Math.PI * 2, r = 0.4 + Math.pow(h3(i, 2, 3), 0.6) * 0.52;
-        o.position.set(Math.cos(a) * r, 0.01, Math.sin(a) * r);
-        aim(o, (h3(i, 3, 1) - 0.5) * 0.9 + Math.cos(a) * 0.3, 1, (h3(i, 4, 1) - 0.5) * 0.9 + Math.sin(a) * 0.3, Math.cos(a), 0.2, Math.sin(a));
-        o.scale.setScalar(0.6 + h3(i, 5, 1) * 0.9); o.updateMatrix(); blades.setMatrixAt(i, o.matrix);
-      }
-      g.add(blades);
       var s1 = new THREE.Mesh(q.stoneGeo, q.stone); s1.scale.setScalar(0.09); g.add(at(s1, 0.62, 0.05, 0.5));
       var s2 = new THREE.Mesh(q.stoneGeo, q.stone); s2.scale.setScalar(0.05); s2.rotation.y = 2; g.add(at(s2, -0.7, 0.04, 0.38));
+      return g;
+    }
+    /* 땅 꾸밈(2026-11-20 사용자 지시). 단계가 오를수록 땅도 함께 자란다. 씨앗마다 풀빛·꽃·떨어진 열매가 다르다
+       - 씨앗·새싹: 흙만(새싹 하나만 보이게)
+       - 묘목: 옆에 작은 새싹 한두 개, 둘레에 작은 잡초(세 잎)와 풀 몇 포기
+       - 나무: 끝이 둥글게 휘는 부드러운 풀 포기(뾰족한 둥지처럼 보이지 않게), 바람에 살랑살랑
+       - 꽃: 풀 + 땅에도 작은 꽃(그 나무의 꽃잎)
+       - 열매·수확: 풀 + 꽃 + 잡초 + 떨어진 열매(열매 둘, 수확 뒤 하나) */
+    var wind = { value: 0 };
+    // 풀잎이 바람에 흔들린다: 잎 끝으로 갈수록 크게, 포기마다 박자가 다르게(정점 셰이더)
+    function swayMat(m, amp) {
+      m.onBeforeCompile = function (sh) {
+        sh.uniforms.uWind = wind;
+        sh.vertexShader = 'uniform float uWind;\n' + sh.vertexShader.replace('#include <begin_vertex>',
+          '#include <begin_vertex>\n#ifdef USE_INSTANCING\nfloat swPh = instanceMatrix[3].x * 4.1 + instanceMatrix[3].z * 3.3;\n#else\nfloat swPh = 0.0;\n#endif\n' +
+          'transformed.x += (sin(uWind * 1.6 + swPh) * 0.65 + sin(uWind * 2.7 + swPh * 1.7) * 0.35) * ' + amp.toFixed(3) + ' * uv.y * uv.y;');
+      };
+      m.customProgramCacheKey = function () { return 'sway' + amp; };
+      return m;
+    }
+    // 흙 윗면의 높이(가운데에서 반지름 r)
+    function surfY(r) { return -0.05 + 0.1 * Math.sqrt(Math.max(0, 1 - Math.pow(r / 0.95, 2))); }
+    var GRASS = {
+      apple:     { a: ['#3E8A34', '#86C255', '#C4E59A'], b: ['#5A9E3C', '#A8D46C', '#D8EEB0'], weed: ['#3F8F3A', '#79BE57', '#BFE39C'] },
+      tangerine: { a: ['#2C7434', '#5FA548', '#A9D88E'], b: ['#447F33', '#8EBD52', '#C9E3A0'], weed: ['#2A7A3A', '#5BAE58', '#A6DC98'] },
+      peach:     { a: ['#5A9A3A', '#A3CC5E', '#DCEFAE'], b: ['#6FA845', '#BCD772', '#E6F3C0'], weed: ['#5C9E40', '#98C964', '#D2EBB0'] },
+      coffee:    { a: ['#2A6E33', '#56A04A', '#9FD487'], b: ['#3F7A36', '#7FB453', '#C2E19C'], weed: ['#2C7038', '#58A452', '#A0D690'] }
+    };
+    var dressCache = {};
+    function dressKit(seed) {
+      if (dressCache[seed]) return dressCache[seed];
+      var G = GRASS[seed] || GRASS.apple;
+      var ga = swayMat(leafMat(G.a[0], G.a[1], G.a[2], false), 0.03), gb = swayMat(leafMat(G.b[0], G.b[1], G.b[2], false), 0.03);
+      var wd = swayMat(leafMat(G.weed[0], G.weed[1], G.weed[2], false), 0.012);
+      return (dressCache[seed] = {
+        mats: [ga, gb], weed: wd,
+        // 풀잎: 넓고 끝이 둥글게 휘어 내려온다(전의 뾰족한 잎 대신)
+        blade: realLeaf(0.17, 0.05, ga, { fold: 0.32, droop: 0.85 }).children[0].geometry,
+        // 잡초 잎: 짧고 둥근 잎(세 장이 모여 토끼풀처럼)
+        round: realLeaf(0.055, 0.06, wd, { fold: 0.1, droop: 0.12 }).children[0].geometry
+      });
+    }
+    var DRESS = {
+      2: { tufts: 3, weeds: 6, sprouts: 2 },
+      3: { tufts: 9, weeds: 4 },
+      bloom: { tufts: 7, weeds: 5, flowers: 7 },
+      4: { tufts: 7, weeds: 7, flowers: 5, fallen: 2 },
+      harvested: { tufts: 7, weeds: 6, flowers: 5, fallen: 1 },
+      journey: { tufts: 6, weeds: 2 }
+    };
+    var SEED_N = { apple: 3, tangerine: 7, peach: 11, coffee: 13 };
+    function dress(g, kind, seed) {
+      var P = DRESS[kind];
+      if (!P) return g;
+      if (!GRASS[seed]) seed = 'apple';
+      var K = dressKit(seed), q = treeKit(), R = rng(SEED_N[seed] * 31 + String(kind).length * 7 + (kind === 3 ? 5 : 0)), o = new THREE.Object3D(), i, j;
+      // 빈 자리 찾기: 줄기 둘레와 수확 바구니 자리는 비운다. front 이면 보는 쪽(앞)에
+      function spot(rMin, rMax, front) {
+        for (var k = 0; k < 24; k++) {
+          var a = R() * Math.PI * 2, r = rMin + R() * (rMax - rMin), x = Math.cos(a) * r, z = Math.sin(a) * r;
+          if (front && z < 0.05) continue;
+          if (kind === 'harvested' && x > 0.5 && z > 0.12) continue;
+          return [x, surfY(r), z];
+        }
+        return [-0.5, surfY(0.6), 0.35];
+      }
+      // 풀 포기: 한 자리에서 잎 4~6장이 바깥으로 부채처럼 벌어진다
+      var sets = [[], []];
+      for (i = 0; i < (P.tufts || 0); i++) {
+        var c = spot(0.42, 0.86), nb = 4 + Math.floor(R() * 3), base = R() * 6.283, sz = 0.75 + R() * 0.45;
+        for (j = 0; j < nb; j++) {
+          var hd = base + j / nb * 6.283 + (R() - 0.5) * 0.6, tl = 0.25 + R() * 0.45;
+          o.position.set(c[0] + Math.cos(hd) * 0.012, c[1], c[2] + Math.sin(hd) * 0.012);
+          aim(o, Math.sin(tl) * Math.cos(hd), Math.cos(tl), Math.sin(tl) * Math.sin(hd), -Math.sin(hd), 0, Math.cos(hd));
+          o.scale.setScalar(sz * (0.75 + R() * 0.4)); o.updateMatrix();
+          sets[(i + j) % 2].push(o.matrix.clone());
+        }
+      }
+      sets.forEach(function (arr, mi) {
+        if (!arr.length) return;
+        var im = new THREE.InstancedMesh(K.blade, K.mats[mi], arr.length); im.frustumCulled = false;
+        arr.forEach(function (m, n) { im.setMatrixAt(n, m); }); g.add(im);
+      });
+      // 잡초: 둥근 잎 세 장이 땅 가까이 펼쳐진다
+      if (P.weeds) {
+        var wm = [];
+        for (i = 0; i < P.weeds; i++) {
+          var w = spot(0.3, 0.88), ws = 0.8 + R() * 0.5, wr = R() * 6.283;
+          for (j = 0; j < 3; j++) {
+            var h2 = wr + j * 2.094, t2 = 1.05 + R() * 0.25;
+            o.position.set(w[0], w[1] + 0.012, w[2]);
+            aim(o, Math.sin(t2) * Math.cos(h2), Math.cos(t2), Math.sin(t2) * Math.sin(h2), -Math.sin(h2), 0, Math.cos(h2));
+            o.scale.setScalar(ws); o.updateMatrix(); wm.push(o.matrix.clone());
+          }
+        }
+        var wi = new THREE.InstancedMesh(K.round, K.weed, wm.length); wi.frustumCulled = false;
+        wm.forEach(function (m, n) { wi.setMatrixAt(n, m); }); g.add(wi);
+      }
+      // 묘목 옆의 작은 새싹: 가는 줄기에 그 나무의 잎 두 장
+      if (P.sprouts) {
+        var lf = leafOf(seed);
+        for (i = 0; i < P.sprouts; i++) {
+          var sp = spot(0.32, 0.55, true), sg = new THREE.Group(), hgt = 0.09 + R() * 0.05;
+          sg.add(limb([[0, 0, 0], [0.006, hgt * 0.5, 0.002], [0, hgt, 0]], 0.009, 0.006, q.stalk, 0, 6, 0));
+          [1.4, -1.75].forEach(function (hd, n) {
+            var m = new THREE.Mesh(lf.geo, lf.mats[1]); m.position.set(0, hgt, 0); m.scale.setScalar(0.28 + R() * 0.08);
+            aim(m, Math.sin(hd) * Math.cos(0.55), Math.sin(0.55), Math.cos(hd) * Math.cos(0.55), 0, 0.75, 0.65); sg.add(m);
+          });
+          sg.rotation.y = R() * 6.283; g.add(at(sg, sp[0], sp[1] - 0.005, sp[2]));
+        }
+      }
+      // 땅에 핀 작은 꽃: 짧은 꽃대 위에 그 나무의 꽃잎 다섯 장과 꽃술
+      if (P.flowers) {
+        var fl = flowerOf(seed), pet = new THREE.InstancedMesh(fl.geo, fl.mat, P.flowers * 5), mid = new THREE.InstancedMesh(q.dotGeo, q.pollen, P.flowers), cc = new THREE.Object3D(), M = new THREE.Matrix4(), np = 0;
+        pet.frustumCulled = mid.frustumCulled = false; cc.rotation.order = 'YXZ';
+        for (i = 0; i < P.flowers; i++) {
+          var fp = spot(0.38, 0.84, i < P.flowers - 1), fh = 0.05 + R() * 0.05;
+          g.add(limb([[fp[0], fp[1], fp[2]], [fp[0] + 0.004, fp[1] + fh * 0.6, fp[2] + 0.003], [fp[0], fp[1] + fh, fp[2] + 0.006]], 0.006, 0.004, q.stalk, 0, 5, 0));
+          var nx = (R() - 0.5) * 0.5, ny = 1, nz = 0.35 + R() * 0.3;
+          o.position.set(fp[0], fp[1] + fh, fp[2] + 0.006);
+          aim(o, ny, -nx, 0.013, nx, ny, nz);
+          o.scale.setScalar(fl.F.size * (0.55 + R() * 0.2)); o.updateMatrix();
+          for (j = 0; j < 5; j++) {
+            cc.position.set(0, 0, 0); cc.scale.setScalar(1); cc.rotation.set(-fl.F.cup, j / 5 * Math.PI * 2 + i, 0); cc.updateMatrix();
+            M.multiplyMatrices(o.matrix, cc.matrix); pet.setMatrixAt(np++, M);
+          }
+          cc.rotation.set(0, 0, 0); cc.position.set(0, 0.012, 0); cc.scale.setScalar(0.022); cc.updateMatrix();
+          M.multiplyMatrices(o.matrix, cc.matrix); mid.setMatrixAt(i, M);
+        }
+        g.add(pet); g.add(mid);
+      }
+      // 떨어진 열매: 앞쪽 흙 위에 비스듬히 누워 있다
+      for (i = 0; i < (P.fallen || 0); i++) {
+        var fr = spot(0.45, 0.72, true), m2 = mini(seed);
+        m2.scale.multiplyScalar(seed === 'coffee' ? 0.85 : 0.92);
+        m2.rotation.set(0.5 + R() * 0.8, R() * 6.283, 0.3 + R() * 0.6);
+        g.add(at(m2, fr[0], fr[1] + (seed === 'coffee' ? 0.05 : 0.09), fr[2]));
+      }
       return g;
     }
     // 잎을 한꺼번에 놓는다. 한 장은 [x, y, z, 뻗는 쪽 xyz, 윗면이 보는 쪽 xyz, 크기]
@@ -1068,6 +1198,7 @@ function boot(options) {
         return g;
       }
     };
+    Object.keys(STAGE).forEach(function (k) { var make = STAGE[k]; STAGE[k] = function (seed) { return dress(make(seed), k, seed); }; });
     var SCALE = { 0: 1.5, 1: 1.4, 2: 1.22, 3: 1.16, bloom: 1.03, 4: 1.03, harvested: 0.98 };
     var STRIP = SCALE;
 
@@ -1481,7 +1612,7 @@ function boot(options) {
         scene.add(holder);
         items.push({ name: c[0], spin: spin, holder: holder, x: c[1], y: c[2], z: c[3], s: c[4], ph: i * 1.9 });
       });
-      var seed = new THREE.Mesh(q.seedGeo, q.seed), land = ground(), sh = shadow(1.9, -1.3, 0.16);
+      var seed = new THREE.Mesh(q.seedGeo, q.seed), land = dress(ground(), 'journey', 'apple'), sh = shadow(1.9, -1.3, 0.16);
       seed.scale.setScalar(0.0001); scene.add(seed);
       land.scale.setScalar(1.25); land.position.y = -4.8; land.visible = false; scene.add(land); scene.add(sh);
       var v = { scene: scene, cam: cam, live: true, p: STILL ? 0 : 0, target: 0, lx: 0, ly: 0, tx: 0, ty: 0, pop: clock.t };
@@ -1568,6 +1699,7 @@ function boot(options) {
     }
 
     function frame(dt) {
+      wind.value = STILL || reduce ? 0 : clock.t;
       var H = window.innerHeight, t = clock.t;
       for (var i = 0; i < views.length; i++) {
         var v = views[i];
