@@ -15,6 +15,12 @@ button.orchard-lv{cursor:pointer;border-radius:50%;-webkit-tap-highlight-color:t
 button.orchard-lv:hover{transform:scale(1.06)}button.orchard-lv:active{transform:scale(.94);transition-duration:.12s}
 button.orchard-lv:focus-visible{outline:2px solid var(--o-accent);outline-offset:3px}
 @media (hover:none){button.orchard-lv:hover{transform:none}}
+/* 수확한 뒤의 레벨 표시: 누를 수 있다는 걸 알리도록 빛이 천천히 차올랐다 잦아든다(2.8초) */
+@keyframes orchard-lv-glow{0%,100%{filter:drop-shadow(0 6px 10px color-mix(in srgb,var(--o-lv) 34%,transparent)) drop-shadow(0 0 0 transparent)}50%{filter:drop-shadow(0 6px 10px color-mix(in srgb,var(--o-lv) 34%,transparent)) drop-shadow(0 0 12px color-mix(in srgb,var(--o-lv) 72%,transparent))}}
+button.orchard-lv{animation:orchard-lv-glow 2.8s cubic-bezier(.45,0,.55,1) infinite}
+button.orchard-lv::after{content:"";position:absolute;inset:-6px;border-radius:50%;pointer-events:none;background:radial-gradient(closest-side,color-mix(in srgb,var(--o-lv) 26%,transparent),transparent);opacity:0;animation:orchard-lv-halo 2.8s cubic-bezier(.45,0,.55,1) infinite;z-index:-1}
+@keyframes orchard-lv-halo{0%,100%{opacity:0;transform:scale(.86)}50%{opacity:1;transform:scale(1.08)}}
+@media (prefers-reduced-motion:reduce){button.orchard-lv{animation:none;filter:drop-shadow(0 6px 10px color-mix(in srgb,var(--o-lv) 34%,transparent)) drop-shadow(0 0 10px color-mix(in srgb,var(--o-lv) 60%,transparent))}button.orchard-lv::after{display:none}}
 @media (prefers-reduced-motion:reduce){button.orchard-lv{transition:none}}
 .orchard-lv svg{display:block;width:100%;height:100%;overflow:visible}
 .orchard-lv .l{fill:var(--o-lv);transform-origin:center;transform-box:fill-box}

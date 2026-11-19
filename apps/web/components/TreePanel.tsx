@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Button, ContentBadge, FlexBox, SectionMessage, Typography } from '@montage-ui/core';
+import { Box, ContentBadge, FlexBox, SectionMessage, Typography } from '@montage-ui/core';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 
 import { TREE } from '@/lib/copy';
@@ -109,10 +109,7 @@ export default function TreePanel({ view, harvesting, onHarvest, onOpenCard, onG
           sx={{ flex: 1, minWidth: 0, paddingTop: SIDE_TOP, '@media (max-width: 767px)': { paddingTop: 0, width: '100%' } }}
         >
           {view.lead.kind === 'harvested' && (
-            <>
-              <Typography as="p" variant="body2-reading" color="semantic.foreground.neutral.secondary">{TREE.harvestedText}</Typography>
-              <Button variant="outlined" color="assistive" size="medium" onClick={onOpenCard}>{TREE.openCard}</Button>
-            </>
+            <Typography as="p" variant="body2-reading" color="semantic.foreground.neutral.secondary">{TREE.harvestedText}</Typography>
           )}
           {view.lead.kind === 'canHarvest' && (
             <SectionMessage variant="positive" description={TREE.canHarvestDesc} sx={{ width: '100%' }}>{TREE.canHarvestTitle}</SectionMessage>
