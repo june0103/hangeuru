@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, FlexBox, FormControl, FormControlField, FormControlLabel, FormControlNegativeMessage, TextField, Typography } from '@montage-ui/core';
+import { FlexBox, FormControl, FormControlField, FormControlLabel, FormControlNegativeMessage, TextField, Typography } from '@montage-ui/core';
 import { useActionState, useState } from 'react';
 
 import { signIn } from '@/app/actions';
@@ -8,6 +8,7 @@ import { FIELD, LOGIN } from '@/lib/copy';
 import type { ActionResult } from '@/lib/types';
 
 import AuthFoot from './AuthFoot';
+import PrimaryButton from './orchard/WaterFill';
 import PasswordField from './PasswordField';
 import { useActionResult } from './useActionResult';
 import { useFirstErrorFocus } from './useFirstErrorFocus';
@@ -48,7 +49,7 @@ export default function LoginForm() {
           </FormControlField>
           {errors?.password && <FormControlNegativeMessage>{errors.password}</FormControlNegativeMessage>}
         </FormControl>
-        <Button type="submit" variant="solid" color="primary" size="large" fullWidth loading={pending}>{LOGIN.submit}</Button>
+        <PrimaryButton type="submit" size="large" fullWidth loading={pending}>{LOGIN.submit}</PrimaryButton>
       </FlexBox>
       <AuthFoot prefix={LOGIN.footPrefix} link={LOGIN.footLink} href="/signup" />
     </>

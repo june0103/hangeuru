@@ -2,40 +2,41 @@
 
 import { Box, Global, containerStyle } from '@montage-ui/core';
 import { usePathname } from 'next/navigation';
-import { type PropsWithChildren, useState, useTransition } from 'react';
+import { type PropsWithChildren, useEffect, useRef, useState, useTransition } from 'react';
 
 import { signOut } from '@/app/actions';
-import type { Profile } from '@/lib/types';
+import type { Member } from '@/lib/types';
 
 import BottomNav from './BottomNav';
 import Header from './Header';
+import { useOrchardLayout } from './orchard/OrchardProvider';
 import SettingsModal from './SettingsModal';
 
 // 본문 여백과 토스트 위치 (spec 3.2, 3.10)
 const PAD_TOP = 24;
 const PAD_TOP_M = 16;
 const PAD_BOTTOM = 96;
-const PAD_BOTTOM_M = 88;
-const PAD_BOTTOM_M_HOME = 164;
+// 768px 미만은 본문이 하단 탭 바 위의 스크롤 영역(.o-scroll, app/orchard.css) 안에 있다
+const PAD_BOTTOM_M = 24;
 // 몽타주 토스트 영역이 모바일에서 아래 20px를 더하므로 72px, 148px에서 20을 뺀다
 const TOAST_M = '52px';
-const TOAST_M_HOME = '128px';
 
-type Me = Pick<Profile, 'name' | 'seed' | 'plan'> & { harvested: boolean };
+type Me = Pick<Member, 'name' | 'seed' | 'plan'> & { harvested: boolean };
 
 export default function AppShell({ me, children }: PropsWithChildren<{ me: Me }>) {
-  const home = usePathname() === '/';
   const [settings, setSettings] = useState(false);
   const [signingOut, startSignOut] = useTransition();
+  useOrchardLayout('app');
+  // 768px 미만에서는 화면 대신 스크롤 영역이 스크롤되므로, 화면을 옮기면 맨 위로 올린다
+  const scroller = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  useEffect(() => { scroller.current?.scrollTo(0, 0); }, [pathname]);
   return (
     <>
-      <Global styles={{ '@media (max-width: 767px)': { ':root': { '--app-toast-offset': home ? TOAST_M_HOME : TOAST_M } } }} />
-      <Header
-        userName={me.name}
-        onOpenSettings={() => setSettings(true)}
-        onSignOut={() => startSignOut(() => signOut())}
-        signingOut={signingOut}
-      />
+      <Global styles={{ '@media (max-width: 767px)': { ':root': { '--app-toast-offset': TOAST_M } } }} />
+      {/* 768px 미만: 헤더와 본문은 하단 탭 바 위에서만 스크롤된다(spec 3.10) */}
+      <div className="o-scroll" ref={scroller}>
+      <Header userName={me.name} onOpenSettings={() => setSettings(true)} />
       <Box
         as="main"
         sx={[
@@ -45,15 +46,16 @@ export default function AppShell({ me, children }: PropsWithChildren<{ me: Me }>
             paddingBottom: PAD_BOTTOM,
             '@media (max-width: 767px)': {
               paddingTop: PAD_TOP_M,
-              paddingBottom: `calc(${home ? PAD_BOTTOM_M_HOME : PAD_BOTTOM_M}px + env(safe-area-inset-bottom, 0px))`,
+              paddingBottom: PAD_BOTTOM_M,
             },
           },
         ]}
       >
         {children}
       </Box>
+      </div>
       <BottomNav />
-      <SettingsModal open={settings} onOpenChange={setSettings} me={me} />
+      <SettingsModal open={settings} onOpenChange={setSettings} me={me} onSignOut={() => startSignOut(() => signOut())} signingOut={signingOut} />
     </>
   );
 }

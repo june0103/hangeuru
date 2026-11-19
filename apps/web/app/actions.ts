@@ -3,14 +3,16 @@
 // 서버 액션 7개 (spec 8장). 화면이 버튼을 막아도 서버는 조건을 처음부터 다시 검사한다.
 // 읽기와 쓰기는 lib/data.ts를 거친다. 쓰기는 secret key 클라이언트로만 한다.
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
 import { redirect, unstable_rethrow } from 'next/navigation';
 
 import { ACTION, ERRORS, LOCATION, SETTINGS } from '@/lib/copy';
 import {
   createAuthUser, deleteAuthUser, getProfile, getSessionUserId, insertCheckIn, insertProfile, listAttendanceOf, markHarvested,
-  signInWithPassword, signOutSession, updateCheckOut, updateProfileRow,
+  setSeedOnce, signInWithPassword, signOutSession, updateCheckOut, updateProfileRow,
 } from '@/lib/data';
 import { CAMP, FRUIT_DAYS, PLANS, SEASON, SEEDS, campCheck, isWorkday } from '@/lib/rules';
+import { SEEN_COOKIE, SEEN_MAX_AGE } from '@/lib/session';
 import { serverNow, serverToday } from '@/lib/time';
 import type { ActionResult, PlanKey, SeedKey } from '@/lib/types';
 import { checkInMessage, statsOf } from '@/lib/view';
@@ -31,6 +33,11 @@ function locationError(pos: unknown): ActionResult | null {
   }
   const c = campCheck({ lat, lng });
   return c.inside ? null : { ok: false, message: LOCATION.outside(c.distance, CAMP.radiusM) };
+}
+
+// 이 브라우저에서 로그인한 적이 있다고 적어 둔다. 다음부터는 스플래시를 건너뛴다(spec 8.4)
+async function markSeen() {
+  (await cookies()).set(SEEN_COOKIE, '1', { path: '/', sameSite: 'lax', maxAge: SEEN_MAX_AGE });
 }
 
 async function requireUser() {
@@ -63,7 +70,6 @@ export async function signUp(_: ActionResult | null, f: FormData): Promise<Actio
     const name = str(f, 'name').trim();
     const email = str(f, 'email').trim().toLowerCase();
     const password = str(f, 'password');
-    const seed = str(f, 'seed');
     const plan = str(f, 'plan');
     const errors: Record<string, string> = {};
     if (!validName(name)) errors.name = ERRORS.name;
@@ -72,21 +78,22 @@ export async function signUp(_: ActionResult | null, f: FormData): Promise<Actio
     const passwordConfirm = str(f, 'passwordConfirm');
     if (!passwordConfirm) errors.passwordConfirm = ERRORS.passwordConfirmEmpty;
     else if (passwordConfirm !== password) errors.passwordConfirm = ERRORS.passwordMismatch;
-    if (!isSeed(seed)) errors.seed = ERRORS.seed;
     if (!isPlan(plan)) errors.plan = ERRORS.plan;
-    if (Object.keys(errors).length || !isSeed(seed) || !isPlan(plan)) return { ok: false, errors };
+    if (Object.keys(errors).length || !isPlan(plan)) return { ok: false, errors };
 
     const user = await createAuthUser(email, password);
     if (user === 'taken') return { ok: false, errors: { email: ERRORS.emailTaken } };
     try {
-      await insertProfile({ id: user.id, name, plan, seed, joinDate: serverToday() });
+      await insertProfile({ id: user.id, name, plan, joinDate: serverToday() });
     } catch (e) {
       await deleteAuthUser(user.id);
       throw e;
     }
     if ((await signInWithPassword(email, password)) !== 'ok') return { ok: false, message: ACTION.signedUpLoginLater };
+    await markSeen();
     revalidatePath('/', 'layout');
-    redirect('/?welcome=1');
+    // 씨앗은 가입한 뒤 씨앗 고르기 화면에서 심는다(spec 3.4)
+    redirect('/seeds');
   });
 }
 
@@ -102,6 +109,7 @@ export async function signIn(_: ActionResult | null, f: FormData): Promise<Actio
     const result = await signInWithPassword(email, password);
     if (result === 'rate_limited') return { ok: false, message: ACTION.rateLimited };
     if (result !== 'ok') return { ok: false, errors: { password: ERRORS.credentials } };
+    await markSeen();
     revalidatePath('/', 'layout');
     redirect('/');
   });
@@ -111,6 +119,16 @@ export async function signOut() {
   await signOutSession();
   revalidatePath('/', 'layout');
   redirect('/login');
+}
+
+/** 씨앗 고르기 화면에서 씨앗을 심는다. 이미 심었으면 그대로 둔다. 다음 화면으로는 화면이 넘어간다 */
+export async function plantSeed(seed: string): Promise<ActionResult> {
+  return guard(async () => {
+    const me = await requireUser();
+    if (!isSeed(seed)) return { ok: false, message: ERRORS.seed };
+    await setSeedOnce(me.id, seed);
+    return done({ ok: true });
+  });
 }
 
 export async function checkIn(pos: { lat: number; lng: number }): Promise<ActionResult> {

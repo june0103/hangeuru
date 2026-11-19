@@ -59,7 +59,7 @@ describe('오늘 그라운드 (3.5)', () => {
       { ...rec('2026-12-17', '10:00'), userId: 'a' },
       { ...rec('2026-12-17', '09:00', '18:00'), userId: 'b' },
     ], people);
-    expect(v.text).toBe('오늘 2명이 출근했고, 지금 1명이 그라운드에 있어요.');
+    expect(v.text).toBe('오늘 2명이 출근했어요.');
     expect(v.chips).toEqual([{ id: 'b', name: '나', inCamp: false }, { id: 'a', name: '가', inCamp: true }]);
   });
 });
@@ -83,5 +83,50 @@ describe('위치 안내 문구 (2.8)', () => {
     const { LOCATION } = await import('./copy');
     expect(LOCATION.outside(612.4, 500)).toBe('그라운드에서 610m 떨어져 있어요. 그라운드 500m 안에서 기록할 수 있어요.');
     expect(LOCATION.outside(12840, 500)).toBe('그라운드에서 12.8km 떨어져 있어요. 그라운드 500m 안에서 기록할 수 있어요.');
+  });
+});
+
+describe('배지 (3.5)', () => {
+  it('출근 전에는 하나도 없다', async () => {
+    const { badgesView } = await import('./view');
+    const v = badgesView(me, statsOf(me, [], '2026-11-24'), '2026-11-24');
+    expect(v.map(b => b.key)).toEqual(['first', 'week', 'streak', 'ten', 'harvest']);
+    expect(v.every(b => !b.earned)).toBe(true);
+    expect(v[2].label).toBe('연속 달성');
+  });
+  it('주간 목표를 채우면 첫 출근, 주간 목표, 연속이 열린다', async () => {
+    const { badgesView } = await import('./view');
+    const recs = ['2026-11-23', '2026-11-24', '2026-11-25'].map(d => rec(d));
+    const v = badgesView(me, statsOf(me, recs, '2026-11-25'), '2026-11-25');
+    expect(v.filter(b => b.earned).map(b => b.key)).toEqual(['first', 'week', 'streak']);
+    expect(v[2].label).toBe('1주 연속');
+  });
+  it('사전 기간에는 주간 목표 배지를 주지 않고, 수확하면 수확 배지가 열린다', async () => {
+    const { badgesView } = await import('./view');
+    const pre = badgesView(me, statsOf(me, [rec('2026-11-18')], '2026-11-19'), '2026-11-19');
+    expect(pre.filter(b => b.earned).map(b => b.key)).toEqual(['first']);
+    const hv = badgesView({ ...me, harvestedAt: '2026-12-17T09:00:00.000Z' }, statsOf(me, [], '2026-12-17'), '2026-12-17');
+    expect(hv.find(b => b.key === 'harvest')!.earned).toBe(true);
+  });
+});
+
+describe('씨앗을 아직 심지 않은 구성원', () => {
+  const noSeed: Profile = { ...me, id: 'n', name: '새내기', seed: null };
+  it('과수원에는 나오지 않고, 인원 수에도 세지 않는다', async () => {
+    const { gardenView } = await import('./view');
+    const v = gardenView('me', [me, noSeed], [rec('2026-12-17'), { ...rec('2026-12-17'), userId: 'n' }], '2026-12-17');
+    expect(v.members.map(m => m.id)).toEqual(['me']);
+    expect(v.lead).toContain('오늘 1명 중 1명이 출근했어요.');
+  });
+  it('오늘 그라운드에는 출근한 사람으로 나온다', () => {
+    const v = campView('2026-12-17', [{ ...rec('2026-12-17'), userId: 'n' }], [me, noSeed]);
+    expect(v.chips).toEqual([{ id: 'n', name: '새내기', inCamp: true }]);
+  });
+  it('나무의 열매 수는 출근일을 따른다', async () => {
+    const { treeView } = await import('./view');
+    const member = { ...me, seed: 'apple' as const };
+    const days = (n: number) => ({ ...statsOf(me, [], '2026-12-17'), days: n });
+    expect(treeView(member, days(19), false, '2026-12-17').fruits).toBe(0);
+    expect(treeView(member, days(22), false, '2026-12-17').fruits).toBe(7);
   });
 });

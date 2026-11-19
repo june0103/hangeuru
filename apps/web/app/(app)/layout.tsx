@@ -9,6 +9,8 @@ export default async function AppLayout({ children }: PropsWithChildren) {
   const id = await getSessionUserId();
   const me = id ? await getProfile(id) : null;
   if (!me) redirect(id ? '/auth/signout' : '/login');
+  // 씨앗을 아직 심지 않았으면 씨앗 고르기부터(spec 3.1)
+  if (!me.seed) redirect('/seeds');
   return (
     <AppShell me={{ name: me.name, seed: me.seed, plan: me.plan, harvested: !!me.harvestedAt }}>
       {children}

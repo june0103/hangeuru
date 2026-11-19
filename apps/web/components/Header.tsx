@@ -1,7 +1,6 @@
 'use client';
 
-import { Box, Button, FlexBox, IconButton, Tab, TabList, TabListItem, TextButton, addOpacity, containerStyle } from '@montage-ui/core';
-import type { Theme } from '@montage-ui/core';
+import { Box, FlexBox, IconButton, Tab, TabList, TabListItem, TextButton, containerStyle } from '@montage-ui/core';
 import { IconPerson } from '@montage-ui/icon';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -9,9 +8,9 @@ import { usePathname } from 'next/navigation';
 import { HEADER, NAV } from '@/lib/copy';
 
 import BrandMark from './BrandMark';
+import ThemeControl from './ThemeControl';
 
 const MIN_HEIGHT = 56;
-const TAB_GAP = 32;
 const USER_GAP = 12;
 const ICON = 18;
 
@@ -28,33 +27,21 @@ type Props = {
   /** 로그인한 화면이면 이름. 로그인·가입 화면에서는 null */
   userName: string | null;
   onOpenSettings?: () => void;
-  onSignOut?: () => void;
-  signingOut?: boolean;
 };
 
-export default function Header({ userName, onOpenSettings, onSignOut, signingOut }: Props) {
+// 헤더(spec 3.2): 색 띠 없이 배경에 녹는다. 768px 이상은 로고 왼쪽, 탭 셋 가운데, 테마 전환과 이름 오른쪽.
+// 로그아웃은 내 설정 창에 있다(3.8). 바탕과 자리 잡기는 app/orchard.css 의 :is(body,.o-scroll) > header, [data-orchard-head]
+export default function Header({ userName, onOpenSettings }: Props) {
   const pathname = usePathname();
   return (
-    <Box
-      as="header"
-      sx={(theme: Theme) => ({
-        position: 'sticky',
-        top: 0,
-        zIndex: 10,
-        paddingTop: 'env(safe-area-inset-top, 0px)',
-        backgroundColor: addOpacity(theme.semantic.background.neutral.primary, theme.opacity[88]),
-        backdropFilter: 'blur(32px)',
-        WebkitBackdropFilter: 'blur(32px)',
-        borderBottom: `1px solid ${theme.semantic.line.neutral.tertiary}`,
-      })}
-    >
-      <FlexBox alignItems="stretch" sx={[containerStyle(), { minHeight: MIN_HEIGHT }]}>
+    <Box as="header" sx={{ position: 'sticky', top: 0, zIndex: 10, paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+      <FlexBox alignItems="stretch" data-orchard-head={userName ? 'bar' : undefined} sx={[containerStyle(), { minHeight: MIN_HEIGHT }]}>
         <FlexBox alignItems="center">
           <BrandMark href={userName ? '/' : '/login'} />
         </FlexBox>
         {userName && (
           <>
-            <Box sx={{ display: 'none', marginLeft: TAB_GAP, alignSelf: 'flex-end', '@media (min-width: 768px)': { display: 'block' } }}>
+            <Box data-orchard-head="tabs" sx={{ display: 'none', alignSelf: 'flex-end', '@media (min-width: 768px)': { display: 'block' } }}>
               <Tab value={navKey(pathname)}>
                 <TabList size="small" aria-label={NAV.ariaLabel}>
                   {NAV_ITEMS.map(item => (
@@ -63,7 +50,8 @@ export default function Header({ userName, onOpenSettings, onSignOut, signingOut
                 </TabList>
               </Tab>
             </Box>
-            <FlexBox alignItems="center" gap={USER_GAP} sx={{ marginLeft: 'auto' }}>
+            <FlexBox data-orchard-head="user" alignItems="center" gap={USER_GAP} sx={{ marginLeft: 'auto' }}>
+              <ThemeControl />
               {/* 768px 미만은 이름이 길면 브랜드와 겹쳐서 아이콘 버튼만 둔다 (spec 3.2) */}
               <Box sx={{ display: 'none', '@media (min-width: 768px)': { display: 'block' } }}>
                 <TextButton
@@ -81,9 +69,6 @@ export default function Header({ userName, onOpenSettings, onSignOut, signingOut
                   <IconPerson />
                 </IconButton>
               </Box>
-              <Button variant="outlined" color="assistive" size="small" onClick={onSignOut} loading={signingOut}>
-                {HEADER.signOut}
-              </Button>
             </FlexBox>
           </>
         )}

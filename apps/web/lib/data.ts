@@ -8,7 +8,7 @@ import { createAdminClient } from './supabase/admin';
 import { createClient } from './supabase/server';
 import type { Attendance, PlanKey, Profile, SeedKey } from './types';
 
-type ProfileRow = { id: string; name: string; plan: PlanKey; seed: SeedKey; join_date: string; harvested_at: string | null };
+type ProfileRow = { id: string; name: string; plan: PlanKey; seed: SeedKey | null; join_date: string; harvested_at: string | null };
 type AttendanceRow = { user_id: string; work_date: string; check_in_at: string | null; check_out_at: string | null };
 
 const PROFILE_COLS = 'id, name, plan, seed, join_date, harvested_at';
@@ -112,8 +112,18 @@ export async function listAllAttendance(): Promise<Attendance[]> {
 
 /* ---------- 쓰기 (서버 액션만 부른다) ---------- */
 
-export async function insertProfile(p: Omit<Profile, 'harvestedAt'>) {
-  must(await createAdminClient().from('profiles').insert({ id: p.id, name: p.name, plan: p.plan, seed: p.seed, join_date: p.joinDate }));
+/** 씨앗은 비워 둔 채 만든다. 씨앗은 가입한 뒤 setSeedOnce로 정한다 */
+export async function insertProfile(p: Omit<Profile, 'harvestedAt' | 'seed'>) {
+  must(await createAdminClient().from('profiles').insert({ id: p.id, name: p.name, plan: p.plan, join_date: p.joinDate }));
+}
+
+/** 씨앗이 비어 있을 때만 심는다. 이미 심었으면 먼저 심은 씨앗을 그대로 돌려준다 */
+export async function setSeedOnce(userId: string, seed: SeedKey): Promise<SeedKey> {
+  const admin = createAdminClient();
+  const updated = must(await admin.from('profiles').update({ seed }).eq('id', userId).is('seed', null).select('seed'));
+  if (updated.length) return updated[0].seed as SeedKey;
+  const row = must(await admin.from('profiles').select('seed').eq('id', userId).single<{ seed: SeedKey }>());
+  return row.seed;
 }
 
 /** 오늘 기록이 이미 있으면 아무것도 바꾸지 않고 false. 두 기기에서 동시에 눌러도 1건만 남는다 */
@@ -137,6 +147,6 @@ export async function markHarvested(userId: string, at: string): Promise<string>
   return row.harvested_at;
 }
 
-export async function updateProfileRow(id: string, patch: Partial<Pick<Profile, 'name' | 'plan' | 'seed'>>) {
+export async function updateProfileRow(id: string, patch: { name?: string; plan?: PlanKey; seed?: SeedKey }) {
   must(await createAdminClient().from('profiles').update(patch).eq('id', id));
 }

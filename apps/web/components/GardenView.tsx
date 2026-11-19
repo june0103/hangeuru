@@ -5,6 +5,7 @@ import type { Theme } from '@montage-ui/core';
 import { IconFireFill } from '@montage-ui/icon';
 
 import { GARDEN } from '@/lib/copy';
+import { fruitCount } from '@/lib/rules';
 import type { GardenView as View } from '@/lib/view';
 
 import Panel from './Panel';
@@ -23,7 +24,11 @@ export default function GardenView({ view }: { view: View }) {
   return (
     <>
       <Typography as="h1" variant="title3" weight="bold" color="semantic.foreground.neutral.primary">{GARDEN.title}</Typography>
-      <Typography as="p" variant="body1-reading" color="semantic.foreground.neutral.secondary" sx={{ marginTop: LEAD_TOP, maxWidth: '38em' }}>{view.lead}</Typography>
+      <Typography as="p" variant="body1-reading" color="semantic.foreground.neutral.secondary" sx={{ marginTop: LEAD_TOP, maxWidth: '38em' }}>
+        {view.leadLines[0]}{' '}
+        {/* 768px 미만에서는 수확 문장을 다음 줄로 내려 두 줄로 깔끔하게(spec 3.7) */}
+        <Box as="span" sx={{ '@media (max-width: 767px)': { display: 'block' } }}>{view.leadLines[1]}</Box>
+      </Typography>
       <Box
         as="ul"
         sx={{
@@ -55,7 +60,7 @@ export default function GardenView({ view }: { view: View }) {
               )}
             </FlexBox>
             <Box sx={{ flexShrink: 0 }}>
-              <TreeFigure seed={m.seed} days={m.days} harvested={m.harvested} label={m.figureLabel} mini />
+              <TreeFigure seed={m.seed} days={m.days} fruits={fruitCount(m.days)} harvested={m.harvested} label={m.figureLabel} mini />
             </Box>
           </Panel>
         ))}

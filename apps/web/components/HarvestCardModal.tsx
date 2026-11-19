@@ -1,84 +1,80 @@
 'use client';
 
-import {
-  ActionArea, ActionAreaButton, Box, FlexBox, IconButton, Modal, ModalContainer, ModalContent, ModalNavigation, Skeleton, Typography, useToast,
-} from '@montage-ui/core';
-import { IconClose } from '@montage-ui/icon';
-import { useEffect, useState } from 'react';
+import { FlexBox, IconButton, Modal, ModalContainer, useToast } from '@montage-ui/core';
+import type { Theme } from '@montage-ui/core';
+import { IconDownload } from '@montage-ui/icon';
+import { useEffect, useRef } from 'react';
 
-import { drawHarvestCard } from '@/lib/card';
 import { CARD } from '@/lib/copy';
+import { saveCard, sparkleRain } from '@/lib/orchard/extras';
 import type { CardModel } from '@/lib/view';
 
-// 수확 카드 모달 (spec 3.9)
-const IMG_MAX = 360;
-const IMG_RADIUS = 16;
+import { useOrchard, useOrchardView } from './orchard/OrchardProvider';
 
-function CardBody({ model, onClose }: { model: CardModel; onClose: () => void }) {
+// 수확 카드 (spec 3.9, 4.7). 창의 제목 줄과 버튼 없이, 뒤 화면을 딤 처리하고 카드만 가운데에 띄운다.
+// 카드 오른쪽 위의 저장 아이콘을 누르면 카드 모습 그대로 그림(PNG)으로 내려받는다(아이콘은 그림에 들어가지 않는다).
+// 열릴 때 전설의 카드처럼 수평으로 돌며 나타나고, 빛이 지나간 뒤 둘레에 반짝이는 조각이 조금 떨어진다.
+// 바깥(딤)을 누르거나 Esc 를 누르면 닫힌다. 모양은 app/orchard.css 의 .orchard-card, [data-orchard-modal="card"]
+
+function CardBody({ model }: { model: CardModel }) {
   const toast = useToast();
-  const [img, setImg] = useState<{ blob: Blob; url: string } | null>(null);
+  const api = useOrchard();
+  const card = useRef<HTMLDivElement>(null);
+  const fruit = useRef<HTMLSpanElement>(null);
+  useOrchardView(fruit, (o, el) => o.fruit(el, model.seed), [model.seed]);
 
+  // 창의 바탕과 테두리를 지우고 카드만 남긴다
   useEffect(() => {
-    let alive = true;
-    drawHarvestCard(model).then(r => { if (alive) setImg(r); });
-    return () => { alive = false; };
-  }, [model]);
+    const dlg = card.current?.closest('[role="dialog"]');
+    dlg?.setAttribute('data-orchard-modal', 'card');
+    // 카드가 돌아 멈출 즈음 둘레에 반짝이는 조각이 조금 떨어진다(app/orchard.css 의 oc-reveal 1.4초)
+    const t = setTimeout(() => { if (card.current) sparkleRain(card.current.getBoundingClientRect(), 26, 0); }, 1000);
+    return () => { clearTimeout(t); dlg?.removeAttribute('data-orchard-modal'); };
+  }, []);
 
-  const copy = async () => {
-    try {
-      if (!img || !navigator.clipboard || typeof ClipboardItem === 'undefined') throw new Error('unsupported');
-      await navigator.clipboard.write([new ClipboardItem({ 'image/png': img.blob })]);
-      toast({ content: CARD.copied, variant: 'positive' });
-    } catch {
-      toast({ content: CARD.copyFailed, variant: 'normal' });
-    }
-  };
   const save = () => {
     try {
-      if (!img) throw new Error('not ready');
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(img.blob);
-      a.download = model.fileName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      if (!card.current) throw new Error('not ready');
+      saveCard(card.current, model.fileName, !!api?.isDark());
+      toast({ content: CARD.saved, variant: 'positive' });
     } catch {
       toast({ content: CARD.saveFailed, variant: 'normal' });
     }
   };
 
   return (
-    <FlexBox flex="1" flexDirection="column" sx={{ minHeight: 0 }}>
-      <ModalNavigation trailingContent={<IconButton aria-label={CARD.close} onClick={onClose}><IconClose /></IconButton>}>
-        {CARD.title}
-      </ModalNavigation>
-      <ModalContent>
-        <FlexBox flexDirection="column" alignItems="center" gap={12}>
-          {img ? (
-            // 길게 누르거나 오른쪽 버튼으로 복사·저장할 수 있게 <img>로 보인다
-             
-            <Box as="img" src={img.url} alt={model.alt} width={IMG_MAX} height={480}
-              sx={{ display: 'block', width: '100%', maxWidth: IMG_MAX, height: 'auto', borderRadius: IMG_RADIUS, WebkitTouchCallout: 'default', userSelect: 'auto' }} />
-          ) : (
-            <Skeleton variant="rectangle" width="100%" height={480} radius={IMG_RADIUS} sx={{ maxWidth: IMG_MAX }} />
-          )}
-          <Typography as="p" variant="label1-reading" align="center" color="semantic.foreground.neutral.secondary">{CARD.help}</Typography>
-        </FlexBox>
-      </ModalContent>
-      <ActionArea variant="neutral">
-        <ActionAreaButton variant="alternative" buttonVariant="solid" buttonColor="assistive" onClick={save} disabled={!img}>{CARD.save}</ActionAreaButton>
-        <ActionAreaButton onClick={copy} disabled={!img} autoFocus>{CARD.copy}</ActionAreaButton>
-      </ActionArea>
-    </FlexBox>
+    <div className="orchard-card" ref={card}>
+      <div className="oc-head">
+        <span>{CARD.brand}</span>
+        {/* 헤더의 프로필 아이콘과 같은 톤(neutral secondary). 저장 그림에는 들어가지 않는다 */}
+        <IconButton size={32} aria-label={CARD.save} color="semantic.foreground.neutral.secondary" onClick={save} className="oc-save" autoFocus>
+          <IconDownload />
+        </IconButton>
+      </div>
+      <div role="img" aria-label={model.alt}>
+        <div className="oc-fruit"><span ref={fruit} /></div>
+        <p className="oc-title">{model.heading}</p>
+        <p className="oc-sub">{model.sub}</p>
+        <dl className="oc-cells">
+          {model.cells.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}
+        </dl>
+        <div className="oc-rec">
+          <div className="oc-rec-head"><span>{model.record.label}</span><b>{model.record.percentText}</b></div>
+          <FlexBox className="oc-bar">
+            <FlexBox as="i" style={{ width: `${model.record.ratio * 100}%` }} sx={(theme: Theme) => ({ backgroundColor: theme.semantic.foreground.positive.primary })} />
+          </FlexBox>
+        </div>
+        <p className="oc-foot">{CARD.foot}</p>
+      </div>
+    </div>
   );
 }
 
 export default function HarvestCardModal({ open, onOpenChange, model }: { open: boolean; onOpenChange: (v: boolean) => void; model: CardModel | null }) {
   return (
     <Modal open={open && !!model} onOpenChange={onOpenChange}>
-      <ModalContainer variant="bottom" size="large" sm={{ variant: 'popup' }}>
-        {open && model && <CardBody model={model} onClose={() => onOpenChange(false)} />}
+      <ModalContainer variant="popup" size="medium" aria-label={CARD.title}>
+        {open && model && <CardBody model={model} />}
       </ModalContainer>
     </Modal>
   );

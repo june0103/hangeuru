@@ -1,0 +1,17 @@
+/* 과수원 그리기 엔진이 스스로 만드는 요소의 스타일. 값은 보드의 디자인 레이어(orchard.js)와 같다.
+   패널·헤더 같은 화면 스타일은 여기 두지 않는다. --o-accent, --o-shadow 는 화면 쪽 스타일이 정한다 */
+
+/* 배경: 화면 전체에 깔리는 셰이더 캔버스 */
+#orchard-bg { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: -1; pointer-events: none; }
+
+/* 에셋 한 칸: 과일, 나무, 장면이 그려지는 캔버스 */
+.orchard-slot { display: block; width: 100%; height: 100%; }
+
+/* 빛줄기: 그림 상자 안에서 끊기지 않게, 화면 맨 위에서 흙까지 내려오는 빛을 그림 뒤에 따로 둔다(위는 좁고 아래로 퍼진다) */
+.orchard-shaft { position: absolute; left: 50%; width: 92%; transform: translateX(-50%); z-index: 0; pointer-events: none; opacity: 0; background: linear-gradient(to bottom, rgba(255, 255, 244, .42) 0, rgba(255, 255, 244, .9) 46%, rgba(255, 255, 244, .6) 84%, rgba(255, 255, 244, 0) 100%); -webkit-mask-image: linear-gradient(to right, transparent 2%, #000 50%, transparent 98%); mask-image: linear-gradient(to right, transparent 2%, #000 50%, transparent 98%); clip-path: polygon(34% 0, 66% 0, 100% 100%, 0 100%); filter: blur(10px); }
+.orchard-shaft + canvas, .orchard-shaft ~ .orchard-slot { position: relative; z-index: 1; }
+
+/* 잎이 흩날리는 연출과 떠오르는 글자(extras.js 의 burst, floatChip). 움직임은 Web Animations 로 준다 */
+.orchard-burst { position: fixed; inset: 0; pointer-events: none; z-index: 2147483000; overflow: hidden; }
+.orchard-burst i { position: fixed; border-radius: 80% 12% 80% 12%; will-change: transform, opacity; }
+.orchard-plus { position: fixed; z-index: 2147483000; pointer-events: none; padding: 6px 12px; border-radius: 9999px; background: var(--o-accent); color: #fff; font-weight: 700; font-size: 15px; line-height: 20px; box-shadow: 0 12px 24px -12px var(--o-shadow); }

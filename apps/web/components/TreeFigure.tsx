@@ -1,166 +1,176 @@
 'use client';
 
-import { Box, keyframes } from '@montage-ui/core';
-import type { Theme } from '@montage-ui/core';
-import type { KeyboardEvent } from 'react';
+import { type KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
-import { type Paint, type Primitive, type Shape, SIZES, VIEWBOX, fruitShapes, treeModel } from '@/lib/tree';
+import { TREE } from '@/lib/copy';
+import { type StageView, stageOf } from '@/lib/orchard/engine';
+import { burst, dashOf, floatChip, levelBadgeSvg, levelLabel, levelLook } from '@/lib/orchard/extras';
+import { FRUIT_DAYS } from '@/lib/rules';
 import type { SeedKey } from '@/lib/types';
 
-// spec 4.3, 4.6의 모션 수치
-const POP_MS = 450;
-const RING_MS = 1600;
+import { useOrchard, useOrchardView } from './orchard/OrchardProvider';
 
-const pop = keyframes`
-  0% { transform: scale(.3); opacity: 0; }
-  60% { transform: scale(1.12); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
-`;
-const ring = keyframes`
-  0% { transform: scale(.7); opacity: .9; }
-  100% { transform: scale(1.35); opacity: 0; }
-`;
+// 나무 그림(spec 4장). 씨앗마다 다른 나무가 출근일에 따라 자란다. 그리기는 lib/orchard/engine.js 가 한다.
+// 누르면 살짝 휘청이고 잎이 떨어진다. 출근해서 날이 늘면: 열매 전에는 물뿌리개가 물을 주고 자라고, 열매 뒤에는 열매가 하나 더 맺힌다.
+const RATIO = '240 / 260';
+const MINI = { w: 72, h: 78 };
+const SEED_ICON = 44;
+const HARVEST_MS = 800;
+const GROW_MS = 450;
 
-// 나무 색 역할을 CSS 변수로 둔다. 라이트·다크 값은 spec 4.5
-const paint = (p: Paint | undefined) => (p === undefined ? 'none' : p.startsWith('#') ? p : `var(--tree-${p})`);
-
-function Prim({ p }: { p: Primitive }) {
-  if (p.type === 'circle') return <circle cx={p.cx} cy={p.cy} r={p.r} fill={paint(p.fill)} />;
-  if (p.type === 'ellipse') {
-    return (
-      <ellipse cx={p.cx} cy={p.cy} rx={p.rx} ry={p.ry} fill={paint(p.fill)}
-        transform={p.rotate ? `rotate(${p.rotate} ${p.cx} ${p.cy})` : undefined} />
-    );
-  }
-  return (
-    <path d={p.d} fill={paint(p.fill)} stroke={p.stroke ? paint(p.stroke) : undefined}
-      strokeWidth={p.strokeWidth} strokeLinecap="round" strokeLinejoin="round" />
-  );
+/** 씨앗 선택에 쓰는 열매 하나(3D) */
+export function FruitIcon({ seed, selected }: { seed: SeedKey; selected?: () => boolean }) {
+  const box = useRef<HTMLSpanElement>(null);
+  const sel = useRef(selected);
+  useEffect(() => { sel.current = selected; });
+  useOrchardView(box, (o, el) => o.fruit(el, seed, { hover: el.parentElement, selected: () => !!sel.current?.() }), [seed]);
+  return <span ref={box} aria-hidden="true" style={{ display: 'block', flex: 'none', width: SEED_ICON, height: SEED_ICON }} />;
 }
 
-export function Shapes({ list }: { list: Shape[] }) {
-  return (
-    <>
-      {list.map((s, i) => (
-        <path key={i} d={s.d} fill={s.fill ?? 'none'} stroke={s.stroke} strokeWidth={s.sw}
-          strokeLinecap={s.stroke ? 'round' : undefined} opacity={s.o} />
-      ))}
-    </>
-  );
-}
-
-/** 씨앗 선택에 쓰는 열매 하나 */
-export function FruitIcon({ seed, variant }: { seed: SeedKey; variant: 'seedPicker' }) {
-  const s = SIZES[variant];
-  const w = s.w;
-  const h = +(w * 1.2).toFixed(1);
-  return (
-    <svg width={w} height={h} viewBox={s.viewBox} aria-hidden="true" style={{ display: 'block', flexShrink: 0 }}>
-      <Shapes list={fruitShapes(seed, s.r)} />
-    </svg>
-  );
-}
+/** 달려 있는 열매 수: 열매가 달린 나무는 fruits 그대로, 수확한 뒤에는 20일 뒤로 더 맺힌 것만 */
+const hanging = (fruits: number, days: number, harvested: boolean) => (harvested ? Math.max(0, days - FRUIT_DAYS) : fruits);
 
 type Props = {
   seed: SeedKey;
   days: number;
+  /** 열매 수(20일 전에는 0) */
+  fruits?: number;
   harvested: boolean;
   label: string;
   mini?: boolean;
-  /** 방금 출근이나 수확으로 새로 생긴 요소 하나만 튀어 오르게 한다 */
-  animateNewest?: boolean;
-  /** 수확할 수 있을 때 열매를 누르면 */
+  /** 수확할 수 있을 때 나무를 누르면 */
   onHarvest?: () => void;
   harvestLabel?: string;
+  /** 출근해서 자라는 장면(물 주기, 열매 추가)이 끝난 뒤. 새 출근일을 준다 */
+  onGrown?: (days: number) => void;
+  /** 레벨 표시를 그릴 자리(홈의 내 씨앗 패널 머리줄, 씨앗 칩 아래). 없으면 레벨 표시를 그리지 않는다 */
+  levelSlot?: HTMLElement | null;
+  /** 레벨 표시를 누르면(수확한 뒤에만 준다) */
+  onLevel?: () => void;
+  levelActionLabel?: string;
 };
 
-export default function TreeFigure({ seed, days, harvested, label, mini = false, animateNewest = false, onHarvest, harvestLabel }: Props) {
-  const m = treeModel(seed, days, harvested);
-  const popGroup = (newest: boolean, ox: number, oy: number, children: React.ReactNode, key?: string) => (
-    <g key={key} className={newest && animateNewest ? 'is-pop' : undefined} style={{ transformOrigin: `${ox}px ${oy}px` }}>
-      {children}
-    </g>
+export default function TreeFigure({ seed, days, fruits = 0, harvested, label, mini = false, onHarvest, harvestLabel, onGrown, levelSlot, onLevel, levelActionLabel }: Props) {
+  const api = useOrchard();
+  const wrap = useRef<HTMLSpanElement>(null);
+  const fig = useRef<HTMLSpanElement>(null);
+  const badge = useRef<HTMLElement>(null);
+  // 화면에 그려진 상태. 출근하면 props 가 먼저 바뀌고, 물 주는 장면이 끝난 뒤에 이 값이 따라간다
+  const [shown, setShown] = useState({ days, harvested });
+  const grew = useRef(false);
+  const busy = useRef(false);
+  const grownRef = useRef(onGrown);
+  useEffect(() => { grownRef.current = onGrown; });
+
+  const kind = stageOf(shown.days, shown.harvested);
+  const view = useOrchardView<StageView>(
+    fig,
+    (o, el) => o.stage(el, kind, seed, {
+      live: !mini, sway: mini ? 0.16 : 0.24, scale: mini ? 1.04 : 1, touch: wrap.current,
+      fruits: hanging(fruits, shown.days, shown.harvested),
+    }),
+    [seed, kind, mini],
+    v => {
+      // 자라서 새 모습이 된 나무는 한 번 통 튀고 잎을 떨군다
+      if (!grew.current) return;
+      grew.current = false;
+      setTimeout(() => { v.bounce(); v.shower(7); }, GROW_MS);
+    },
   );
+
+  useEffect(() => {
+    if (days === shown.days && harvested === shown.harvested) return;
+    const v = view.current;
+    const el = wrap.current;
+    const at = () => { const r = el!.getBoundingClientRect(); return [r.left + r.width / 2, r.top] as const; };
+    const next = { days, harvested };
+    // 하루 출근한 것이 아니면(다른 사람 화면, 처음 그릴 때, 움직임 줄이기) 바로 맞춘다
+    if (mini || !v || !el || api?.reduce || days !== shown.days + 1 || harvested !== shown.harvested) {
+      if (harvested && !shown.harvested && el && !mini) { const [x, y] = at(); burst(x, y + el.offsetHeight * 0.4, 14); }
+      setShown(next);
+      return;
+    }
+    if (busy.current) return;
+    busy.current = true;
+    const done = (text: string) => {
+      busy.current = false;
+      const [x, y] = at();
+      floatChip(x, y + 24, text);
+      setShown(next);
+      grownRef.current?.(days);
+    };
+    const r = el.getBoundingClientRect();
+    if (r.top < 56 || r.bottom > window.innerHeight - 72) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    if (shown.days >= FRUIT_DAYS) {
+      // 열매가 열린 뒤: 그 자리에서 열매가 하나 더 맺힌다
+      const more = v.addFruit();
+      const [x, y] = at();
+      burst(x, y + el.offsetHeight * 0.4, 10);
+      done(more ? TREE.plusFruit : TREE.plusDay);
+    } else {
+      // 열매 전: 물뿌리개가 물을 준 뒤에 자란다
+      grew.current = true;
+      v.water(() => done(TREE.plusDay));
+    }
+  }, [days, harvested, shown, mini, api, view]);
+
+  const look = useMemo(() => levelLook(shown.days, shown.harvested), [shown]);
+  useEffect(() => {
+    const p = badge.current?.querySelector<SVGPathElement>('.p');
+    if (p) p.style.strokeDasharray = dashOf(look);
+  }, [look, levelSlot, onLevel]);
+
+  const harvest = () => {
+    const el = wrap.current as (HTMLSpanElement & { __dragged?: boolean }) | null;
+    if (!el || !onHarvest || busy.current) return;
+    if (el.__dragged) { el.__dragged = false; return; }   // 끌어서 흔든 것은 수확이 아니다
+    busy.current = true;
+    view.current?.poke(0, 1.5);
+    const r = el.getBoundingClientRect();
+    burst(r.left + r.width / 2, r.top + r.height * 0.4, 14);
+    setTimeout(() => { busy.current = false; onHarvest(); }, api?.reduce ? 0 : HARVEST_MS);
+  };
   const onKey = (e: KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onHarvest?.(); }
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); harvest(); }
   };
 
+  const button = !mini && !!onHarvest;
   return (
-    <Box
-      as="svg"
-      role="img"
-      aria-label={label}
-      viewBox={`0 0 ${VIEWBOX.w} ${VIEWBOX.h}`}
-      width={mini ? SIZES.mini.w : '100%'}
-      height={mini ? SIZES.mini.h : undefined}
-      sx={(theme: Theme) => ({
-        display: 'block',
-        height: mini ? SIZES.mini.h : 'auto',
-        overflow: 'visible',
-        '--tree-leaf': theme.semantic.foreground.positive.primary,
-        '--tree-leafDark': theme.atomic.green[40],
-        '--tree-trunk': theme.atomic.orange[30],
-        '--tree-soil': theme.atomic.orange[20],
-        '--tree-seed': theme.atomic.orange[40],
-        "html[data-theme='dark'] &": {
-          '--tree-leafDark': theme.atomic.green[50],
-          '--tree-trunk': theme.atomic.orange[40],
-          '--tree-soil': theme.atomic.orange[30],
-          '--tree-seed': theme.atomic.orange[60],
-        },
-        '.is-pop': { animation: `${pop} ${POP_MS}ms cubic-bezier(.34, 1.56, .64, 1) both` },
-        '.fruit-btn': { cursor: 'pointer', outline: 'none' },
-        '.fruit-ring': {
-          fill: 'none',
-          stroke: theme.semantic.foreground.brand.primary,
-          strokeWidth: 2,
-          transformBox: 'fill-box',
-          transformOrigin: 'center',
-          animation: `${ring} ${RING_MS}ms ease-out infinite`,
-        },
-        '.fruit-btn:focus-visible .fruit-ring': { animation: 'none', strokeWidth: 3 },
-        '.fruit-hit-m': { display: 'none' },
-        '@media (max-width: 767px)': { '.fruit-hit': { display: 'none' }, '.fruit-hit-m': { display: 'inline' } },
-        '@media (prefers-reduced-motion: reduce)': {
-          '.is-pop': { animation: 'none' },
-          '.fruit-ring': { animation: 'none' },
-        },
-      })}
+    <span
+      ref={wrap}
+      className="orchard-tree"
+      role={button ? 'button' : 'img'}
+      tabIndex={button ? 0 : undefined}
+      aria-label={button ? harvestLabel : label}
+      onClick={button ? harvest : undefined}
+      onKeyDown={button ? onKey : undefined}
+      style={mini ? { width: MINI.w, height: MINI.h, flex: 'none' } : { width: '100%', aspectRatio: RATIO }}
     >
-      {m.base.map((p, i) => <Prim key={`base-${i}`} p={p} />)}
-      {m.parts.map(part =>
-        popGroup(part.newest, part.origin.x, part.origin.y, part.items.map((p, i) => <Prim key={i} p={p} />), part.key),
+      <span ref={fig} className="orchard-fig" />
+      {levelSlot && !mini && createPortal(
+        onLevel ? (
+          <button
+            ref={badge as React.RefObject<HTMLButtonElement>}
+            type="button"
+            className="orchard-lv"
+            aria-label={`${levelActionLabel}, ${levelLabel(look)}`}
+            onClick={onLevel}
+            style={{ '--o-lv': look.hue } as React.CSSProperties}
+            dangerouslySetInnerHTML={{ __html: levelBadgeSvg(look) }}
+          />
+        ) : (
+          <span
+            ref={badge as React.RefObject<HTMLSpanElement>}
+            className="orchard-lv"
+            role="img"
+            aria-label={levelLabel(look)}
+            style={{ '--o-lv': look.hue } as React.CSSProperties}
+            dangerouslySetInnerHTML={{ __html: levelBadgeSvg(look) }}
+          />
+        ),
+        levelSlot,
       )}
-      {m.fruit && (mini || !onHarvest ? (
-        <g transform={`translate(${m.fruit.x} ${m.fruit.y})`}>
-          <Shapes list={m.fruit.shapes} />
-        </g>
-      ) : (
-        <g
-          transform={`translate(${m.fruit.x} ${m.fruit.y})`}
-          className="fruit-btn"
-          role="button"
-          tabIndex={0}
-          aria-label={harvestLabel}
-          onClick={onHarvest}
-          onKeyDown={onKey}
-        >
-          <circle className="fruit-ring" r={m.fruit.ringR} />
-          {/* 터치 영역은 보이는 크기와 상관없이 지름 64px (spec 3.10). 모바일 그림 폭 220px에서는 반지름을 키운다 */}
-          <circle className="fruit-hit" r={m.fruit.hitR} fill="transparent" />
-          <circle className="fruit-hit-m" r={+(m.fruit.hitR * VIEWBOX.w / SIZES.homeMobile).toFixed(1)} fill="transparent" />
-          {popGroup(m.fruit.newest, 0, 0, <Shapes list={m.fruit.shapes} />)}
-        </g>
-      ))}
-      {m.basket && popGroup(m.basket.newest, m.basket.x, m.basket.y, (
-        <g transform={`translate(${m.basket.x} ${m.basket.y})`}>
-          <Prim p={m.basket.handle} />
-          <g transform={`translate(${m.basket.fruitAt.x} ${m.basket.fruitAt.y})`}>
-            <Shapes list={m.basket.fruitShapes} />
-          </g>
-          <Prim p={m.basket.body} />
-        </g>
-      ))}
-    </Box>
+    </span>
   );
 }

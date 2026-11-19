@@ -61,7 +61,7 @@ export default function SeedPicker({ value, onChange, disabled, labelledBy, desc
               ref={i === 0 ? firstRef : undefined}
               aria-label={seedLabel(k)}
             />
-            <FruitIcon seed={k} variant="seedPicker" />
+            <FruitIcon seed={k} selected={() => value === k} />
             <Typography variant="label1" weight="bold" color="semantic.foreground.neutral.primary">{seedLabel(k)}</Typography>
           </Box>
         );

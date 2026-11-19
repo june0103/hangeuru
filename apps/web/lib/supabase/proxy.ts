@@ -2,8 +2,11 @@
 import { createServerClient } from '@supabase/ssr';
 import { type NextRequest, NextResponse } from 'next/server';
 
-const PROTECTED = ['/', '/calendar', '/garden'];
-const AUTH_ONLY = ['/login', '/signup'];
+import { SEEN_COOKIE } from '../session';
+
+// /seeds: 씨앗 고르기, /fruit: 20일 열매 화면, /start: 처음 온 사람이 보는 스플래시
+const PROTECTED = ['/', '/calendar', '/garden', '/seeds', '/fruit'];
+const AUTH_ONLY = ['/login', '/signup', '/start'];
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -36,7 +39,9 @@ export async function updateSession(request: NextRequest) {
   const user = data?.claims;
 
   const path = request.nextUrl.pathname;
-  const target = !user && PROTECTED.includes(path) ? '/login' : user && AUTH_ONLY.includes(path) ? '/' : null;
+  // 로그인하지 않은 채 보호 경로에 오면: 이 브라우저에서 로그인한 적이 있으면 로그인으로, 처음이면 스플래시로
+  const seen = request.cookies.get(SEEN_COOKIE)?.value === '1';
+  const target = !user && PROTECTED.includes(path) ? (seen ? '/login' : '/start') : user && AUTH_ONLY.includes(path) ? '/' : null;
   if (!target) return supabaseResponse;
 
   // 리다이렉트 응답에도 갱신된 쿠키와 캐시 헤더를 옮겨 담는다(spec 8.4)

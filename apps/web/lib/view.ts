@@ -1,20 +1,23 @@
 // 규칙(lib/rules.ts)과 문구(lib/copy.ts)를 합쳐 화면이 그대로 그릴 값을 만든다.
 // 패널 컴포넌트는 여기서 만든 값만 props로 받고, 날짜나 목표를 다시 계산하지 않는다(spec 12.6).
 import {
-  ACTION, CALENDAR, CAMP, CARD, DASH, GARDEN, TODAY, TREE, WEEK, WEEKDAYS,
+  ACTION, BADGES, CALENDAR, CAMP, CARD, DASH, GARDEN, TODAY, TREE, WEEK, WEEKDAYS,
   koDate, koDay, koDuration, koMonth, planLabel, seedLabel,
 } from './copy';
 import {
-  ALL_WORKDAYS, FRUIT_DAYS, HOLIDAYS, SEASON, STAGES, addDays, computeStats, dow, growth, isWorkday,
+  ALL_WORKDAYS, FRUIT_DAYS, HOLIDAYS, SEASON, STAGES, addDays, computeStats, dow, fruitCount, growth, isWorkday,
   weekStart, workdaysLeft, workdaysOfWeek,
 } from './rules';
 import { hhmmKST, todayKST } from './time';
-import type { Attendance, PlanKey, Profile, SeedKey } from './types';
+import type { Attendance, Member, PlanKey, Profile, SeedKey } from './types';
 
 type Stats = ReturnType<typeof computeStats>;
 
 export const statsOf = (p: Profile, records: Attendance[], today: string) =>
   computeStats(p.plan, p.joinDate, records.map(r => r.workDate), today);
+
+/** 씨앗을 심은 구성원인지 */
+export const isMember = (p: Profile): p is Member => p.seed !== null;
 
 const nextWorkday = (s: string) => ALL_WORKDAYS.find(d => d > s) ?? null;
 const stayMinutes = (r: Attendance) =>
@@ -115,18 +118,36 @@ export type TreeView = {
   seed: SeedKey;
   seedLabel: string;
   days: number;
+  /** 나무에 달린 열매 수. 20일 전에는 0 (spec 2.3) */
+  fruits: number;
   harvested: boolean;
   canHarvest: boolean;
   headline: string;
   figureLabel: string;
   harvestLabel: string;
-  lead: { kind: 'harvested' } | { kind: 'canHarvest' } | { kind: 'progress'; text: string };
+  /** progress: now 는 지금 모습 한 줄, next 는 작은 글씨로 두는 둘째 줄 */
+  lead: { kind: 'harvested' } | { kind: 'canHarvest' } | { kind: 'progress'; now: string; next: string };
+  /** 열매가 열린 뒤의 작은 줄: 출근일과 열매 수. 그 전에는 null */
+  count: string | null;
   short: string | null;
-  note: string | null;
+  /** 씨앗 칩을 누르면 뜨는 안내. 한 줄 또는 두 줄 */
+  tip: string[];
   track: { filled: number; label: string; steps: TrackStep[] };
 };
 
-export function treeView(me: Profile, st: Stats, hasToday: boolean, today: string): TreeView {
+// 성장 막대의 다섯 단계(새싹부터 열매까지)는 같은 간격으로 놓는다(spec 3.5)
+const TRACK = STAGES.slice(1);
+/** 막대가 채워진 비율(0~1). 단계 사이는 날짜로 나눠 잇는다. 예: 19일은 꽃과 열매 사이의 4/5 */
+export function trackFilled(days: number): number {
+  const last = TRACK.length - 1;
+  let idx = -1;
+  TRACK.forEach((s, i) => { if (days >= s.from) idx = i; });
+  if (idx >= last) return 1;
+  if (idx < 0) return 0;
+  return (idx + (days - TRACK[idx].from) / (TRACK[idx + 1].from - TRACK[idx].from)) / last;
+}
+
+export function treeView(me: Member, st: Stats, hasToday: boolean, today: string): TreeView {
   const over = today > SEASON.end;
   const days = st.days;
   const g = growth(days);
@@ -144,10 +165,9 @@ export function treeView(me: Profile, st: Stats, hasToday: boolean, today: strin
   if (harvested) lead = { kind: 'harvested' };
   else if (canHarvest) lead = { kind: 'canHarvest' };
   else {
-    const now = days === 0 ? TREE.nowNone : TREE.now(days, g.cur.label);
     const next = over || !g.next ? TREE.next.over : TREE.next[g.next.key as keyof typeof TREE.next];
     const nextText = typeof next === 'function' ? next(g.next ? g.next.from - days : 0) : next;
-    lead = { kind: 'progress', text: `${now} ${nextText}` };
+    lead = { kind: 'progress', now: TREE.nowLine[g.cur.key], next: TREE.nextLine(days, nextText) };
   }
 
   const n = Math.min(days, FRUIT_DAYS);
@@ -155,6 +175,7 @@ export function treeView(me: Profile, st: Stats, hasToday: boolean, today: strin
     seed: me.seed,
     seedLabel: seedLabel(me.seed),
     days,
+    fruits: fruitCount(days),
     harvested,
     canHarvest,
     headline,
@@ -162,13 +183,29 @@ export function treeView(me: Profile, st: Stats, hasToday: boolean, today: strin
     harvestLabel: TREE.harvestButton(me.seed),
     lead,
     short: !harvested && !canHarvest && !over && days + left < FRUIT_DAYS ? TREE.short(FRUIT_DAYS - days - left) : null,
-    note: !harvested && !canHarvest ? TREE.fruitNote : null,
+    count: g.canHarvest ? TREE.fruitLine(days, fruitCount(days)) : null,
+    tip: [TREE.seedTip(me.seed), TREE.fruitTip],
     track: {
-      filled: n / FRUIT_DAYS,
+      filled: trackFilled(days),
       label: TREE.trackLabel(n),
-      steps: STAGES.slice(1).map(s => ({ label: s.label, from: s.from, at: s.from / FRUIT_DAYS, reached: days >= s.from, daysText: TREE.trackDays(s.from) })),
+      steps: TRACK.map((s, i) => ({ label: s.label, from: s.from, at: i / (TRACK.length - 1), reached: days >= s.from, daysText: TREE.trackDays(s.from) })),
     },
   };
+}
+
+export type BadgeKey = 'first' | 'week' | 'streak' | 'ten' | 'harvest';
+export type BadgeView = { key: BadgeKey; label: string; earned: boolean };
+
+/** 홈의 배지 다섯 개. 기록에서 바로 계산한다(따로 저장하지 않는다) */
+export function badgesView(me: Profile, st: Stats, today: string): BadgeView[] {
+  const started = today >= SEASON.start;
+  return [
+    { key: 'first', label: BADGES.first, earned: st.days >= 1 },
+    { key: 'week', label: BADGES.week, earned: started && !!st.cur?.done },
+    { key: 'streak', label: st.streak >= 1 ? BADGES.streak(st.streak) : BADGES.streakNone, earned: st.streak >= 1 },
+    { key: 'ten', label: BADGES.ten, earned: st.days >= 10 },
+    { key: 'harvest', label: BADGES.harvest, earned: !!me.harvestedAt },
+  ];
 }
 
 export type CampView = { text: string; chips: { id: string; name: string; inCamp: boolean }[] };
@@ -179,9 +216,8 @@ export function campView(today: string, todays: Attendance[], profiles: Profile[
   const name = new Map(profiles.map(p => [p.id, p.name]));
   const list = [...todays].sort((a, b) => (a.checkInAt ?? '').localeCompare(b.checkInAt ?? ''));
   if (list.length === 0) return { text: CAMP.empty, chips: [] };
-  const here = list.filter(r => !r.checkOutAt).length;
   return {
-    text: CAMP.summary(list.length, here),
+    text: CAMP.summary(list.length),
     chips: list.map(r => ({ id: r.userId, name: name.get(r.userId) ?? '', inCamp: !r.checkOutAt })),
   };
 }
@@ -256,12 +292,14 @@ export type MemberCardView = {
   streakText: string | null;
   figureLabel: string;
 };
-export type GardenView = { lead: string; members: MemberCardView[] };
+/** lead 는 한 문장으로 이은 것, leadLines 는 [오늘 문장, 수확 문장]. 768px 미만에서는 수확 문장을 다음 줄로 내린다(3.7) */
+export type GardenView = { lead: string; leadLines: [string, string]; members: MemberCardView[] };
 
 export function gardenView(meId: string, profiles: Profile[], all: Attendance[], today: string): GardenView {
   const byUser = new Map<string, Attendance[]>();
   for (const r of all) byUser.set(r.userId, [...(byUser.get(r.userId) ?? []), r]);
-  const list = profiles.map(p => {
+  // 씨앗을 아직 심지 않은 사람은 과수원에 나무가 없다
+  const list = profiles.filter(isMember).map(p => {
     const recs = byUser.get(p.id) ?? [];
     return { p, st: statsOf(p, recs, today), r: recs.find(x => x.workDate === today) ?? null };
   });
@@ -275,9 +313,11 @@ export function gardenView(meId: string, profiles: Profile[], all: Attendance[],
   const came = list.filter(x => x.r).length;
   const hv = list.filter(x => x.p.harvestedAt).length;
   const hvText = hv ? GARDEN.harvestedSome(hv) : GARDEN.harvestedNone;
-  const lead = today > SEASON.end ? GARDEN.over(hvText) : !isWorkday(today) ? GARDEN.rest(hvText) : GARDEN.workday(list.length, came, hvText);
+  const leadOf = (hvPart: string) => today > SEASON.end ? GARDEN.over(hvPart) : !isWorkday(today) ? GARDEN.rest(hvPart) : GARDEN.workday(list.length, came, hvPart);
+  const lead = leadOf(hvText);
   return {
     lead,
+    leadLines: [leadOf('').trim(), hvText],
     members: list.map(({ p, st, r }) => ({
       id: p.id,
       name: p.name,
@@ -301,18 +341,16 @@ export type CardModel = {
   heading: string;
   sub: string;
   cells: [string, string][];
-  dotsLabel: string;
-  /** 시즌 출근일 27일, 날짜순 */
-  dots: { date: string; week: string; attended: boolean }[];
+  /** 시즌 출근일 가운데 나온 날. 막대 하나로 보여 준다(spec 3.9) */
+  record: { label: string; percentText: string; ratio: number };
   alt: string;
   fileName: string;
 };
 
-export function cardModel(me: Profile, records: Attendance[], today: string): CardModel | null {
+export function cardModel(me: Member, records: Attendance[], today: string): CardModel | null {
   if (!me.harvestedAt) return null;
   const st = statsOf(me, records, today);
   const hvDate = todayKST(new Date(me.harvestedAt));
-  const has = new Set(st.dates);
   const plan: PlanKey = me.plan;
   return {
     seed: me.seed,
@@ -324,8 +362,11 @@ export function cardModel(me: Profile, records: Attendance[], today: string): Ca
       [CARD.cells.first, st.dates[0] ? koDay(st.dates[0]) : DASH],
       [CARD.cells.harvested, koDay(hvDate)],
     ],
-    dotsLabel: CARD.dotsLabel(SEASON.open, ALL_WORKDAYS[ALL_WORKDAYS.length - 1]),
-    dots: ALL_WORKDAYS.map(d => ({ date: d, week: weekStart(d), attended: has.has(d) })),
+    record: {
+      label: CARD.record(ALL_WORKDAYS.length, st.days),
+      percentText: CARD.percent(Math.round(Math.min(1, st.days / ALL_WORKDAYS.length) * 100)),
+      ratio: Math.min(1, st.days / ALL_WORKDAYS.length),
+    },
     alt: CARD.alt(me.name, me.seed, st.days, plan, hvDate),
     fileName: CARD.fileName(hvDate),
   };
