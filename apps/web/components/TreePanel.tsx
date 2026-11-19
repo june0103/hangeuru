@@ -83,7 +83,9 @@ export default function TreePanel({ view, harvesting, onHarvest, onOpenCard, onG
         gap={BODY_GAP}
         sx={{ marginTop: BODY_TOP, '@media (max-width: 767px)': { flexDirection: 'column', alignItems: 'center', gap: 8 } }}
       >
-        <Box sx={{ position: 'relative', flex: `0 0 ${FIG}px`, maxWidth: '100%', '@media (max-width: 767px)': { flexBasis: 'auto', width: FIG_M } }}>
+        {/* 나무 그림 줄: 패널 폭. 그림은 가운데, 씨앗 칩은 오른쪽 아래(나무 그림 아랫변과 레벨 표시의 오른쪽 끝에 맞춤, spec 3.5) */}
+        <Box className="orchard-figrow" sx={{ position: 'relative', display: 'flex', justifyContent: 'center', flex: `0 0 ${FIG}px`, maxWidth: '100%', '@media (max-width: 767px)': { flexBasis: 'auto', alignSelf: 'stretch' } }}>
+        <Box sx={{ width: '100%', '@media (max-width: 767px)': { width: FIG_M } }}>
           <TreeFigure
             seed={view.seed}
             days={view.days}
@@ -97,7 +99,7 @@ export default function TreePanel({ view, harvesting, onHarvest, onOpenCard, onG
             onLevel={view.harvested ? onOpenCard : undefined}
             levelActionLabel={TREE.openCard}
           />
-          {/* 씨앗 칩: 나무 그림 오른쪽에 붙인다(spec 3.5) */}
+        </Box>
           <span className="orchard-chipfig"><SeedChip label={view.seedLabel} tip={view.tip} /></span>
         </Box>
         <FlexBox
