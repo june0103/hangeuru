@@ -8,6 +8,7 @@ import { FIELD, LOGIN } from '@/lib/copy';
 import type { ActionResult } from '@/lib/types';
 
 import AuthFoot from './AuthFoot';
+import PasswordField from './PasswordField';
 import { useActionResult } from './useActionResult';
 import { useFirstErrorFocus } from './useFirstErrorFocus';
 
@@ -42,8 +43,8 @@ export default function LoginForm() {
         <FormControl>
           <FormControlLabel>{FIELD.password.label}</FormControlLabel>
           <FormControlField>
-            <TextField ref={bind('password')} name="password" type="password" autoComplete="current-password" placeholder={FIELD.password.loginPlaceholder}
-              width="100%" value={password} onChange={e => setPassword(e.target.value)} status={errors?.password ? 'negative' : 'normal'} />
+            <PasswordField inputRef={bind('password')} name="password" autoComplete="current-password" placeholder={FIELD.password.loginPlaceholder}
+              value={password} onChange={setPassword} invalid={!!errors?.password} />
           </FormControlField>
           {errors?.password && <FormControlNegativeMessage>{errors.password}</FormControlNegativeMessage>}
         </FormControl>

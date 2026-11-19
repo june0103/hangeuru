@@ -69,6 +69,9 @@ export async function signUp(_: ActionResult | null, f: FormData): Promise<Actio
     if (!validName(name)) errors.name = ERRORS.name;
     if (!EMAIL_RE.test(email)) errors.email = ERRORS.email;
     if (password.length < 8) errors.password = ERRORS.passwordShort;
+    const passwordConfirm = str(f, 'passwordConfirm');
+    if (!passwordConfirm) errors.passwordConfirm = ERRORS.passwordConfirmEmpty;
+    else if (passwordConfirm !== password) errors.passwordConfirm = ERRORS.passwordMismatch;
     if (!isSeed(seed)) errors.seed = ERRORS.seed;
     if (!isPlan(plan)) errors.plan = ERRORS.plan;
     if (Object.keys(errors).length || !isSeed(seed) || !isPlan(plan)) return { ok: false, errors };

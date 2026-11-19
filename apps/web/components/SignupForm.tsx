@@ -10,6 +10,7 @@ import { FIELD, SIGNUP } from '@/lib/copy';
 import type { ActionResult, PlanKey, SeedKey } from '@/lib/types';
 
 import AuthFoot from './AuthFoot';
+import PasswordField from './PasswordField';
 import PlanPicker from './PlanPicker';
 import SeedPicker from './SeedPicker';
 import { useActionResult } from './useActionResult';
@@ -18,11 +19,11 @@ import { useFirstErrorFocus } from './useFirstErrorFocus';
 // spec 3.4 가입
 const LEAD_BOTTOM = 24;
 const FIELD_GAP = 16;
-const ORDER = ['name', 'email', 'password', 'seed', 'plan'] as const;
+const ORDER = ['name', 'email', 'password', 'passwordConfirm', 'seed', 'plan'] as const;
 
 export default function SignupForm({ closed }: { closed: boolean }) {
   const [state, action, pending] = useActionState<ActionResult | null, FormData>(signUp, null);
-  const [v, setV] = useState({ name: '', email: '', password: '' });
+  const [v, setV] = useState({ name: '', email: '', password: '', passwordConfirm: '' });
   const [seed, setSeed] = useState<SeedKey | ''>('');
   const [plan, setPlan] = useState<PlanKey | ''>('');
   const ids = { seed: useId(), plan: useId(), seedMsg: useId(), planMsg: useId() };
@@ -39,7 +40,7 @@ export default function SignupForm({ closed }: { closed: boolean }) {
   const foot = <AuthFoot prefix={SIGNUP.footPrefix} link={SIGNUP.footLink} href="/login" />;
   if (closed) return <>{head(SIGNUP.closed)}{foot}</>;
 
-  const text = (name: 'name' | 'email' | 'password', props: { type?: string; autoComplete: string; placeholder: string; maxLength?: number; inputMode?: 'email' }) => (
+  const text = (name: 'name' | 'email', props: { type?: string; autoComplete: string; placeholder: string; maxLength?: number; inputMode?: 'email' }) => (
     <FormControl>
       <FormControlLabel>{FIELD[name].label}</FormControlLabel>
       <FormControlField>
@@ -56,7 +57,23 @@ export default function SignupForm({ closed }: { closed: boolean }) {
       <FlexBox as="form" action={action} noValidate flexDirection="column" gap={FIELD_GAP}>
         {text('name', { autoComplete: 'name', placeholder: FIELD.name.placeholder, maxLength: 20 })}
         {text('email', { type: 'email', autoComplete: 'username', inputMode: 'email', placeholder: FIELD.email.placeholder })}
-        {text('password', { type: 'password', autoComplete: 'new-password', placeholder: FIELD.password.signupPlaceholder })}
+        {(['password', 'passwordConfirm'] as const).map(k => (
+          <FormControl key={k}>
+            <FormControlLabel>{FIELD[k].label}</FormControlLabel>
+            <FormControlField>
+              <PasswordField
+                inputRef={bind(k)}
+                name={k}
+                value={v[k]}
+                onChange={val => setV({ ...v, [k]: val })}
+                placeholder={k === 'password' ? FIELD.password.signupPlaceholder : FIELD.passwordConfirm.placeholder}
+                autoComplete="new-password"
+                invalid={!!errors?.[k]}
+              />
+            </FormControlField>
+            {errors?.[k] && <FormControlNegativeMessage>{errors[k]}</FormControlNegativeMessage>}
+          </FormControl>
+        ))}
 
         <FormControl>
           <Typography id={ids.seed} variant="label1" weight="medium" color="semantic.foreground.neutral.secondary">{FIELD.seed.label}</Typography>

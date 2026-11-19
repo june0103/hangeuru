@@ -55,10 +55,14 @@ export const FIELD = {
   name: { label: '이름', placeholder: '캠프에서 쓰는 이름' },
   email: { label: '이메일', placeholder: 'name@example.com' },
   password: { label: '비밀번호', loginPlaceholder: '비밀번호', signupPlaceholder: '8자 이상' },
+  passwordConfirm: { label: '비밀번호 확인', placeholder: '비밀번호를 한 번 더 입력' },
   seed: { label: '씨앗', help: '20일을 출근하면 이 열매가 열려요.' },
   plan: { label: '출근 플랜', help: '나중에 내 설정에서 바꿀 수 있어요.' },
 } as const;
 export const planOptionDesc = (p: PlanKey) => `${PLANS[p].desc} 주간 목표는 ${PLANS[p].goal}일이에요.`;
+
+/** 비밀번호 칸의 눈 아이콘 버튼 (3.3) */
+export const PASSWORD_TOGGLE = { show: '비밀번호 보기', hide: '비밀번호 숨기기' } as const;
 
 export const LOGIN = {
   title: '로그인',
@@ -82,6 +86,8 @@ export const ERRORS = {
   emailTaken: '이미 가입한 이메일이에요. 로그인해 주세요.',
   passwordEmpty: '비밀번호를 입력해 주세요.',
   passwordShort: '비밀번호는 8자 이상이어야 해요.',
+  passwordConfirmEmpty: '비밀번호를 한 번 더 입력해 주세요.',
+  passwordMismatch: '비밀번호가 일치하지 않아요.',
   credentials: '이메일 또는 비밀번호가 맞지 않아요.',
   seed: '씨앗을 하나 골라 주세요.',
   plan: '출근 플랜을 하나 골라 주세요.',
