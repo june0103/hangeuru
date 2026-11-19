@@ -26,7 +26,7 @@ export default function BadgesPanel({ badges }: { badges: BadgeView[] }) {
   return (
     <Panel aria-labelledby="h-badges" order={4}>
       <Typography as="h2" id="h-badges" variant="headline2" weight="bold" color="semantic.foreground.neutral.primary">{BADGES.title}</Typography>
-      <Typography as="p" variant="body2" color="semantic.foreground.neutral.secondary" sx={{ marginTop: TEXT_TOP }}>{summary}</Typography>
+      <Typography as="p" variant="body2" color="semantic.foreground.neutral.secondary" sx={{ marginTop: TEXT_TOP }}>{typeof summary === 'string' ? summary : <>{summary[0]}<br />{summary[1]}</>}</Typography>
       <ul className="orchard-badges">
         {badges.map((b, i) => (
           <li key={b.key} className={b.earned ? 'on' : 'off'} style={{ '--i': i } as React.CSSProperties}>

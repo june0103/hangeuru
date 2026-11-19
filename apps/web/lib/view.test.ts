@@ -59,7 +59,7 @@ describe('오늘 그라운드 (3.5)', () => {
       { ...rec('2026-12-17', '10:00'), userId: 'a' },
       { ...rec('2026-12-17', '09:00', '18:00'), userId: 'b' },
     ], people);
-    expect(v.text).toBe('오늘 2명이 출근했고, 지금 1명이 그라운드에 있어요.');
+    expect(v.text).toBe('오늘 2명이 출근했어요.');
     expect(v.chips).toEqual([{ id: 'b', name: '나', inCamp: false }, { id: 'a', name: '가', inCamp: true }]);
   });
 });

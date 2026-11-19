@@ -216,9 +216,8 @@ export function campView(today: string, todays: Attendance[], profiles: Profile[
   const name = new Map(profiles.map(p => [p.id, p.name]));
   const list = [...todays].sort((a, b) => (a.checkInAt ?? '').localeCompare(b.checkInAt ?? ''));
   if (list.length === 0) return { text: CAMP.empty, chips: [] };
-  const here = list.filter(r => !r.checkOutAt).length;
   return {
-    text: CAMP.summary(list.length, here),
+    text: CAMP.summary(list.length),
     chips: list.map(r => ({ id: r.userId, name: name.get(r.userId) ?? '', inCamp: !r.checkOutAt })),
   };
 }
