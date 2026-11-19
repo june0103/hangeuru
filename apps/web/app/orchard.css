@@ -77,13 +77,15 @@ html[data-theme="dark"] .orchard-card{--oc-fg:var(--o-fg);--oc-fg2:rgba(194,196,
 [data-orchard-modal="glass"] [data-component="text-field"],[data-orchard-modal="glass"] [role="radiogroup"] label{background-color:var(--o-cell) !important;-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4)}
 [data-orchard-modal="glass"] [data-component="text-field"]{box-shadow:inset 0 0 0 1px var(--o-cell-edge)}
 /* 아래 버튼 줄은 창 바닥에 붙어 있고, 그 위의 내용만 스크롤된다. 바닥 줄은 뒤가 비치지 않게 짙은 유리로 덮는다 */
-[data-orchard-modal="glass"] [data-component="action-area"]{background:color-mix(in srgb,var(--o-page) var(--o-bar),transparent) !important;-webkit-backdrop-filter:blur(24px) saturate(1.5);backdrop-filter:blur(24px) saturate(1.5);box-shadow:inset 0 1px 0 var(--o-line);-webkit-mask-image:none !important;mask-image:none !important}
+[data-orchard-modal="glass"] [data-component="action-area"]{background:linear-gradient(to top,color-mix(in srgb,var(--o-page) 36%,transparent),transparent) !important;-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4);box-shadow:none !important;-webkit-mask-image:linear-gradient(to top,#000 calc(100% - 20px),transparent) !important;mask-image:linear-gradient(to top,#000 calc(100% - 20px),transparent) !important;padding-left:28px !important;padding-right:28px !important}
 [data-orchard-modal="glass"] [data-component="action-area"] *{-webkit-mask-image:none !important;mask-image:none !important}
 /* 위의 제목 줄도 창 위에 붙어 있어, 스크롤한 내용이 뒤로 비치지 않게 같은 유리로 덮는다 */
 [data-orchard-modal="glass"] [data-component="modal-navigation"] > div > div{align-items:center}
 /* 768px 이상의 팝업은 몽타주 기본이 내용 위 여백 0 이라 첫 항목이 제목 줄에 붙는다. 모바일 시트와 같게 20px 띄운다 */
-@media (min-width:768px){[data-orchard-modal="glass"] [data-component="modal-content"]{padding-top:20px !important}}
-[data-orchard-modal="glass"] [data-component="modal-navigation"]{background:color-mix(in srgb,var(--o-page) var(--o-bar),transparent) !important;-webkit-backdrop-filter:blur(24px) saturate(1.5);backdrop-filter:blur(24px) saturate(1.5)}
+/* 제목과 첫 항목 사이: 제목 줄 아래 8px + 내용 위 16px(모바일·웹 같음). 버튼 줄 좌우 28px 는 내용 칸과 같은 여백 */
+[data-orchard-modal="glass"] [data-component="modal-content"]{padding-top:16px !important}
+[data-orchard-modal="glass"] [data-component="modal-navigation"] > div{padding-bottom:8px !important}
+[data-orchard-modal="glass"] [data-component="modal-navigation"]{background:transparent !important;-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4);-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 16px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 16px),transparent)}
 [data-orchard-modal="glass"] div:not(.orchard-card):not(.orchard-card div):not(button div):not([data-component="action-area"]):not([data-component="modal-navigation"]){background-color:transparent !important}
 @media (max-width:767px){[data-orchard-modal="glass"]{height:auto !important;max-height:92dvh !important}}
 .orchard-theme{position:relative;display:flex;align-items:center;color:var(--o-fg)}html[data-theme="dark"] .orchard-theme{color:var(--o-fg)}
