@@ -84,7 +84,7 @@ export async function signUp(_: ActionResult | null, f: FormData): Promise<Actio
       await deleteAuthUser(user.id);
       throw e;
     }
-    if (!(await signInWithPassword(email, password))) return { ok: false, message: ACTION.failed };
+    if ((await signInWithPassword(email, password)) !== 'ok') return { ok: false, message: ACTION.signedUpLoginLater };
     revalidatePath('/', 'layout');
     redirect('/?welcome=1');
   });
@@ -99,7 +99,9 @@ export async function signIn(_: ActionResult | null, f: FormData): Promise<Actio
     if (!password) errors.password = ERRORS.passwordEmpty;
     if (Object.keys(errors).length) return { ok: false, errors };
     // 실패 이유와 상관없이 같은 문구로 돌려줘 가입된 이메일인지 알 수 없게 한다(spec 8.3)
-    if (!(await signInWithPassword(email, password))) return { ok: false, errors: { password: ERRORS.credentials } };
+    const result = await signInWithPassword(email, password);
+    if (result === 'rate_limited') return { ok: false, message: ACTION.rateLimited };
+    if (result !== 'ok') return { ok: false, errors: { password: ERRORS.credentials } };
     revalidatePath('/', 'layout');
     redirect('/');
   });
@@ -118,10 +120,13 @@ export async function checkIn(pos: { lat: number; lng: number }): Promise<Action
     if (!isWorkday(today)) return { ok: false, message: ACTION.notWorkday };
     const outside = locationError(pos);
     if (outside) return outside;
-    const before = statsOf(me, await listAttendanceOf(me.id), today);
-    const inserted = await insertCheckIn(me.id, today, serverNow());
+    const records = await listAttendanceOf(me.id);
+    const before = statsOf(me, records, today);
+    const at = serverNow();
+    const inserted = await insertCheckIn(me.id, today, at);
     if (!inserted) return done({ ok: true });
-    const after = statsOf(me, await listAttendanceOf(me.id), today);
+    // 저장한 기록을 더해 계산한다. DB를 다시 읽지 않는다(spec 6.5)
+    const after = statsOf(me, [...records, { userId: me.id, workDate: today, checkInAt: at, checkOutAt: null }], today);
     return done({ ok: true, message: checkInMessage(before, after) });
   });
 }

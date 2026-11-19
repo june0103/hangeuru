@@ -861,6 +861,8 @@ export const hhmmKST = (iso: string) =>
 - 계산: 서버에서 `computeStats`를 돌려 결과만 컴포넌트에 넘긴다
 - 쓰기: 서버 액션이 `getClaims()`로 사용자를 확인하고 2.7의 조건을 검사한 뒤, secret key 클라이언트(`lib/supabase/admin.ts`)로 저장한다. 끝나면 `revalidatePath('/', 'layout')`로 화면을 새로 그린다
 - 캐시: 모든 화면은 요청마다 새로 그린다. 로그인 쿠키가 실린 응답을 캐시하면 다른 사람에게 세션이 넘어갈 수 있다
+- 서버 위치: Vercel 함수는 서울(`icn1`)에서 돈다(`apps/web/vercel.json`). DB(Supabase 서울)와 사용자가 모두 서울이라, 다른 지역에 두면 DB를 다녀올 때마다 왕복이 길어진다
+- 중복 조회: 한 요청 안에서 로그인 사용자와 내 프로필은 한 번만 읽는다(React `cache`)
 - 조회량: 과수원은 시즌 전체 기록을 읽는다. 한 번에 1,000행을 넘을 수 있으므로 1,000행씩 나눠 끝까지 읽는다
 - 애니메이션: 출근 액션이 돌려준 날짜를 클라이언트 상태로 받아, 새로 생긴 잎이나 꽃, 열매에만 한 번 모션을 준다
 
@@ -991,11 +993,11 @@ grant select, insert, update, delete on public.profiles, public.attendance to se
 1. 항목을 모두 검사하고 오류를 한꺼번에 돌려준다. 초대 코드 같은 가입 제한은 두지 않는다
 2. secret key 클라이언트의 관리자 API로 사용자를 만든다(`email_confirm: true`). 이미 있는 이메일이면 `errors.email`에 "이미 가입한 이메일이에요. 로그인해 주세요."
 3. `profiles`에 `{ id, name, plan, seed, join_date: todayKST() }`를 넣는다. 실패하면 방금 만든 사용자를 지우고 공통 실패 문구를 돌려준다
-4. 세션 클라이언트로 `signInWithPassword`를 불러 로그인 쿠키를 심고 `/?welcome=1`로 보낸다. 홈은 이 값을 보고 토스트를 한 번 띄운 뒤 주소에서 지운다
+4. 세션 클라이언트로 `signInWithPassword`를 불러 로그인 쿠키를 심고 `/?welcome=1`로 보낸다. 홈은 이 값을 보고 토스트를 한 번 띄운 뒤 주소에서 지운다 사용자는 만들었는데 로그인만 실패하면 `message: '가입은 끝났어요. 잠시 후 로그인해 주세요.'`를 돌려준다
 
 **signIn**
 
-형식 검사를 통과하면 `signInWithPassword`를 부른다. 실패 이유와 상관없이 `errors.password`에 "이메일 또는 비밀번호가 맞지 않아요."만 돌려줘, 가입된 이메일인지 알 수 없게 한다.
+형식 검사를 통과하면 `signInWithPassword`를 부른다. 실패 이유와 상관없이 `errors.password`에 "이메일 또는 비밀번호가 맞지 않아요."만 돌려줘, 가입된 이메일인지 알 수 없게 한다. 다만 Supabase 로그인 횟수 제한(429)에 걸리면 `message: '요청이 많아 잠시 기다려야 해요. 잠시 후 다시 시도해 주세요.'`를 돌려준다. 모든 로그인이 Vercel 서버 IP에서 나가서 구성원 전체가 같은 제한을 나눠 쓰기 때문이다. 운영자는 Supabase Authentication → Rate Limits에서 한도를 넉넉히 둔다
 
 **checkIn**
 
@@ -1201,8 +1203,9 @@ grant select, insert, update, delete on public.profiles, public.attendance to se
 4. API 키 화면에서 프로젝트 URL, publishable key, secret key를 복사한다
 5. 코드를 GitHub 저장소에 올리고 Vercel에서 그 저장소로 프로젝트를 만든다. Root Directory는 apps/web, Production Branch는 `main`으로 지정한다. `main`에 푸시되면 운영 배포, `develop`과 PR은 미리보기 배포가 된다(12.2)
 6. Vercel 환경 변수에 6.4의 3개를 Production과 Preview 모두에 넣는다
-7. 배포한 주소에서 10장의 수용 기준을 점검한다. 점검용 계정은 끝나고 Supabase 대시보드에서 지운다
-8. 캠프 채널에 주소를 공유한다
+7. 함수 지역은 `apps/web/vercel.json`의 `regions: ["icn1"]`(서울)로 정한다
+8. 배포한 주소에서 10장의 수용 기준을 점검한다. 점검용 계정은 끝나고 Supabase 대시보드에서 지운다
+9. 캠프 채널에 주소를 공유한다
 
 ### 11.2 운영자가 하는 일
 

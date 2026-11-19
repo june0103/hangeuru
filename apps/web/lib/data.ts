@@ -2,6 +2,8 @@
 // 읽기: 로그인한 사용자의 세션 클라이언트(행 수준 보안 적용). 쓰기: secret key 클라이언트(서버 액션에서만 부른다).
 import 'server-only';
 
+import { cache } from 'react';
+
 import { createAdminClient } from './supabase/admin';
 import { createClient } from './supabase/server';
 import type { Attendance, PlanKey, Profile, SeedKey } from './types';
@@ -28,17 +30,19 @@ function must<T>(res: { data: T | null; error: { message: string } | null }): T 
 /* ---------- 세션과 계정 ---------- */
 
 /** 로그인한 사용자 id. 서버에서는 getClaims()로만 확인한다(getSession은 믿지 않는다) */
-export async function getSessionUserId(): Promise<string | null> {
+// 한 요청 안에서는 한 번만 확인한다(레이아웃과 페이지가 같이 부른다, spec 6.5)
+export const getSessionUserId = cache(async (): Promise<string | null> => {
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   return data?.claims?.sub ?? null;
-}
+});
 
-/** 성공하면 로그인 쿠키를 심고 true */
-export async function signInWithPassword(email: string, password: string): Promise<boolean> {
+/** 성공하면 로그인 쿠키를 심고 'ok'. Supabase 로그인 횟수 제한(429)에 걸리면 'rate_limited' */
+export async function signInWithPassword(email: string, password: string): Promise<'ok' | 'rate_limited' | 'failed'> {
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  return !error;
+  if (!error) return 'ok';
+  return error.status === 429 || error.code === 'over_request_rate_limit' ? 'rate_limited' : 'failed';
 }
 
 export async function signOutSession() {
@@ -62,11 +66,12 @@ export async function deleteAuthUser(id: string) {
 
 /* ---------- 읽기 ---------- */
 
-export async function getProfile(id: string): Promise<Profile | null> {
+// 한 요청 안에서는 한 번만 읽는다(spec 6.5)
+export const getProfile = cache(async (id: string): Promise<Profile | null> => {
   const supabase = await createClient();
   const row = must(await supabase.from('profiles').select(PROFILE_COLS).eq('id', id).maybeSingle<ProfileRow>());
   return row ? toProfile(row) : null;
-}
+});
 
 export async function listProfiles(): Promise<Profile[]> {
   const supabase = await createClient();

@@ -250,6 +250,8 @@ export const CARD = {
 /* ---------- 서버 동작의 토스트와 거절 문구 (8장) ---------- */
 export const ACTION = {
   failed: '저장하지 못했어요. 잠시 후 다시 시도해 주세요.',
+  rateLimited: '요청이 많아 잠시 기다려야 해요. 잠시 후 다시 시도해 주세요.',
+  signedUpLoginLater: '가입은 끝났어요. 잠시 후 로그인해 주세요.',
   notWorkday: '오늘은 출근을 기록할 수 없는 날이에요.',
   checkInFirst: '먼저 출근을 기록해 주세요.',
   notRipe: '아직 열매가 열리지 않았어요.',
