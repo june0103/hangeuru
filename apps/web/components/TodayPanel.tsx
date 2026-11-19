@@ -14,6 +14,7 @@ const META_TOP = 4;
 const META_GAP = 8;
 const BUTTON_TOP = 20;
 const HINT_TOP = 10;
+const HINT_TOP_M = 16;
 const TIMES_TOP = 20;
 
 export function StatusBadge({ text, tone, size = 'small' }: { text: string; tone: 'neutral' | 'lime'; size?: 'small' | 'medium' }) {
@@ -47,7 +48,7 @@ export default function TodayPanel({ view, button }: { view: TodayView; button: 
       {/* 주 버튼은 모바일에서도 이 패널 안에 둔다 (spec 3.5, 3.10) */}
       <Box sx={{ marginTop: BUTTON_TOP }}>{button}</Box>
       <Typography as="p" variant="label2" color="semantic.foreground.neutral.tertiary"
-        sx={{ marginTop: HINT_TOP }}>
+        sx={{ marginTop: HINT_TOP, '@media (max-width: 767px)': { marginTop: HINT_TOP_M } }}>
         {view.hint}
       </Typography>
       <Box
