@@ -51,12 +51,9 @@ function Dot({ d }: { d: WeekDot }) {
 export default function WeekPanel({ view }: { view: WeekView }) {
   return (
     <Panel aria-labelledby="h-week" order={1}>
-      <FlexBox alignItems="center" justifyContent="space-between" gap={12}>
-        <FlexBox alignItems="center" gap={8}>
-          <Typography as="h2" id="h-week" variant="headline2" weight="bold" color="semantic.foreground.neutral.primary">{view.title}</Typography>
-          <ContentBadge size="small" color="neutral" variant="solid">{view.planLabel}</ContentBadge>
-        </FlexBox>
-        {view.done && <ContentBadge size="small" color="accent" accentColor="semantic.foreground.brand.primary" data-orchard-chip="accent">{WEEK.done}</ContentBadge>}
+      <FlexBox alignItems="center" gap={8}>
+        <Typography as="h2" id="h-week" variant="headline2" weight="bold" color="semantic.foreground.neutral.primary">{view.title}</Typography>
+        <ContentBadge size="small" color="neutral" variant="solid">{view.planLabel}</ContentBadge>
       </FlexBox>
       <Box as="ol" sx={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 4, margin: `${DOTS_TOP}px 0 0`, padding: 0, listStyle: 'none' }}>
         {view.dots.map(d => <Dot key={d.date} d={d} />)}
