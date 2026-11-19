@@ -742,6 +742,71 @@ function boot(options) {
       };
       return kit;
     }
+    /* 열매별 씨앗(로그인 뒤 고른 씨앗을 심을 때, 씨앗 단계의 나무). 스플래시·온보딩의 씨앗은 treeKit 의 seedGeo 하나를 그대로 쓴다.
+       모양은 실제 씨앗을 참고했다(사과·귤·복숭아·커피, 2026-11-20 웹 검색). 지금 씨앗과 같은 매끄러운 3D(공을 빚어 만든 몸통 + 유광 재질)
+       - 사과: 한쪽 끝이 뾰족한 작은 눈물방울, 짙은 적갈색, 반들반들
+       - 귤: 미색(크림), 한쪽이 뾰족한 쐐기형 눈물방울, 세로로 잔주름
+       - 복숭아: 큰 타원형 씨(핵), 끝이 뾰족하고 표면에 깊은 골, 붉은 갈색, 무광. 한쪽 옆에 솔기
+       - 커피: 생두. 한쪽은 둥글고 반대쪽은 평평하며 가운데에 S자 골, 옅은 회녹색 */
+    var seedCache = {};
+    function seedOf(kind) {
+      if (seedCache[kind]) return seedCache[kind];
+      var q = treeKit(), S;
+      if (kind === 'apple') S = {
+        geo: ball(function (v, u) {
+          var t = (u.y + 1) / 2;                                            // 0 아래(둥근 쪽) ~ 1 위(뾰족한 끝)
+          var w = Math.pow(Math.sin(Math.PI * Math.min(1, 0.24 + t * 0.84)), 0.6);
+          v.x = u.x * 0.6 * w; v.z = u.z * 0.42 * w; v.y = u.y * (u.y > 0 ? 1.25 : 0.95);
+        }, 40, 28),
+        mat: clay('#4E2410', { roughness: 0.3, clearcoat: 0.8, clearcoatRoughness: 0.18, sheen: lin('#5C2A14') }),
+        scale: 1
+      };
+      else if (kind === 'tangerine') S = {
+        geo: ball(function (v, u) {
+          var t = (u.y + 1) / 2, a = Math.atan2(u.z, u.x);
+          var w = Math.pow(Math.sin(Math.PI * Math.min(1, 0.12 + t * 0.95)), 0.7);
+          var ridge = 1 + 0.045 * Math.sin(a * 9 + u.y * 2) + (fbm(u.x * 5, u.y * 5, u.z * 5, 2) - 0.5) * 0.1;
+          v.x = u.x * 0.66 * w * ridge; v.z = u.z * 0.46 * w * ridge; v.y = u.y * (u.y > 0 ? 1.15 : 0.9);
+        }, 48, 32),
+        mat: clay('#EADBB6', { roughness: 0.55, clearcoat: 0.25, clearcoatRoughness: 0.5 }),
+        scale: 1.05
+      };
+      else if (kind === 'peach') S = {
+        geo: ball(function (v, u) {
+          var t = (u.y + 1) / 2;
+          var w = Math.pow(Math.sin(Math.PI * Math.min(1, 0.1 + t * 0.95)), 0.6);
+          // 깊은 골: 길게 이어지는 굵은 주름 + 잔구멍
+          var g1 = fbm(u.x * 3.2 + 1, u.y * 1.6, u.z * 3.2, 3), g2 = fbm(u.x * 9, u.y * 9 + 3, u.z * 9, 2);
+          var groove = 1 - 0.14 * Math.pow(Math.abs(Math.sin(g1 * 9)), 0.5) - 0.04 * g2;
+          var seam = 1 + 0.06 * Math.exp(-Math.pow(u.z / 0.12, 2)) * (u.x > 0 ? 1 : 0);   // 한쪽 옆 솔기
+          v.x = u.x * 0.72 * w * groove * seam; v.z = u.z * 0.56 * w * groove; v.y = u.y * (u.y > 0 ? 1.12 : 0.92) * (0.97 + 0.03 * groove);
+        }, 72, 52),
+        mat: clay('#8A4E33', { roughness: 0.82, clearcoat: 0.05 }),
+        scale: 1.35
+      };
+      else if (kind === 'coffee') S = {
+        geo: ball(function (v, u) {
+          // 둥근 등(+z)과 평평한 배(-z), 배 가운데로 S자 골
+          v.x = u.x * 0.6; v.y = u.y * 0.92;
+          v.z = u.z > 0 ? u.z * 0.42 : Math.max(u.z * 0.42, -0.14);
+          if (u.z < 0) {
+            var cx = 0.05 * Math.sin(u.y * 3.2), d = (u.x * 0.6 - cx) / 0.07;
+            v.z += 0.09 * Math.exp(-d * d) * Math.min(1, (1 - Math.abs(u.y)) * 3);
+          }
+        }, 56, 40),
+        mat: clay('#AEB48A', { roughness: 0.62, clearcoat: 0.15, clearcoatRoughness: 0.6 }),
+        scale: 1.1
+      };
+      else S = { geo: q.seedGeo, mat: q.seed, scale: 1 };
+      return (seedCache[kind] = S);
+    }
+    // 씨앗 하나(크기 s). 열매를 모르면 온보딩의 기본 씨앗
+    function seedMesh(kind, s) {
+      var S = seedOf(kind), m = new THREE.Mesh(S.geo, S.mat);
+      m.scale.setScalar(s * S.scale);
+      if (kind === 'coffee') m.rotation.x = -0.5;   // 생두는 평평한 배와 골이 살짝 보이게
+      return m;
+    }
     var _x = new THREE.Vector3(), _y = new THREE.Vector3(), _z = new THREE.Vector3(), _m = new THREE.Matrix4();
     // 물체의 +z 를 z 쪽으로, +y 를 되도록 y 쪽으로 돌린다
     function aim(obj, zx, zy, zz, yx, yy, yz) {
@@ -977,7 +1042,7 @@ function boot(options) {
     }
     var STAGE = {
       // 씨앗: 흙에 반쯤 묻힌 씨
-      0: function () { var q = treeKit(), g = ground(), sd = new THREE.Mesh(q.seedGeo, q.seed); sd.scale.setScalar(0.2); sd.rotation.set(0.3, 0, 0.6); g.add(at(sd, 0.02, 0.12, 0.06)); return g; },
+      0: function (seed) { var g = ground(), sd = seedMesh(seed, 0.2); sd.rotation.set(sd.rotation.x + 0.3, 0, 0.6); g.add(at(sd, 0.02, 0.12, 0.06)); return g; },
       1: function (seed) { return sapling(seed, false); },
       2: function (seed) { return sapling(seed, true); },
       3: function (seed) { return tree(seed, false); },
@@ -1325,7 +1390,7 @@ function boot(options) {
       }
       root.add(clods);
       var cap = new THREE.Mesh(q.soilGeo, dirt); root.add(cap);            // 씨앗을 덮는 흙
-      var sd = new THREE.Mesh(q.seedGeo, q.seed); sd.scale.setScalar(0.13); root.add(sd);
+      var sd = seedMesh(seed, 0.13); root.add(sd);   // 고른 열매의 씨앗
       // 튀는 흙 알갱이
       var bits = [];
       for (i = 0; i < 12; i++) { var b = new THREE.Mesh(q.stoneGeo, dirt); b.visible = false; root.add(b); bits.push({ m: b, vx: 0, vy: 0, vz: 0 }); }
@@ -1395,7 +1460,11 @@ function boot(options) {
         root.rotation.y = Math.sin(t * 0.35) * 0.22;
       };
       v.play = function () { v.t0 = clock.t; v.burst = false; bits.forEach(function (b) { b.m.visible = false; }); };
-      v.setSeed = function (name) { var n = leafOf(LEAF[name] ? name : 'apple'); leaves.forEach(function (L) { L.m.geometry = n.geo; L.m.material = n.mats[L.k]; }); };
+      // 고른 열매가 바뀌면 잎 모양과 심는 씨앗을 같이 바꾼다
+      v.setSeed = function (name) {
+        var n = leafOf(LEAF[name] ? name : 'apple'); leaves.forEach(function (L) { L.m.geometry = n.geo; L.m.material = n.mats[L.k]; });
+        var S = seedOf(name); sd.geometry = S.geo; sd.material = S.mat; sd.scale.setScalar(0.13 * S.scale);
+      };
       v.bounce = v.play;
       el.addEventListener('pointerdown', function (ev) { var r = el.getBoundingClientRect(); W.av += ((ev.clientX - r.left) / r.width - 0.5) * -3.2 || 1; });
       return mount(el, v);
