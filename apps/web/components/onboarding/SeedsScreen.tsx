@@ -32,13 +32,13 @@ export default function SeedsScreen() {
   const api = useOrchard();
   const [seed, setSeed] = useState<SeedKey>(ORDER[0]);
   const [planted, setPlanted] = useState(false);
-  const [go, setGo] = useState(0);
   const [saving, startSave] = useTransition();
   const seedRef = useRef(seed);
   const hero = useRef<HTMLDivElement>(null);
   const soil = useRef<HTMLDivElement>(null);
   const meta = useRef<HTMLDivElement>(null);
   const done = useRef<HTMLHeadingElement>(null);
+  const plantedBox = useRef<HTMLElement>(null);
   const pick = useRef<HTMLHeadingElement>(null);
   const showcase = useOrchardView<ShowcaseView>(hero, (o, el) => o.showcase(el, ORDER[0]), []);
   const planting = useOrchardView(soil, (o, el) => o.planting(el, ORDER[0]), []);
@@ -70,7 +70,10 @@ export default function SeedsScreen() {
 
   const plant = () => {
     setPlanted(true);
-    setGo(n => n + 1);
+    // 글과 버튼이 새싹이 올라올 즈음 차례로 나오게, 등장 움직임을 처음부터 다시 건다.
+    // 이 영역을 새로 만들면 3D 그림이 올라간 상자가 바뀌어 그림이 사라지니, 클래스만 다시 붙인다
+    const box = plantedBox.current;
+    if (box) { box.classList.remove('go'); void box.offsetWidth; box.classList.add('go'); }
     planting.current?.setSeed(seedRef.current);
     planting.current?.play();
     api?.ripple(window.innerWidth / 2, window.innerHeight / 2);
@@ -123,7 +126,7 @@ export default function SeedsScreen() {
               <PrimaryButton size="large" onClick={plant}>{SEED_SCREEN.plant(seed)}</PrimaryButton>
             </div>
           </section>
-          <section key={go} className={planted ? 'screen planted go' : 'screen planted'} aria-labelledby="h-planted" hidden={!planted}>
+          <section ref={plantedBox} className="screen planted" aria-labelledby="h-planted" hidden={!planted}>
             <div className="hero3d" ref={soil} role="img" aria-label={SEED_SCREEN.plantedLabel} />
             <h1 id="h-planted" tabIndex={-1} ref={done}>{SEED_SCREEN.planted(seed)}</h1>
             <p>{SEED_SCREEN.plantedText}</p>
