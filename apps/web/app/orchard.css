@@ -46,10 +46,9 @@ button.orchard-lv::after{content:"";position:absolute;inset:-6px;border-radius:5
 .orchard-signout{margin-top:4px;padding-top:12px;border-top:1px solid var(--o-line);display:flex}
 .orchard-signout button{appearance:none;-webkit-appearance:none;border:0;background:none;min-height:44px;padding:0 2px;font-family:inherit;font-weight:600;font-size:15px;line-height:22px;letter-spacing:.0096em;color:var(--o-fg2);cursor:pointer;border-radius:8px;transition:opacity .3s cubic-bezier(.32,.72,0,1)}
 .orchard-signout button:hover{opacity:.72}
-@media (min-width:768px){[data-orchard-head="bar"]{display:grid !important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center !important}[data-orchard-head="tabs"]{margin-left:0 !important;align-self:stretch !important;justify-self:center;display:flex !important}[data-orchard-head="user"]{margin-left:0 !important;justify-self:end}}
-/* 768px 이상: 탭은 헤더 한 줄 안에서 가운데. 탭 칸이 헤더 높이를 다 채워 글자는 로고·이름과 같은 높이, 고른 탭의 밑줄은 헤더 아랫변에 붙는다(spec 3.2). 탭 아래 회색 줄은 없앤다 */
-[data-orchard-head="tabs"] [data-component="tab-list"],[data-orchard-head="tabs"] [data-component="tab-list"] > div,[data-orchard-head="tabs"] [data-component="tab-list"] > div > div,[data-orchard-head="tabs"] [data-component="tab-list"] > div > div > div,[data-orchard-head="tabs"] [data-component="tab-list"] > div > div > div > div{height:100% !important}
-[data-orchard-head="tabs"] [data-component="tab-list-item"]{height:100% !important;padding-top:0 !important;padding-bottom:0 !important;display:flex !important;align-items:center}
+@media (min-width:768px){[data-orchard-head="bar"]{display:grid !important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center !important}[data-orchard-head="tabs"]{margin-left:0 !important;align-self:center !important;justify-self:center;display:flex !important}[data-orchard-head="user"]{margin-left:0 !important;justify-self:end}}
+/* 768px 이상: 탭은 헤더 한 줄 정가운데. 글자는 로고·이름과 같은 높이이고, 고른 탭의 밑줄은 글자 바로 아래 6px 에 둔다(헤더 아랫변까지 내리면 글자와 멀어 보였다, 2026-11-20). 탭 아래 회색 줄은 없앤다(spec 3.2) */
+[data-orchard-head="tabs"] [data-component="tab-list-item"]{padding-top:6px !important;padding-bottom:6px !important}
 [data-orchard-head="tabs"] [data-component="tab-list"]::after{display:none !important}
 [data-orchard-lead]{display:grid !important;gap:6px;margin:0}
 .orchard-now{font-size:16px;line-height:26px;font-weight:500;letter-spacing:.0057em;color:var(--o-fg);text-wrap:pretty}html[data-theme="dark"] .orchard-now{color:var(--o-fg)}
