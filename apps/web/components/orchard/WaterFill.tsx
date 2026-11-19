@@ -2,7 +2,7 @@
 
 import { Button } from '@montage-ui/core';
 import type { Theme } from '@montage-ui/core';
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ElementType } from 'react';
 
 // 파란 주 버튼의 찰랑이는 물(spec 3.2). 평소에는 그대로이고, 올리거나 누르면 바탕이 비치며 수면이 조금 내려와 출렁인다.
 // 물 층은 버튼 바탕 위·글자 아래에 깔려 글자와 누르는 영역을 건드리지 않는다. 움직임과 값은 app/orchard.css 의 .orchard-fill, .orchard-water
@@ -38,7 +38,8 @@ export function WaterFill() {
   );
 }
 
-type Props = Omit<ComponentProps<typeof Button>, 'variant' | 'color'>;
+// 링크 모양(as={Link}, href)으로도 쓴다(안내 화면)
+type Props = Omit<ComponentProps<typeof Button>, 'variant' | 'color'> & { as?: ElementType; href?: string };
 
 /** 몽타주 Button(solid, primary)에 물결을 입힌 주 버튼 */
 export default function PrimaryButton({ children, className, sx, ...rest }: Props) {

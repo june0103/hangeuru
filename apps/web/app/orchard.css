@@ -46,7 +46,11 @@ button.orchard-lv::after{content:"";position:absolute;inset:-6px;border-radius:5
 .orchard-signout{margin-top:4px;padding-top:12px;border-top:1px solid var(--o-line);display:flex}
 .orchard-signout button{appearance:none;-webkit-appearance:none;border:0;background:none;min-height:44px;padding:0 2px;font-family:inherit;font-weight:600;font-size:15px;line-height:22px;letter-spacing:.0096em;color:var(--o-fg2);cursor:pointer;border-radius:8px;transition:opacity .3s cubic-bezier(.32,.72,0,1)}
 .orchard-signout button:hover{opacity:.72}
-@media (min-width:768px){[data-orchard-head="bar"]{display:grid !important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center !important}[data-orchard-head="tabs"]{margin-left:0 !important;align-self:end !important;justify-self:center}[data-orchard-head="user"]{margin-left:0 !important;justify-self:end}}
+@media (min-width:768px){[data-orchard-head="bar"]{display:grid !important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center !important}[data-orchard-head="tabs"]{margin-left:0 !important;align-self:stretch !important;justify-self:center;display:flex !important}[data-orchard-head="user"]{margin-left:0 !important;justify-self:end}}
+/* 768px 이상: 탭은 헤더 한 줄 안에서 가운데. 탭 칸이 헤더 높이를 다 채워 글자는 로고·이름과 같은 높이, 고른 탭의 밑줄은 헤더 아랫변에 붙는다(spec 3.2). 탭 아래 회색 줄은 없앤다 */
+[data-orchard-head="tabs"] [data-component="tab-list"],[data-orchard-head="tabs"] [data-component="tab-list"] > div,[data-orchard-head="tabs"] [data-component="tab-list"] > div > div,[data-orchard-head="tabs"] [data-component="tab-list"] > div > div > div,[data-orchard-head="tabs"] [data-component="tab-list"] > div > div > div > div{height:100% !important}
+[data-orchard-head="tabs"] [data-component="tab-list-item"]{height:100% !important;padding-top:0 !important;padding-bottom:0 !important;display:flex !important;align-items:center}
+[data-orchard-head="tabs"] [data-component="tab-list"]::after{display:none !important}
 [data-orchard-lead]{display:grid !important;gap:6px;margin:0}
 .orchard-now{font-size:16px;line-height:26px;font-weight:500;letter-spacing:.0057em;color:var(--o-fg);text-wrap:pretty}html[data-theme="dark"] .orchard-now{color:var(--o-fg)}
 .orchard-next{font-size:13px;line-height:20px;font-weight:400;letter-spacing:.0194em;color:var(--o-fg3)}
@@ -111,8 +115,9 @@ section[aria-labelledby="h-cal"] [role="img"]{width:8px !important;height:8px !i
 .orchard-fill{position:relative;overflow:hidden;isolation:isolate;transition:background-color .36s cubic-bezier(.4,0,1,1)}
 .orchard-fill:hover,.orchard-fill:focus-visible,.orchard-fill:active{background-color:color-mix(in srgb,var(--o-base) 58%,transparent) !important;transition:background-color .6s cubic-bezier(.2,0,0,1)}
 .orchard-water{position:absolute;inset:0;z-index:-1;pointer-events:none;transform:translate3d(0,0,0);transition:transform .36s cubic-bezier(.4,0,1,1)}
-.orchard-fill:hover > .orchard-water,.orchard-fill:focus-visible > .orchard-water,.orchard-fill:active > .orchard-water{transform:translate3d(0,22%,0);transition:transform .7s cubic-bezier(.34,1.25,.64,1)}
-.orchard-fill[aria-disabled="true"] > .orchard-water,.orchard-fill:disabled > .orchard-water{display:none}
+/* 몽타주 Button 은 내용을 span 으로 한 번 더 감싸므로 물 층은 바로 아래 자식이 아니다(">" 를 쓰면 수면이 내려오지 않는다) */
+.orchard-fill:hover .orchard-water,.orchard-fill:focus-visible .orchard-water,.orchard-fill:active .orchard-water{transform:translate3d(0,22%,0);transition:transform .7s cubic-bezier(.34,1.25,.64,1)}
+.orchard-fill[aria-disabled="true"] .orchard-water,.orchard-fill:disabled .orchard-water{display:none}
 .orchard-water .tilt{position:absolute;top:0;bottom:-70%;left:-8%;right:-8%;transform-origin:50% 0}
 .orchard-water .crest{position:absolute;top:-9px;left:0;right:0;height:10px}
 .orchard-water .body{position:absolute;inset:0;background:var(--o-base)}
