@@ -1,27 +1,30 @@
 'use client';
 
-import { Box, FlexBox, useToast } from '@montage-ui/core';
+import { FlexBox, useToast } from '@montage-ui/core';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState, useTransition } from 'react';
 
 import { checkIn, checkOut, harvest } from '@/app/actions';
 import { LOCATION } from '@/lib/copy';
 import { getPosition } from '@/lib/geo';
+import { FRUIT_DAYS } from '@/lib/rules';
 import type { ActionResult } from '@/lib/types';
-import type { CampView, CardModel, TodayView, TreeView, WeekView } from '@/lib/view';
+import type { BadgeView, CampView, CardModel, TodayView, TreeView, WeekView } from '@/lib/view';
 
+import BadgesPanel from './BadgesPanel';
 import CampPanel from './CampPanel';
 import HarvestCardModal from './HarvestCardModal';
 import MainActionButton from './MainActionButton';
+import { useOrchardScheme } from './orchard/OrchardProvider';
 import TodayPanel from './TodayPanel';
 import TreePanel from './TreePanel';
 import WeekPanel from './WeekPanel';
 
-// spec 3.5 배치: 992px 이상 2단(왼쪽 340px), 미만 1단. 3.10 모바일 고정 출근 버튼
+// spec 3.5 배치: 992px 이상은 세 칸 두 줄(왼쪽 오늘·이번 주, 가운데 내 씨앗, 오른쪽 오늘 그라운드·배지)로 한 화면에 다 보인다.
+// 칸 나누기는 app/orchard.css 가 .p-today 등의 이름으로 한다. 미만은 한 단. 주 버튼은 모바일에서도 오늘 패널 안에 있다(3.10)
 const SIDE = 340;
 const GAP = 24;
 const GAP_M = 16;
-const POP_MS = 600;
 
 type Props = {
   today: TodayView;
@@ -29,18 +32,19 @@ type Props = {
   tree: TreeView;
   camp: CampView;
   card: CardModel | null;
+  badges: BadgeView[];
   welcome: string | null;
 };
 
-export default function HomeView({ today, week, tree, camp, card, welcome }: Props) {
+export default function HomeView({ today, week, tree, camp, card, badges, welcome }: Props) {
   const toast = useToast();
   const router = useRouter();
   const params = useSearchParams();
   const [pending, start] = useTransition();
   const [harvesting, startHarvest] = useTransition();
-  const [animate, setAnimate] = useState(false);
   const [cardOpen, setCardOpen] = useState(false);
   const welcomed = useRef(false);
+  useOrchardScheme(tree.seed);
 
   // 가입 직후 환영 토스트를 한 번 띄우고 주소에서 지운다 (spec 8.3)
   useEffect(() => {
@@ -54,7 +58,8 @@ export default function HomeView({ today, week, tree, camp, card, welcome }: Pro
   const report = (r: ActionResult) => {
     if (r.message) toast({ content: r.message, variant: r.ok ? 'positive' : 'negative' });
   };
-  const pop = () => { setAnimate(true); setTimeout(() => setAnimate(false), POP_MS); };
+  // 물 주는 장면이 끝난 뒤: 20일을 채운 날이면 열매가 맺히는 화면으로 간다(spec 3.14)
+  const onGrown = (days: number) => { if (days === FRUIT_DAYS) router.push('/fruit'); };
 
   const onMain = () => {
     const act = today.button.action;
@@ -67,14 +72,13 @@ export default function HomeView({ today, week, tree, camp, card, welcome }: Pro
         return;
       }
       const r = act === 'checkIn' ? await checkIn(pos) : await checkOut(pos);
-      if (r.ok && act === 'checkIn' && r.message) pop();
       report(r);
     });
   };
   const onHarvest = () => {
     startHarvest(async () => {
       const r = await harvest();
-      if (r.ok) { pop(); setCardOpen(true); } else report(r);
+      if (r.ok) setCardOpen(true); else report(r);
     });
   };
 
@@ -82,7 +86,7 @@ export default function HomeView({ today, week, tree, camp, card, welcome }: Pro
   const todayPanel = <TodayPanel view={today} button={button} />;
   const weekPanel = week && <WeekPanel view={week} />;
   const treePanel = (
-    <TreePanel view={tree} animateNewest={animate} harvesting={harvesting} onHarvest={onHarvest} onOpenCard={() => setCardOpen(true)} />
+    <TreePanel view={tree} harvesting={harvesting} onHarvest={onHarvest} onOpenCard={() => setCardOpen(true)} onGrown={onGrown} />
   );
   const campPanel = <CampPanel view={camp} />;
 
@@ -108,22 +112,9 @@ export default function HomeView({ today, week, tree, camp, card, welcome }: Pro
         <div style={{ flex: 1 }}>
           <div className="p-tree">{treePanel}</div>
           <div className="p-camp">{campPanel}</div>
+          <div className="p-badges"><BadgesPanel badges={badges} /></div>
         </div>
       </FlexBox>
-      {/* 768px 미만: 하단 탭 바 바로 위 고정 버튼 */}
-      <Box
-        sx={(theme) => ({
-          display: 'none',
-          '@media (max-width: 767px)': {
-            display: 'block', position: 'fixed', left: 0, right: 0, zIndex: 9,
-            bottom: 'calc(56px + env(safe-area-inset-bottom, 0px))',
-            padding: '16px 20px 12px',
-            background: `linear-gradient(to top, ${theme.semantic.background.neutral.secondary} 72%, transparent)`,
-          },
-        })}
-      >
-        {button}
-      </Box>
       <HarvestCardModal open={cardOpen} onOpenChange={setCardOpen} model={card} />
     </>
   );

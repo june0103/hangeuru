@@ -9,12 +9,16 @@ export type Profile = {
   id: string;
   name: string;
   plan: PlanKey;
-  seed: SeedKey;
+  /** 가입한 뒤 씨앗 고르기 화면에서 정한다. 그 전에는 null */
+  seed: SeedKey | null;
   /** 가입한 날의 KST 날짜 YYYY-MM-DD */
   joinDate: string;
   /** 수확한 시각(ISO). 수확 전에는 null */
   harvestedAt: string | null;
 };
+
+/** 씨앗을 심은 구성원. 홈·캘린더·과수원은 이 상태에서만 들어온다 */
+export type Member = Profile & { seed: SeedKey };
 
 /** attendance 1행 */
 export type Attendance = {

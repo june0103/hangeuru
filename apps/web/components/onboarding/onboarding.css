@@ -1,0 +1,190 @@
+/* 온보딩 화면(스플래시, 씨앗 고르기, 20일 열매 화면)의 스타일(spec 3.x). 보드 시안의 값을 그대로 옮겼다.
+   색은 OrchardTheme 의 --o-* 변수에서 받는다. 배경과 3D 그림은 lib/orchard/engine.js 가 그린다 */
+.ob {
+  --bg: var(--o-page); --panel: var(--o-panel); --fg: var(--o-fg); --fg2: var(--o-fg2); --fg3: var(--o-fg3); --line: var(--o-line);
+  --brand: var(--o-accent); --on-brand: var(--o-white); --glass: var(--o-tint); --edge: var(--o-edge); --shadow: var(--o-shadow); --sheen: var(--o-sheen);
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  color: var(--fg); font-weight: 400; font-size: 15px; line-height: 22px; letter-spacing: 0.0096em; word-break: keep-all;
+  h1, h2, p, ol { margin: 0; }
+  ol { padding: 0; list-style: none; }
+  h1:focus { outline: none; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .app { position: relative; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
+  .app [hidden] { display: none !important; }
+
+  /* 헤더: 원티드 로고(LogoWanted 112 × 32) */
+  .top {
+    display: flex; align-items: center; gap: 12px; min-height: 56px;
+    padding-left: max(20px, env(safe-area-inset-left, 0px));
+    padding-right: max(20px, env(safe-area-inset-right, 0px));
+  }
+  .brand { display: flex; align-items: center; gap: 12px; min-height: 44px; color: var(--fg); text-decoration: none; }
+  .brand svg { width: 112px; height: 32px; flex: none; }
+  .brand svg > path:not([fill]) { fill: var(--fg); }
+  .brand-name { font-weight: 600; font-size: 17px; line-height: 24px; letter-spacing: 0; }
+  .skip { margin-left: auto; min-height: 44px; display: inline-flex; align-items: center; padding: 0 4px; color: var(--fg2); font-weight: 500; font-size: 14px; line-height: 20px; text-decoration: none; }
+  .skip:hover { color: var(--fg); }
+
+  .stage {
+    flex: 1; display: flex; flex-direction: column;
+    padding-block: 12px 40px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .screen { margin: auto; width: 100%; }
+
+  /* 차례로 떠오르며 또렷해진다. 끝난 뒤에는 아무 속성도 남기지 않는다(backwards):
+     filter 가 남으면 그 안의 유리가 뒤를 흐리지 못해 테두리와 채움만 얼룩처럼 보인다 */
+  .rise { animation: rise 0.9s var(--ease) backwards; animation-delay: calc(var(--i, 0) * 90ms + 80ms); }
+
+  /* 유리: 뒤가 흐리게 비치고 위쪽 가장자리에 빛이 맺힌다 */
+  .glass {
+    background: color-mix(in srgb, var(--panel) var(--glass), transparent);
+    -webkit-backdrop-filter: blur(22px) saturate(1.6); backdrop-filter: blur(22px) saturate(1.6);
+    border: 1px solid var(--edge);
+    border-radius: 24px;
+    box-shadow: inset 0 1px 0 var(--sheen), 0 28px 64px -36px var(--shadow), 0 2px 8px -5px var(--shadow);
+    padding: 32px;
+  }
+
+  /* 버튼은 몽타주 Button, TextButton 을 쓴다. .btn 과 .textbtn 은 자리와 간격만 잡는 감싸개다 */
+  .btn { display: block; }
+  .btn > * { width: 100%; }
+  .textbtn { display: block; }
+  /* 제목 위의 작은 영문 표지. 칩(알약 모양 바탕)은 쓰지 않고 글자만 둔다.
+     세 글줄의 위계: 표지(14px, 중간 굵기) → 12px → 제목(굵게, 행간 1.3) → 12~16px → 보조 문장(보통 굵기, 행간 1.6) */
+  .eyebrow { display: inline-block; color: var(--fg2); font-weight: 500; font-size: 14px; line-height: 20px; letter-spacing: 0.04em; }
+  .hero3d { display: block; width: min(62vw, 280px); aspect-ratio: 1; }
+
+  /* ---------- 스플래시: 스크롤을 따라 이어지는 장면 ----------
+     화면 세 개 높이의 길(track) 안에서 한 화면(pin)이 붙어 있고, 스크롤한 만큼 3D 장면과 글이 바뀐다 */
+  .journey .top { position: fixed; left: 0; right: 0; top: 0; z-index: 2; }
+  .track { height: 300vh; height: 300dvh; }
+  .pin {
+    position: sticky; top: 0; height: 100vh; height: 100dvh; overflow: hidden;
+    display: grid; grid-template-rows: minmax(0, 1.15fr) minmax(0, 1fr); justify-items: center;
+    padding: 60px max(20px, env(safe-area-inset-right, 0px)) 24px max(20px, env(safe-area-inset-left, 0px));
+  }
+  .pin .hero3d { width: min(92vw, 520px); height: 100%; aspect-ratio: auto; align-self: end; }
+  .caps { position: relative; width: 100%; max-width: 560px; }
+  .cap { position: absolute; inset: 0; display: grid; justify-items: center; align-content: start; text-align: center; opacity: 0; will-change: opacity, transform; }
+  .cap:first-child { opacity: 1; }
+  .cap h1, .cap h2 { margin-top: 12px; font-weight: 700; font-size: clamp(30px, 7.6vw, 44px); line-height: 1.3; letter-spacing: -0.028em; text-wrap: balance; }
+  .cap p { color: var(--fg2); font-weight: 400; font-size: clamp(16px, 1.35vw, 17px); line-height: 1.6; letter-spacing: 0.0057em; margin-top: clamp(12px, 1.5vw, 16px); max-width: 26ch; text-wrap: balance; }
+  .cap .btn { margin-top: 32px; min-width: 200px; }
+  .hint {
+    position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%);
+    display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 0 14px 0 16px; border: 0; border-radius: 9999px;
+    background: color-mix(in srgb, var(--panel) 56%, transparent);
+    -webkit-backdrop-filter: blur(16px) saturate(1.5); backdrop-filter: blur(16px) saturate(1.5);
+    box-shadow: inset 0 0 0 1px var(--edge), inset 0 1px 0 var(--sheen);
+    color: var(--fg2); font-weight: 500; font-size: 13px; line-height: 18px;
+    transition: opacity 0.5s var(--ease);
+  }
+  .hint svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; animation: nudge 1.8s var(--ease) infinite; }
+  /* 모바일 스플래시의 시작하기: 화면 가운데 아래에 뜬 유리 알약. 화살표는 오른쪽. 넓은 화면에서는 쓰지 않는다 */
+  .startglass { display: none; }
+  .dots { position: absolute; right: max(14px, env(safe-area-inset-right, 0px)); top: 50%; transform: translateY(-50%); display: grid; gap: 8px; }
+  .dots li { width: 6px; height: 6px; border-radius: 9999px; background: var(--fg3); opacity: 0.45; transition: height 0.5s var(--ease), opacity 0.5s var(--ease), background-color 0.5s var(--ease); }
+  .dots li.on { height: 20px; opacity: 1; background: var(--fg); }
+
+  /* ---------- 씨앗 고르기: 캐릭터를 고르듯 과일 하나가 주인공 ----------
+     패널과 바탕 없이 배경 위에 바로 놓는다. 위에서부터 물음, 큰 과일(양옆 화살표), 이름과 한 줄 설명, 작은 과일 넷, 심기 버튼 */
+  .select .screen { max-width: 640px; }
+  .pickone { display: grid; justify-items: center; text-align: center; }
+  .pickone h1 { font-weight: 700; font-size: clamp(22px, 5.6vw, 28px); line-height: 1.32; letter-spacing: -0.024em; text-wrap: balance; }
+  .showrow { position: relative; width: 100%; display: grid; justify-items: center; margin-top: 4px; touch-action: pan-y; }
+  .fruit3d { display: block; width: 100%; aspect-ratio: 1; }
+  /* 과일을 바꿀 때 옆으로 밀려 나가는 과일이 가장자리에서 스르르 사라지도록 좌우를 흐린다 */
+  .fruit3d.big { width: min(84vw, 400px); max-height: 46vh; max-height: 46dvh; cursor: grab; -webkit-mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent); mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent); }
+  .fruit3d.big:active { cursor: grabbing; }
+  .arrow {
+    position: absolute; top: 50%; width: 48px; height: 48px; margin-top: -24px; border: 0; border-radius: 9999px; display: grid; place-items: center;
+    background: none; color: var(--fg2); transition: transform 0.5s var(--ease), color 0.3s var(--ease);
+  }
+  .arrow.prev { left: 0; } .arrow.next { right: 0; }
+  .arrow:hover { color: var(--fg); transform: scale(1.12); }
+  .arrow:active { transform: scale(0.9); }
+  .arrow svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .meta h2 { font-weight: 700; font-size: clamp(36px, 10vw, 52px); line-height: 1.24; letter-spacing: -0.03em; }
+  .meta p { color: var(--fg2); font-size: 16px; line-height: 1.6; letter-spacing: 0.0057em; margin-top: 8px; }
+  .meta.swap h2, .meta.swap p { animation: rise 0.7s var(--ease) backwards; }
+  .meta.swap p { animation-delay: 70ms; }
+  .options { display: flex; justify-content: center; gap: 4px; margin: 20px 0 0; border: 0; padding: 0; min-inline-size: 0; }
+  .seed { position: relative; display: block; }
+  .seed input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; z-index: 1; }
+  /* 작은 과일: 크기는 모두 같다. 고른 것만 또렷하고 아래에 점 하나 */
+  .seed .card { display: grid; justify-items: center; width: 60px; padding: 0 0 12px; opacity: 0.45; transition: opacity 0.5s var(--ease); }
+  .seed .card::after { content: ""; width: 6px; height: 6px; border-radius: 9999px; background: var(--fg); opacity: 0; transform: scale(0.4); transition: opacity 0.5s var(--ease), transform 0.5s var(--ease); }
+  .seed:hover .card { opacity: 0.85; }
+  .seed input:checked + .card { opacity: 1; }
+  .seed input:checked + .card::after { opacity: 1; transform: none; }
+  .seed input:focus-visible + .card { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 16px; }
+  .pickone .btn { margin-top: 20px; min-width: 280px; }
+
+  .planted { display: grid; justify-items: center; text-align: center; gap: 4px; }
+  .planted .hero3d { width: min(88vw, 420px); max-height: 50vh; max-height: 50dvh; }
+  /* 글은 심는 장면(씨앗이 떨어지고 새싹이 올라옴)이 끝날 즈음 차례로 나타난다 */
+  .planted.go h1 { animation: rise 0.9s var(--ease) 1.9s backwards; }
+  .planted.go p { animation: rise 0.9s var(--ease) 2.05s backwards; }
+  .planted.go .btn { animation: rise 0.9s var(--ease) 2.25s backwards; }
+  .planted.go .textbtn { animation: rise 0.9s var(--ease) 2.4s backwards; }
+  .planted h1 { font-weight: 700; font-size: clamp(26px, 6.6vw, 32px); line-height: 1.3; letter-spacing: -0.026em; }
+  .planted p { color: var(--fg2); font-size: 16px; line-height: 24px; margin-top: 4px; }
+  .planted .btn { margin-top: 24px; min-width: 240px; }
+  .planted .textbtn { margin-top: 4px; }
+  /* 열매가 맺히는 모션 확인 화면: 나무가 주인공, 아래에 과일 넷과 다시 보기 */
+  .fruiting .hero3d { width: min(100%, 460px); aspect-ratio: 1 / 1.06; max-height: 50vh; max-height: 50dvh; }
+  .fruiting .slot { display: block; width: 100%; height: 100%; }
+  .fruiting .eyebrow { margin-top: 4px; }
+  .fruiting h1 { margin-top: 4px; }
+  .fruiting .options { margin-top: 16px; }
+  .fruiting .btn { margin-top: 16px; }
+  /* 세로가 짧은 화면(360 × 640 같은 가장 작은 기종): 그림을 줄여 버튼까지 한 화면에 들어오게 한다 */
+  @media (max-height: 700px) {
+    .fruit3d.big { max-height: 36vh; max-height: 36dvh; }
+    .planted .hero3d, .fruiting .hero3d { max-height: 38vh; max-height: 38dvh; }
+    .options { margin-top: 12px; }
+  }
+
+  @media (max-width: 767px) {
+    .brand-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .glass { padding: 20px; border-radius: 20px; }
+    .pickone .btn, .planted .btn { width: 100%; }
+    .pin { grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); }
+    /* 모바일 스플래시: 아래로 버튼과 점 표시 없이, 화면을 누르면 다음 장면으로 넘어간다 */
+    .hint, .dots { display: none; }
+    /* 시작하기는 세 장면 내내 같은 자리에 있다. 마지막 장면의 파란 버튼은 같은 곳으로 가니 모바일에서는 뺀다. 위의 건너뛰기는 모바일에서도 둔다 */
+    .cap .btn { display: none; }
+    .startglass {
+      position: absolute; left: 50%; bottom: clamp(36px, 9dvh, 88px); transform: translateX(-50%);
+      display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 0 12px 0 16px; border-radius: 9999px;
+      background: color-mix(in srgb, var(--panel) 44%, transparent);
+      -webkit-backdrop-filter: blur(22px) saturate(1.6); backdrop-filter: blur(22px) saturate(1.6);
+      box-shadow: inset 0 0 0 1px var(--edge), inset 0 1px 0 var(--sheen), 0 10px 28px -14px rgba(23, 23, 25, 0.28);
+      color: var(--fg2); font-weight: 500; font-size: 13px; line-height: 18px; text-decoration: none; white-space: nowrap;   /* 글자와 아이콘은 넓은 화면의 아래로 버튼과 같다 */
+      transition: transform 0.3s var(--ease), background-color 0.3s var(--ease);
+    }
+    .startglass:active { transform: translateX(-50%) scale(0.97); background: color-mix(in srgb, var(--panel) 60%, transparent); }
+    .startglass svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; animation: nudge-x 1.8s var(--ease) infinite; }
+    @media (max-height: 700px) { .startglass { bottom: 24px; } }
+    .pin { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  }
+  @media (min-width: 900px) {
+    /* 넓은 화면의 스플래시: 글은 왼쪽, 장면은 오른쪽 */
+    .pin { grid-template-rows: none; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); align-items: center; padding-inline: max(48px, 8vw); gap: 32px; }
+    .pin .hero3d { grid-column: 2; grid-row: 1; width: 100%; max-width: 620px; height: min(74vh, 620px); align-self: center; justify-self: center; }
+    .caps { grid-column: 1; grid-row: 1; height: 300px; max-width: 520px; justify-self: end; }
+    .cap { justify-items: start; text-align: left; }
+    .cap p { max-width: 30ch; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .rise, .meta.swap h2, .meta.swap p, .hint svg, .startglass svg, .planted.go h1, .planted.go p, .planted.go .btn, .planted.go .textbtn { animation: none; }
+    .seed .card, .seed .card::after, .btn, .arrow { transition: none; }
+  }
+
+}
+
+@keyframes rise { from { opacity: 0; transform: translateY(18px); filter: blur(8px); } to { opacity: 1; transform: none; filter: blur(0); } }
+@keyframes nudge { 0%, 100% { transform: translateY(-2px); } 50% { transform: translateY(3px); } }
+@keyframes nudge-x { 0%, 100% { transform: translateX(-1px); } 50% { transform: translateX(3px); } }

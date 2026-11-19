@@ -5,6 +5,7 @@ import type { Theme } from '@montage-ui/core';
 import { IconFireFill } from '@montage-ui/icon';
 
 import { GARDEN } from '@/lib/copy';
+import { fruitCount } from '@/lib/rules';
 import type { GardenView as View } from '@/lib/view';
 
 import Panel from './Panel';
@@ -55,7 +56,7 @@ export default function GardenView({ view }: { view: View }) {
               )}
             </FlexBox>
             <Box sx={{ flexShrink: 0 }}>
-              <TreeFigure seed={m.seed} days={m.days} harvested={m.harvested} label={m.figureLabel} mini />
+              <TreeFigure seed={m.seed} days={m.days} fruits={fruitCount(m.days)} harvested={m.harvested} label={m.figureLabel} mini />
             </Box>
           </Panel>
         ))}

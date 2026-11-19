@@ -1,32 +1,30 @@
 'use client';
 
-import {
-  Button, FlexBox, FormControl, FormControlField, FormControlLabel, FormControlMessage, FormControlNegativeMessage, TextField, Typography,
+import { FlexBox, FormControl, FormControlField, FormControlLabel, FormControlMessage, FormControlNegativeMessage, TextField, Typography,
 } from '@montage-ui/core';
 import { useActionState, useId, useState } from 'react';
 
 import { signUp } from '@/app/actions';
 import { FIELD, SIGNUP } from '@/lib/copy';
-import type { ActionResult, PlanKey, SeedKey } from '@/lib/types';
+import type { ActionResult, PlanKey } from '@/lib/types';
 
 import AuthFoot from './AuthFoot';
+import PrimaryButton from './orchard/WaterFill';
 import PasswordField from './PasswordField';
 import PlanPicker from './PlanPicker';
-import SeedPicker from './SeedPicker';
 import { useActionResult } from './useActionResult';
 import { useFirstErrorFocus } from './useFirstErrorFocus';
 
 // spec 3.4 가입
 const LEAD_BOTTOM = 24;
 const FIELD_GAP = 16;
-const ORDER = ['name', 'email', 'password', 'passwordConfirm', 'seed', 'plan'] as const;
+const ORDER = ['name', 'email', 'password', 'passwordConfirm', 'plan'] as const;
 
 export default function SignupForm({ closed }: { closed: boolean }) {
   const [state, action, pending] = useActionState<ActionResult | null, FormData>(signUp, null);
   const [v, setV] = useState({ name: '', email: '', password: '', passwordConfirm: '' });
-  const [seed, setSeed] = useState<SeedKey | ''>('');
   const [plan, setPlan] = useState<PlanKey | ''>('');
-  const ids = { seed: useId(), plan: useId(), seedMsg: useId(), planMsg: useId() };
+  const ids = { plan: useId(), planMsg: useId() };
   const errors = state && !state.ok ? state.errors : undefined;
   const bind = useFirstErrorFocus(errors, ORDER);
   useActionResult(state);
@@ -76,15 +74,6 @@ export default function SignupForm({ closed }: { closed: boolean }) {
         ))}
 
         <FormControl>
-          <Typography id={ids.seed} variant="label1" weight="medium" color="semantic.foreground.neutral.secondary">{FIELD.seed.label}</Typography>
-          <SeedPicker value={seed} onChange={setSeed} labelledBy={ids.seed} describedBy={ids.seedMsg} invalid={!!errors?.seed} firstRef={bind('seed')} />
-          <input type="hidden" name="seed" value={seed} />
-          {errors?.seed
-            ? <FormControlNegativeMessage id={ids.seedMsg}>{errors.seed}</FormControlNegativeMessage>
-            : <FormControlMessage id={ids.seedMsg}>{FIELD.seed.help}</FormControlMessage>}
-        </FormControl>
-
-        <FormControl>
           <Typography id={ids.plan} variant="label1" weight="medium" color="semantic.foreground.neutral.secondary">{FIELD.plan.label}</Typography>
           <PlanPicker value={plan} onChange={setPlan} labelledBy={ids.plan} describedBy={ids.planMsg} invalid={!!errors?.plan} firstRef={bind('plan')} />
           <input type="hidden" name="plan" value={plan} />
@@ -93,7 +82,7 @@ export default function SignupForm({ closed }: { closed: boolean }) {
             : <FormControlMessage id={ids.planMsg}>{FIELD.plan.help}</FormControlMessage>}
         </FormControl>
 
-        <Button type="submit" variant="solid" color="primary" size="large" fullWidth loading={pending}>{SIGNUP.submit}</Button>
+        <PrimaryButton type="submit" size="large" fullWidth loading={pending}>{SIGNUP.submit}</PrimaryButton>
       </FlexBox>
       {foot}
     </>

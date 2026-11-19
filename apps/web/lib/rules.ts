@@ -14,6 +14,9 @@ export const SEEDS = {
   coffee:    { label: '커피',   fruit: '커피 열매', obj: '를' },
 } as const;
 export const FRUIT_DAYS = 20;
+// 20일에 열매 다섯 개가 맺히고, 그 뒤로 출근한 날마다 하나씩 는다. 20일 전에는 0
+export const FRUIT_BASE = 5;
+export const fruitCount = (days: number) => (days >= FRUIT_DAYS ? FRUIT_BASE + (days - FRUIT_DAYS) : 0);
 export const STAGES = [
   { key: 'seed',    label: '씨앗', from: 0 },
   { key: 'sprout',  label: '새싹', from: 1 },

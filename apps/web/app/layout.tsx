@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import type { PropsWithChildren } from 'react';
 
 import '@montage-ui/core/global.css';
+import '@/lib/orchard/engine.css';
+import './orchard.css';
 
 import { APP_NAME } from '@/lib/copy';
 

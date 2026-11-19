@@ -25,8 +25,12 @@ export const DASH = '–';
 export const APP_NAME = '커리어캠프 출근부';
 /** 홈 화면 아이콘 아래처럼 좁은 곳에 쓰는 이름 */
 export const APP_SHORT_NAME = '커리어캠프';
+export const BRAND = {
+  /** 헤더의 원티드 로고를 스크린리더가 읽는 이름 */
+  wanted: '원티드',
+};
 export const NAV = {
-  home: '내 나무',
+  home: '내 씨앗',
   calendar: '캘린더',
   garden: '모두의 과수원',
   gardenShort: '과수원',
@@ -36,19 +40,63 @@ export const HEADER = {
   userName: (name: string) => `${name}님`,
   openSettings: '내 설정 열기',
   signOut: '로그아웃',
+  /** 헤더의 화면 테마 전환(3.2) */
+  theme: '화면 테마',
+  themeModes: { light: 'Light', dark: 'Dark', system: 'Auto' },
 } as const;
 export const PAGE_TITLES = {
   login: '로그인',
   signup: '가입하기',
-  home: '내 나무',
+  home: '내 씨앗',
   calendar: '캘린더',
   garden: '모두의 과수원',
+  start: '시작하기',
+  seeds: '씨앗 고르기',
+  fruit: '열매가 열렸어요',
 } as const;
 
 export const planLabel = (p: PlanKey) => PLANS[p].label;
 export const seedLabel = (s: SeedKey) => SEEDS[s].label;
 export const fruitLabel = (s: SeedKey) => SEEDS[s].fruit;
 export const treeName = (s: SeedKey) => `${SEEDS[s].label}나무`;
+
+/* ---------- 스플래시, 씨앗 고르기, 20일 열매 화면 ---------- */
+export const SPLASH = {
+  skip: '건너뛰기',
+  start: '시작하기',
+  down: '아래로',
+  nextLabel: '다음 장면으로',
+  heroLabel: '사과, 귤, 복숭아, 커피 열매가 모여 씨앗 하나가 되고, 씨앗이 흙에 내려앉는 모습',
+  // 제목 위 표지는 영문 글자만 쓴다. title 과 text 는 줄 단위
+  scenes: [
+    { eyebrow: 'Wanted Career Camp', title: ['새로운 여정이', '시작돼요'], text: [APP_NAME] },
+    { eyebrow: 'Step 1', title: ['씨앗 하나를 골라요'], text: ['사과, 귤, 복숭아, 커피.', '캠프 동안 내가 키울 나무예요.'] },
+    { eyebrow: 'Step 2', title: ['출근한 날만큼 자라요'], text: ['어떤 나무가 될지는 직접 키우면서 만나요.'] },
+  ],
+} as const;
+export const SEED_SCREEN = {
+  title: '어떤 씨앗을 심을까요?',
+  prev: '이전 씨앗',
+  next: '다음 씨앗',
+  legend: '씨앗 고르기',
+  heroLabel: '고른 씨앗의 열매. 잡고 좌우로 끌면 돌아가요',
+  note: { apple: '아삭하고 단단해요.', tangerine: '새콤달콤해요.', peach: '보송보송 달콤해요.', coffee: '진한 향이 나요.' },
+  plant: (seed: SeedKey) => `${SEEDS[seed].label} 씨앗 심기`,
+  planted: (seed: SeedKey) => `${SEEDS[seed].label} 씨앗을 심었어요`,
+  plantedText: '출근할 때마다 조금씩 자라요.',
+  plantedLabel: '파 놓은 흙에 씨앗이 떨어지고 작은 새싹이 올라오는 모습',
+  toHome: '내 씨앗 보러 가기',
+  again: '씨앗 다시 고르기',
+} as const;
+export const FRUIT_SCREEN = {
+  eyebrow: 'Day 20',
+  /** 두 줄 제목 */
+  title: (seed: SeedKey) => ['내 씨앗이', `${SEEDS[seed].label}나무로 열렸어요`] as const,
+  text: '고생했어요',
+  close: '닫기',
+  replay: '다시 보기',
+  heroLabel: '꽃이 핀 나무에 열매가 하나씩 맺혀 과일나무가 되는 모습',
+} as const;
 
 /* ---------- 로그인·가입 (3.3, 3.4) ---------- */
 export const FIELD = {
@@ -73,8 +121,8 @@ export const LOGIN = {
 } as const;
 export const SIGNUP = {
   title: '가입하기',
-  lead: '씨앗을 하나 골라 심어요. 출근한 날만큼 자라요.',
-  submit: '가입하고 씨앗 심기',
+  lead: '가입하면 씨앗을 하나 골라 심어요. 출근한 날만큼 자라요.',
+  submit: '가입하고 씨앗 고르기',
   footPrefix: '이미 가입했다면 ',
   footLink: '로그인',
   closed: `${koDay(SEASON.end)}로 시즌이 끝나 새로 가입할 수 없어요.`,
@@ -138,7 +186,7 @@ export const WEEK = {
 
 /* ---------- 홈: 내 나무 (3.5) ---------- */
 export const TREE = {
-  title: '내 나무',
+  title: '내 씨앗',
   headline: {
     harvested: (seed: SeedKey) => `${SEEDS[seed].fruit}${SEEDS[seed].obj} 수확했어요`,
     canHarvest: '열매가 열렸어요',
@@ -149,8 +197,24 @@ export const TREE = {
   openCard: '수확 카드 보기',
   canHarvestTitle: '수확할 수 있어요',
   canHarvestDesc: '나무의 열매를 눌러 수확하세요. 커피 쿠폰으로 바꿀 수 있는 수확 카드가 나와요.',
-  nowNone: '아직 출근한 날이 없어요.',
-  now: (days: number, stage: string) => `지금까지 ${days}일 출근했고, 지금은 ${stage} 단계예요.`,
+  // 지금 모습을 말하듯 한 줄로. "단계"라는 말은 쓰지 않는다(3.5)
+  nowLine: {
+    seed: '아직 씨앗이에요. 첫 출근으로 싹을 틔워 주세요.',
+    sprout: '아직 새싹이에요. 물을 더 줘서 가꿔 주세요.',
+    sapling: '묘목으로 자랐어요. 꾸준히 물을 주면 나무가 돼요.',
+    tree: '어느새 나무가 됐어요. 곧 꽃망울이 맺혀요.',
+    flower: '지금은 꽃이 피었네요. 열매가 머지않았어요.',
+    fruit: '열매가 열렸어요. 출근할 때마다 하나씩 더 열려요.',
+  },
+  /** 작은 글씨로 두는 둘째 줄: 출근한 날과 다음까지 남은 날 */
+  nextLine: (days: number, next: string) => (days ? `출근 ${days}일 · ${next.replace(/\.$/, '')}` : next.replace(/\.$/, '')),
+  fruitLine: (days: number, fruits: number) => `출근 ${days}일 · 열매 ${fruits}개`,
+  /** 씨앗 칩을 누르면 뜨는 안내 */
+  seedTip: (seed: SeedKey) => `${SEEDS[seed].label} 씨앗을 골랐어요.`,
+  fruitTip: `열매는 출근 ${FRUIT_DAYS}일에 열려요.`,
+  /** 출근한 순간 나무 위에 떠오르는 글 */
+  plusDay: '+1일',
+  plusFruit: '+1일 · 열매 +1',
   next: {
     sprout: () => '하루 나오면 새싹이 나요.',
     sapling: (n: number) => `${n}일 더 나오면 묘목으로 자라요.`,
@@ -160,14 +224,28 @@ export const TREE = {
     over: `${koDay(SEASON.end)}로 시즌이 끝났어요.`,
   },
   short: (n: number) => `남은 출근일을 모두 나와도 열매까지는 ${n}일이 모자라요. 그래도 나무는 계속 자라요.`,
-  fruitNote: `열매는 출근 ${FRUIT_DAYS}일에 열리고, 수확하면 커피 쿠폰으로 바꿀 수 있어요.`,
   trackLabel: (n: number) => `열매까지 ${FRUIT_DAYS}일 중 ${n}일`,
   trackDays: (n: number) => `${n}일`,
   figureLabel: (seed: SeedKey, days: number, stageOrHarvested: string) =>
     `내 ${SEEDS[seed].label}나무. 출근 ${days}일, ${stageOrHarvested}.`,
-  stage: (label: string) => `${label} 단계`,
+  stage: (label: string) => label,
   harvestedTag: '수확 완료',
   harvestButton: (seed: SeedKey) => `${SEEDS[seed].fruit} 수확하기`,
+} as const;
+
+/* ---------- 홈: 배지 (3.5) ---------- */
+export const BADGES = {
+  title: '배지',
+  first: '첫 출근',
+  week: '주간 목표',
+  streak: (n: number) => `${n}주 연속`,
+  streakNone: '연속 달성',
+  ten: '10일 출근',
+  harvest: '첫 수확',
+  locked: '잠김',
+  summary: (n: number) => `${n}개를 모았어요. 남은 배지는 모으면 열려요.`,
+  summaryAll: '배지를 모두 모았어요.',
+  summaryNone: '출근하면 배지가 하나씩 열려요.',
 } as const;
 
 /* ---------- 홈: 오늘 그라운드 (3.5) ---------- */
@@ -221,18 +299,16 @@ export const SETTINGS = {
   cancel: '취소',
   save: '저장하기',
   saved: '설정을 저장했어요.',
+  signOut: '로그아웃',
 } as const;
 
 /* ---------- 수확 카드 (3.9, 4.7) ---------- */
 export const CARD = {
   title: '수확 카드',
   close: '닫기',
-  help: '이 이미지를 복사해 운영진에게 DM으로 보내면 커피 쿠폰으로 바꿔 드려요.',
-  copy: '이미지 복사',
-  save: '이미지 저장',
-  copied: '이미지를 복사했어요. DM에 붙여 넣으세요.',
-  copyFailed: '여기서는 바로 복사할 수 없어요. 이미지를 길게 누르거나 오른쪽 버튼으로 복사해 주세요.',
-  saveFailed: '저장하지 못했어요. 이미지를 길게 눌러 저장해 주세요.',
+  save: '저장하기',
+  saved: '카드를 저장했어요',
+  saveFailed: '저장하지 못했어요. 화면을 캡처해 보내 주세요.',
   fileName: (date: string) => `harvest-${date}.png`,
   alt: (name: string, seed: SeedKey, days: number, plan: PlanKey, harvested: string) =>
     `${name}님의 수확 카드. ${SEEDS[seed].fruit}, 총 출근 ${days}일, 출근 플랜 ${PLANS[plan].label}, 수확한 날 ${md(harvested)}.`,
@@ -243,7 +319,8 @@ export const CARD = {
   sub: (days: number) => `${days}일 출근해서 열매를 수확했어요`,
   cells: { days: '총 출근', plan: '출근 플랜', first: '첫 출근', harvested: '수확한 날' },
   daysValue: (n: number) => `${n}일`,
-  dotsLabel: (from: string, to: string) => `출근 기록 (${md(from)} ~ ${md(to)})`,
+  record: (total: number, days: number) => `출근일 ${total}일 중 ${days}일`,
+  percent: (n: number) => `${n}%`,
   foot: '이 이미지를 운영진에게 DM으로 보내 주세요',
 } as const;
 

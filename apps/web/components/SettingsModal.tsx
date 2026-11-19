@@ -9,7 +9,7 @@ import { useActionState, useId, useState } from 'react';
 
 import { updateProfile } from '@/app/actions';
 import { FIELD, SETTINGS } from '@/lib/copy';
-import type { ActionResult, PlanKey, Profile, SeedKey } from '@/lib/types';
+import type { ActionResult, Member, PlanKey, SeedKey } from '@/lib/types';
 
 import PlanPicker from './PlanPicker';
 import SeedPicker from './SeedPicker';
@@ -19,9 +19,10 @@ import { useFirstErrorFocus } from './useFirstErrorFocus';
 const FIELD_GAP = 24;
 const ORDER = ['name'] as const;
 
-type Me = Pick<Profile, 'name' | 'seed' | 'plan'> & { harvested: boolean };
+type Me = Pick<Member, 'name' | 'seed' | 'plan'> & { harvested: boolean };
+type SignOut = { onSignOut: () => void; signingOut: boolean };
 
-function SettingsForm({ me, onDone }: { me: Me; onDone: () => void }) {
+function SettingsForm({ me, onDone, onSignOut, signingOut }: { me: Me; onDone: () => void } & SignOut) {
   const [state, action, pending] = useActionState<ActionResult | null, FormData>(updateProfile, null);
   const [seed, setSeed] = useState<SeedKey>(me.seed);
   const [plan, setPlan] = useState<PlanKey>(me.plan);
@@ -73,6 +74,11 @@ function SettingsForm({ me, onDone }: { me: Me; onDone: () => void }) {
             <input type="hidden" name="plan" value={plan} />
             <FormControlMessage id={ids.planHelp}>{SETTINGS.planHelp}</FormControlMessage>
           </FormControl>
+
+          {/* 로그아웃은 헤더가 아니라 여기 맨 아래에 둔다 (spec 3.8) */}
+          <div className="orchard-signout">
+            <button type="button" onClick={onSignOut} disabled={signingOut}>{SETTINGS.signOut}</button>
+          </div>
         </FlexBox>
       </ModalContent>
       <ActionArea variant="neutral">
@@ -83,11 +89,11 @@ function SettingsForm({ me, onDone }: { me: Me; onDone: () => void }) {
   );
 }
 
-export default function SettingsModal({ open, onOpenChange, me }: { open: boolean; onOpenChange: (v: boolean) => void; me: Me }) {
+export default function SettingsModal({ open, onOpenChange, me, onSignOut, signingOut }: { open: boolean; onOpenChange: (v: boolean) => void; me: Me } & SignOut) {
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContainer variant="bottom" size="large" sm={{ variant: 'popup' }}>
-        {open && <SettingsForm me={me} onDone={() => onOpenChange(false)} />}
+        {open && <SettingsForm me={me} onDone={() => onOpenChange(false)} onSignOut={onSignOut} signingOut={signingOut} />}
       </ModalContainer>
     </Modal>
   );

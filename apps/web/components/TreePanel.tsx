@@ -1,15 +1,17 @@
 'use client';
 
 import { Box, Button, ContentBadge, FlexBox, SectionMessage, Typography } from '@montage-ui/core';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 
 import { TREE } from '@/lib/copy';
+import { levelLook } from '@/lib/orchard/extras';
 import type { TreeView } from '@/lib/view';
 
 import GrowthTrack from './GrowthTrack';
 import Panel from './Panel';
 import TreeFigure from './TreeFigure';
 
-// spec 3.5 내 나무 패널
+// spec 3.5 내 씨앗 패널
 const HEADLINE_TOP = 8;
 const BODY_TOP = 12;
 const BODY_GAP = 24;
@@ -17,21 +19,57 @@ const FIG = 240;
 const FIG_M = 220;
 const SIDE_TOP = 28;
 const SIDE_GAP = 16;
+const TIP_MS = 5000;
+
+/** 씨앗 칩: 누르면 어떤 씨앗을 골랐는지 툴팁처럼 알려 준다 */
+function SeedChip({ label, tip }: { label: string; tip: string[] }) {
+  const [open, setOpen] = useState(false);
+  const wrap = useRef<HTMLSpanElement>(null);
+  const id = useId();
+  useEffect(() => {
+    if (!open) return;
+    const timer = setTimeout(() => setOpen(false), TIP_MS);
+    const away = (e: MouseEvent) => { if (!wrap.current?.contains(e.target as Node)) setOpen(false); };
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('click', away);
+    document.addEventListener('keydown', esc);
+    return () => { clearTimeout(timer); document.removeEventListener('click', away); document.removeEventListener('keydown', esc); };
+  }, [open]);
+  return (
+    <span className="orchard-seedtip" ref={wrap}>
+      <span
+        role="button"
+        tabIndex={0}
+        aria-expanded={open}
+        aria-describedby={id}
+        onClick={() => setOpen(v => !v)}
+        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpen(v => !v); } }}
+      >
+        <ContentBadge size="medium" color="neutral" variant="solid">{label}</ContentBadge>
+      </span>
+      <span role="tooltip" id={id} hidden={!open}>
+        {tip.map(line => <span key={line}>{line}</span>)}
+      </span>
+    </span>
+  );
+}
 
 type Props = {
   view: TreeView;
-  animateNewest: boolean;
   harvesting: boolean;
   onHarvest: () => void;
   onOpenCard: () => void;
+  /** 출근해서 자라는 장면이 끝난 뒤 */
+  onGrown: (days: number) => void;
 };
 
-export default function TreePanel({ view, animateNewest, harvesting, onHarvest, onOpenCard }: Props) {
+export default function TreePanel({ view, harvesting, onHarvest, onOpenCard, onGrown }: Props) {
+  const look = useMemo(() => levelLook(view.days, view.harvested), [view.days, view.harvested]);
   return (
-    <Panel aria-labelledby="h-tree">
+    <Panel aria-labelledby="h-tree" order={2}>
       <FlexBox alignItems="center" justifyContent="space-between" gap={12}>
         <Typography as="h2" id="h-tree" variant="headline2" weight="bold" color="semantic.foreground.neutral.primary">{TREE.title}</Typography>
-        <ContentBadge size="medium" color="neutral" variant="solid">{view.seedLabel}</ContentBadge>
+        <SeedChip label={view.seedLabel} tip={view.tip} />
       </FlexBox>
       <Typography as="p" variant="heading1" weight="bold" color="semantic.foreground.neutral.primary" sx={{ marginTop: HEADLINE_TOP }}>
         {view.headline}
@@ -45,11 +83,13 @@ export default function TreePanel({ view, animateNewest, harvesting, onHarvest, 
           <TreeFigure
             seed={view.seed}
             days={view.days}
+            fruits={view.fruits}
             harvested={view.harvested}
             label={view.figureLabel}
-            animateNewest={animateNewest}
             onHarvest={view.canHarvest && !harvesting ? onHarvest : undefined}
             harvestLabel={view.harvestLabel}
+            onGrown={onGrown}
+            level
           />
         </Box>
         <FlexBox
@@ -68,11 +108,14 @@ export default function TreePanel({ view, animateNewest, harvesting, onHarvest, 
             <SectionMessage variant="positive" description={TREE.canHarvestDesc} sx={{ width: '100%' }}>{TREE.canHarvestTitle}</SectionMessage>
           )}
           {view.lead.kind === 'progress' && (
-            <Typography as="p" variant="body2-reading" color="semantic.foreground.neutral.secondary">{view.lead.text}</Typography>
+            <p data-orchard-lead="">
+              <span className="orchard-now">{view.lead.now}</span>
+              <span className="orchard-next">{view.lead.next}</span>
+            </p>
           )}
+          {view.count && <p data-orchard-lead=""><span className="orchard-next">{view.count}</span></p>}
           {view.short && <Typography as="p" variant="body2-reading" color="semantic.foreground.neutral.tertiary">{view.short}</Typography>}
-          <GrowthTrack track={view.track} />
-          {view.note && <Typography as="p" variant="body2-reading" color="semantic.foreground.neutral.tertiary">{view.note}</Typography>}
+          <GrowthTrack track={view.track} hue={look.hue} deep={look.deep} />
         </FlexBox>
       </FlexBox>
     </Panel>
