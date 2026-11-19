@@ -65,11 +65,13 @@ export default function SplashScreen() {
     };
   }, [progress, view]);
 
+  // 다음 장면으로 넘긴다. 마지막 장면이라 넘어갈 곳이 없으면 false
   const advance = () => {
     const max = document.documentElement.scrollHeight - window.innerHeight;
     const at = progress() * (N - 1);
-    if (at > N - 1.05) return;   // 마지막 장면에서는 넘어갈 곳이 없다(시작하기로 간다)
+    if (at > N - 1.05) return false;   // 마지막 장면에서는 넘어갈 곳이 없다(시작하기로 간다)
     window.scrollTo({ top: max * Math.min(N - 1, Math.floor(at + 0.05) + 1) / (N - 1), behavior: 'smooth' });
+    return true;
   };
 
   return (
@@ -110,7 +112,8 @@ export default function SplashScreen() {
               <span>{SPLASH.down}</span>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9.5l6 6 6-6" /></svg>
             </button>
-            <Link className="startglass" href="/login">
+            {/* 모바일의 시작하기: 화면을 누를 때처럼 다음 장면(Step 1, Step 2)으로 넘기고, 마지막 장면에서 누르면 로그인으로 간다(spec 3.12) */}
+            <Link className="startglass" href="/login" onClick={e => { if (advance()) e.preventDefault(); }}>
               <span>{SPLASH.start}</span>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6l6 6-6 6" /></svg>
             </Link>
