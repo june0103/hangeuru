@@ -5,7 +5,7 @@ import {
   FormControlNegativeMessage, IconButton, Modal, ModalContainer, ModalContent, ModalNavigation, TextField, Typography,
 } from '@montage-ui/core';
 import { IconClose } from '@montage-ui/icon';
-import { useActionState, useId, useState } from 'react';
+import { useActionState, useEffect, useId, useRef, useState } from 'react';
 
 import { updateProfile } from '@/app/actions';
 import { FIELD, SETTINGS } from '@/lib/copy';
@@ -32,8 +32,16 @@ function SettingsForm({ me, onDone, onSignOut, signingOut }: { me: Me; onDone: (
 
   useActionResult(state, onDone);
 
+  // 창 자체를 패널과 같은 유리로 한다(수확 카드 창과 같은 톤, app/orchard.css)
+  const form = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    const dlg = form.current?.closest('[role="dialog"]');
+    dlg?.setAttribute('data-orchard-modal', 'glass');
+    return () => dlg?.removeAttribute('data-orchard-modal');
+  }, []);
+
   return (
-    <FlexBox as="form" action={action} noValidate flex="1" flexDirection="column" sx={{ minHeight: 0 }}>
+    <FlexBox as="form" ref={form} action={action} noValidate flex="1" flexDirection="column" sx={{ minHeight: 0 }}>
       <ModalNavigation
         trailingContent={
           <IconButton aria-label={SETTINGS.close} onClick={onDone}><IconClose /></IconButton>

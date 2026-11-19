@@ -25,7 +25,8 @@ function CardBody({ model, onClose }: { model: CardModel; onClose: () => void })
   useEffect(() => {
     const dlg = card.current?.closest('[role="dialog"]');
     dlg?.setAttribute('data-orchard-modal', 'glass');
-    return () => dlg?.removeAttribute('data-orchard-modal');
+    dlg?.setAttribute('data-orchard-size', 'card');
+    return () => { dlg?.removeAttribute('data-orchard-modal'); dlg?.removeAttribute('data-orchard-size'); };
   }, []);
 
   const save = () => {
