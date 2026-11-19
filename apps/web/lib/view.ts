@@ -293,7 +293,8 @@ export type MemberCardView = {
   streakText: string | null;
   figureLabel: string;
 };
-export type GardenView = { lead: string; members: MemberCardView[] };
+/** lead 는 한 문장으로 이은 것, leadLines 는 [오늘 문장, 수확 문장]. 768px 미만에서는 수확 문장을 다음 줄로 내린다(3.7) */
+export type GardenView = { lead: string; leadLines: [string, string]; members: MemberCardView[] };
 
 export function gardenView(meId: string, profiles: Profile[], all: Attendance[], today: string): GardenView {
   const byUser = new Map<string, Attendance[]>();
@@ -313,9 +314,11 @@ export function gardenView(meId: string, profiles: Profile[], all: Attendance[],
   const came = list.filter(x => x.r).length;
   const hv = list.filter(x => x.p.harvestedAt).length;
   const hvText = hv ? GARDEN.harvestedSome(hv) : GARDEN.harvestedNone;
-  const lead = today > SEASON.end ? GARDEN.over(hvText) : !isWorkday(today) ? GARDEN.rest(hvText) : GARDEN.workday(list.length, came, hvText);
+  const leadOf = (hvPart: string) => today > SEASON.end ? GARDEN.over(hvPart) : !isWorkday(today) ? GARDEN.rest(hvPart) : GARDEN.workday(list.length, came, hvPart);
+  const lead = leadOf(hvText);
   return {
     lead,
+    leadLines: [leadOf('').trim(), hvText],
     members: list.map(({ p, st, r }) => ({
       id: p.id,
       name: p.name,
