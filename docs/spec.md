@@ -950,6 +950,8 @@ grant select, insert, update, delete on public.profiles, public.attendance to se
 | 새 사용자 공개 가입 | 끔. Supabase API로 직접 가입하지 못하게 막고, 가입 폼을 받은 서버 액션만 사용자를 만든다 |
 | 이메일 확인 메일 | 보내지 않는다. 서버가 확인된 상태(`email_confirm: true`)로 만든다 |
 | 비밀번호 최소 길이 | 8 |
+| Rate Limits: sign-ups and sign-ins | IP당 5분에 100회(기본 30). 모든 로그인이 Vercel 서버 IP에서 나가 구성원 약 30명이 나눠 쓴다 |
+| Rate Limits: token refreshes | IP당 5분에 150회(기본값 그대로). 로그인 유지 갱신은 한 사람당 약 1시간에 한 번이다 |
 
 ### 7.5 화면별 조회
 
@@ -997,7 +999,7 @@ grant select, insert, update, delete on public.profiles, public.attendance to se
 
 **signIn**
 
-형식 검사를 통과하면 `signInWithPassword`를 부른다. 실패 이유와 상관없이 `errors.password`에 "이메일 또는 비밀번호가 맞지 않아요."만 돌려줘, 가입된 이메일인지 알 수 없게 한다. 다만 Supabase 로그인 횟수 제한(429)에 걸리면 `message: '요청이 많아 잠시 기다려야 해요. 잠시 후 다시 시도해 주세요.'`를 돌려준다. 모든 로그인이 Vercel 서버 IP에서 나가서 구성원 전체가 같은 제한을 나눠 쓰기 때문이다. 운영자는 Supabase Authentication → Rate Limits에서 한도를 넉넉히 둔다
+형식 검사를 통과하면 `signInWithPassword`를 부른다. 실패 이유와 상관없이 `errors.password`에 "이메일 또는 비밀번호가 맞지 않아요."만 돌려줘, 가입된 이메일인지 알 수 없게 한다. 다만 Supabase 로그인 횟수 제한(429)에 걸리면 `message: '요청이 많아 잠시 기다려야 해요. 잠시 후 다시 시도해 주세요.'`를 돌려준다. 모든 로그인이 Vercel 서버 IP에서 나가서 구성원 전체가 같은 제한을 나눠 쓰기 때문이다. 운영자는 Supabase Authentication → Rate Limits에서 한도를 넉넉히 둔다(7.4)
 
 **checkIn**
 
