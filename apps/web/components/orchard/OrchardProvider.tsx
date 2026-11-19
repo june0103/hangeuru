@@ -33,6 +33,8 @@ const vars = (theme: Theme) => {
       '--o-cell': addOpacity(white, 0.62),
       '--o-cell-edge': addOpacity(s.line.neutral.primary, 0.6),
       '--o-bar': '78%',
+      // 유리 창(프로필) 바탕의 농도. 딤 위에서 회색으로 탁해지지 않게 패널보다 짙다
+      '--o-glass-modal': '88%',
       '--o-edge': addOpacity(white, 0.7),
       '--o-sheen': addOpacity(white, 0.8),
       '--o-shadow': addOpacity(black, 0.24),
@@ -47,6 +49,12 @@ const vars = (theme: Theme) => {
       '--o-cell': addOpacity(white, 0.08),
       '--o-cell-edge': addOpacity(white, 0.14),
       '--o-bar': '62%',
+      '--o-glass-modal': '80%',
+      // 다크에서는 색 번짐을 어둡게(유리 창 바탕)
+      '--oc-b1': addOpacity(theme.atomic.pink[60], 0.3),
+      '--oc-b2': addOpacity(theme.atomic.orange[50], 0.26),
+      '--oc-b3': addOpacity(theme.atomic.lightBlue[50], 0.24),
+      '--oc-b4': addOpacity(theme.atomic.violet[50], 0.3),
       '--o-edge': addOpacity(white, 0.1),
       '--o-sheen': addOpacity(white, 0.1),
       '--o-shadow': addOpacity(black, 0.7),

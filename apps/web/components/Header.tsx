@@ -30,7 +30,7 @@ type Props = {
 };
 
 // 헤더(spec 3.2): 색 띠 없이 배경에 녹는다. 768px 이상은 로고 왼쪽, 탭 셋 가운데, 테마 전환과 이름 오른쪽.
-// 로그아웃은 내 설정 창에 있다(3.8). 바탕과 자리 잡기는 app/orchard.css 의 body > header, [data-orchard-head]
+// 로그아웃은 내 설정 창에 있다(3.8). 바탕과 자리 잡기는 app/orchard.css 의 :is(body,.o-scroll) > header, [data-orchard-head]
 export default function Header({ userName, onOpenSettings }: Props) {
   const pathname = usePathname();
   return (

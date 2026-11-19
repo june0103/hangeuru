@@ -1,6 +1,7 @@
 'use client';
 
 import { type KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import { TREE } from '@/lib/copy';
 import { type StageView, stageOf } from '@/lib/orchard/engine';
@@ -43,15 +44,18 @@ type Props = {
   harvestLabel?: string;
   /** 출근해서 자라는 장면(물 주기, 열매 추가)이 끝난 뒤. 새 출근일을 준다 */
   onGrown?: (days: number) => void;
-  /** 레벨 표시를 붙일지(홈의 내 나무만) */
-  level?: boolean;
+  /** 레벨 표시를 그릴 자리(홈의 내 씨앗 패널 머리줄, 씨앗 칩 아래). 없으면 레벨 표시를 그리지 않는다 */
+  levelSlot?: HTMLElement | null;
+  /** 레벨 표시를 누르면(수확한 뒤에만 준다) */
+  onLevel?: () => void;
+  levelActionLabel?: string;
 };
 
-export default function TreeFigure({ seed, days, fruits = 0, harvested, label, mini = false, onHarvest, harvestLabel, onGrown, level = false }: Props) {
+export default function TreeFigure({ seed, days, fruits = 0, harvested, label, mini = false, onHarvest, harvestLabel, onGrown, levelSlot, onLevel, levelActionLabel }: Props) {
   const api = useOrchard();
   const wrap = useRef<HTMLSpanElement>(null);
   const fig = useRef<HTMLSpanElement>(null);
-  const badge = useRef<HTMLSpanElement>(null);
+  const badge = useRef<HTMLElement>(null);
   // 화면에 그려진 상태. 출근하면 props 가 먼저 바뀌고, 물 주는 장면이 끝난 뒤에 이 값이 따라간다
   const [shown, setShown] = useState({ days, harvested });
   const grew = useRef(false);
@@ -115,7 +119,7 @@ export default function TreeFigure({ seed, days, fruits = 0, harvested, label, m
   useEffect(() => {
     const p = badge.current?.querySelector<SVGPathElement>('.p');
     if (p) p.style.strokeDasharray = dashOf(look);
-  }, [look]);
+  }, [look, levelSlot, onLevel]);
 
   const harvest = () => {
     const el = wrap.current as (HTMLSpanElement & { __dragged?: boolean }) | null;
@@ -144,15 +148,28 @@ export default function TreeFigure({ seed, days, fruits = 0, harvested, label, m
       style={mini ? { width: MINI.w, height: MINI.h, flex: 'none' } : { width: '100%', aspectRatio: RATIO }}
     >
       <span ref={fig} className="orchard-fig" />
-      {level && !mini && (
-        <span
-          ref={badge}
-          className="orchard-lv"
-          role="img"
-          aria-label={levelLabel(look)}
-          style={{ '--o-lv': look.hue } as React.CSSProperties}
-          dangerouslySetInnerHTML={{ __html: levelBadgeSvg(look) }}
-        />
+      {levelSlot && !mini && createPortal(
+        onLevel ? (
+          <button
+            ref={badge as React.RefObject<HTMLButtonElement>}
+            type="button"
+            className="orchard-lv"
+            aria-label={`${levelActionLabel}, ${levelLabel(look)}`}
+            onClick={onLevel}
+            style={{ '--o-lv': look.hue } as React.CSSProperties}
+            dangerouslySetInnerHTML={{ __html: levelBadgeSvg(look) }}
+          />
+        ) : (
+          <span
+            ref={badge as React.RefObject<HTMLSpanElement>}
+            className="orchard-lv"
+            role="img"
+            aria-label={levelLabel(look)}
+            style={{ '--o-lv': look.hue } as React.CSSProperties}
+            dangerouslySetInnerHTML={{ __html: levelBadgeSvg(look) }}
+          />
+        ),
+        levelSlot,
       )}
     </span>
   );

@@ -7,7 +7,15 @@ body{background:transparent !important}
 .orchard-tree > .orchard-fig{position:absolute;inset:0;pointer-events:none}
 .orchard-tree{-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 .orchard-tree[role="button"]{border-radius:16px}
-.orchard-lv{position:absolute;top:-18px;right:-30px;width:54px;height:54px;pointer-events:none;filter:drop-shadow(0 6px 10px color-mix(in srgb,var(--o-lv) 34%,transparent))}
+/* 레벨 표시: 내 씨앗 패널 머리줄의 씨앗 칩 바로 아래(spec 3.5). 수확한 뒤에는 누르면 수확 카드가 다시 열리는 버튼 */
+.orchard-lv-slot{display:flex;justify-content:flex-end;min-height:54px}
+.orchard-lv{position:relative;display:block;flex:none;width:54px;height:54px;padding:0;border:0;background:none;filter:drop-shadow(0 6px 10px color-mix(in srgb,var(--o-lv) 34%,transparent))}
+span.orchard-lv{pointer-events:none}
+button.orchard-lv{cursor:pointer;border-radius:50%;-webkit-tap-highlight-color:transparent;transition:transform .24s cubic-bezier(.2,0,0,1)}
+button.orchard-lv:hover{transform:scale(1.06)}button.orchard-lv:active{transform:scale(.94);transition-duration:.12s}
+button.orchard-lv:focus-visible{outline:2px solid var(--o-accent);outline-offset:3px}
+@media (hover:none){button.orchard-lv:hover{transform:none}}
+@media (prefers-reduced-motion:reduce){button.orchard-lv{transition:none}}
 .orchard-lv svg{display:block;width:100%;height:100%;overflow:visible}
 .orchard-lv .l{fill:var(--o-lv);transform-origin:center;transform-box:fill-box}
 .orchard-lv .t,.orchard-lv .p{fill:none;stroke:var(--o-lv);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.orchard-lv .t{stroke-opacity:.2}.orchard-lv .p{transition:stroke-dasharray 1.4s cubic-bezier(.32,.72,0,1) .3s}
@@ -24,9 +32,9 @@ body{background:transparent !important}
 @keyframes orchard-pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
 .orchard-badges .on .m{animation:orchard-pop .7s cubic-bezier(.34,1.4,.64,1) backwards;animation-delay:calc(var(--i,0) * 90ms + 500ms)}
 @media (max-width:991px){.p-badges{order:5}}
-body > header{background:transparent !important;border-bottom-color:transparent !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important}
-body > header::before{content:"";position:absolute;inset:0 0 -18px 0;z-index:-1;pointer-events:none;background:linear-gradient(to bottom,color-mix(in srgb,var(--o-page) 22%,transparent),transparent);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);-webkit-mask-image:linear-gradient(to bottom,#000 45%,transparent);mask-image:linear-gradient(to bottom,#000 45%,transparent)}
-@media (max-width:767px){body > header button[data-component="icon-button"]{width:44px !important;height:44px !important;margin-right:-10px}body > header button[data-component="icon-button"] svg{width:24px !important;height:24px !important}}
+:is(body,.o-scroll) > header{background:transparent !important;border-bottom-color:transparent !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important}
+:is(body,.o-scroll) > header::before{content:"";position:absolute;inset:0 0 -18px 0;z-index:-1;pointer-events:none;background:linear-gradient(to bottom,color-mix(in srgb,var(--o-page) 22%,transparent),transparent);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);-webkit-mask-image:linear-gradient(to bottom,#000 45%,transparent);mask-image:linear-gradient(to bottom,#000 45%,transparent)}
+@media (max-width:767px){:is(body,.o-scroll) > header button[data-component="icon-button"]{width:44px !important;height:44px !important;margin-right:-10px}:is(body,.o-scroll) > header button[data-component="icon-button"] svg{width:24px !important;height:24px !important}}
 .orchard-signout{margin-top:4px;padding-top:12px;border-top:1px solid var(--o-line);display:flex}
 .orchard-signout button{appearance:none;-webkit-appearance:none;border:0;background:none;min-height:44px;padding:0 2px;font-family:inherit;font-weight:600;font-size:15px;line-height:22px;letter-spacing:.0096em;color:var(--o-fg2);cursor:pointer;border-radius:8px;transition:opacity .3s cubic-bezier(.32,.72,0,1)}
 .orchard-signout button:hover{opacity:.72}
@@ -56,7 +64,7 @@ html[data-theme="dark"] .orchard-card{--oc-fg:var(--o-fg);--oc-fg2:rgba(194,196,
 .orchard-card .oc-rec-foot{margin-top:6px;font-size:12px;line-height:16px;letter-spacing:.0252em;color:var(--oc-fg3)}.orchard-card .oc-foot{margin:14px 0 0;text-align:center;font-size:12px;line-height:16px;letter-spacing:.0252em;color:var(--oc-fg3)}
 @keyframes orchard-card-fill{from{transform:scaleX(0)}to{transform:none}}
 @media (prefers-reduced-motion:reduce){.orchard-card .oc-bar i{animation:none}}
-[data-orchard-modal="glass"]{background:color-mix(in srgb,var(--o-page) var(--o-tint),transparent) !important;-webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5);box-shadow:inset 0 0 0 1px var(--o-edge),inset 0 1px 0 var(--o-sheen),0 24px 48px -24px var(--o-shadow) !important}
+[data-orchard-modal="glass"]{background:radial-gradient(90% 40% at 0% 0%,color-mix(in srgb,var(--oc-b1) 70%,transparent) 0,transparent 70%),radial-gradient(80% 36% at 100% 12%,color-mix(in srgb,var(--oc-b2) 60%,transparent) 0,transparent 70%),radial-gradient(90% 40% at 100% 100%,color-mix(in srgb,var(--oc-b3) 60%,transparent) 0,transparent 70%),radial-gradient(80% 36% at 0% 88%,color-mix(in srgb,var(--oc-b4) 60%,transparent) 0,transparent 70%),color-mix(in srgb,var(--o-page) var(--o-glass-modal),transparent) !important;-webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5);box-shadow:inset 0 0 0 1px var(--o-edge),inset 0 1px 0 var(--o-sheen),0 24px 48px -24px var(--o-shadow) !important}
 /* 유리 창 안의 칸: 입력 칸과 선택 상자는 수확 카드의 칸처럼 옅은 유리 */
 [data-orchard-modal="glass"] [data-component="text-field"],[data-orchard-modal="glass"] [role="radiogroup"] label{background-color:var(--o-cell) !important;-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4)}
 [data-orchard-modal="glass"] [data-component="text-field"]{box-shadow:inset 0 0 0 1px var(--o-cell-edge)}
@@ -64,6 +72,9 @@ html[data-theme="dark"] .orchard-card{--oc-fg:var(--o-fg);--oc-fg2:rgba(194,196,
 [data-orchard-modal="glass"] [data-component="action-area"]{background:color-mix(in srgb,var(--o-page) var(--o-bar),transparent) !important;-webkit-backdrop-filter:blur(24px) saturate(1.5);backdrop-filter:blur(24px) saturate(1.5);box-shadow:inset 0 1px 0 var(--o-line);-webkit-mask-image:none !important;mask-image:none !important}
 [data-orchard-modal="glass"] [data-component="action-area"] *{-webkit-mask-image:none !important;mask-image:none !important}
 /* 위의 제목 줄도 창 위에 붙어 있어, 스크롤한 내용이 뒤로 비치지 않게 같은 유리로 덮는다 */
+[data-orchard-modal="glass"] [data-component="modal-navigation"] > div > div{align-items:center}
+/* 768px 이상의 팝업은 몽타주 기본이 내용 위 여백 0 이라 첫 항목이 제목 줄에 붙는다. 모바일 시트와 같게 20px 띄운다 */
+@media (min-width:768px){[data-orchard-modal="glass"] [data-component="modal-content"]{padding-top:20px !important}}
 [data-orchard-modal="glass"] [data-component="modal-navigation"]{background:color-mix(in srgb,var(--o-page) var(--o-bar),transparent) !important;-webkit-backdrop-filter:blur(24px) saturate(1.5);backdrop-filter:blur(24px) saturate(1.5)}
 [data-orchard-modal="glass"] div:not(.orchard-card):not(.orchard-card div):not(button div):not([data-component="action-area"]):not([data-component="modal-navigation"]){background-color:transparent !important}
 @media (max-width:767px){[data-orchard-modal="glass"]{height:auto !important;max-height:92dvh !important}}
@@ -106,6 +117,10 @@ section[aria-labelledby="h-cal"] [role="img"]{width:8px !important;height:8px !i
 @media (prefers-reduced-motion:reduce){.orchard-fill,.orchard-water{transition-duration:.01s !important}.orchard-water svg,.orchard-water .tilt{animation:none !important}}
 [data-orchard-glass="panel"]{background-color:color-mix(in srgb,var(--og-c) var(--o-tint),transparent) !important;border-color:var(--o-edge) !important;-webkit-backdrop-filter:blur(22px) saturate(1.6);backdrop-filter:blur(22px) saturate(1.6);box-shadow:inset 0 1px 0 var(--o-sheen),0 28px 64px -36px var(--o-shadow),0 2px 8px -5px var(--o-shadow)}
 [data-orchard-glass="inset"]{background-color:color-mix(in srgb,var(--og-c) var(--o-inset),transparent) !important}
+/* 768px 미만: 헤더와 본문을 감싼 스크롤 영역은 화면 위부터 탭 바 윗변 8px 위까지다. 내용이 탭 바 뒤로 지나가지 않는다(spec 3.10).
+   탭 바 영역 = 아래 10px + 탭 바 높이 + 위 8px + 안전 영역. 이 영역 안에서는 배경(#orchard-bg)만 보인다 */
+:root{--o-tabbar:56px;--o-tabzone:calc(10px + var(--o-tabbar) + 8px + env(safe-area-inset-bottom,0px))}
+@media (max-width:767px){.o-scroll{position:fixed;top:0;left:0;right:0;bottom:var(--o-tabzone);overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none}.o-scroll::-webkit-scrollbar{display:none}}
 body > nav{left:12px !important;right:12px !important;bottom:calc(10px + env(safe-area-inset-bottom,0px)) !important;padding-bottom:0 !important}
 body > nav > *{border-radius:22px !important;overflow:hidden;background-color:color-mix(in srgb,var(--o-page) 56%,transparent) !important;border:1px solid var(--o-edge) !important;-webkit-backdrop-filter:blur(22px) saturate(1.6);backdrop-filter:blur(22px) saturate(1.6);box-shadow:inset 0 1px 0 var(--o-sheen),0 18px 40px -22px var(--o-shadow)}
 body > nav *{background-color:transparent !important}

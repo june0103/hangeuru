@@ -19,6 +19,7 @@ const FIG = 240;
 const FIG_M = 220;
 const SIDE_TOP = 28;
 const SIDE_GAP = 16;
+const HEAD_SIDE_GAP = 8;
 const TIP_MS = 5000;
 
 /** 씨앗 칩: 누르면 어떤 씨앗을 골랐는지 툴팁처럼 알려 준다 */
@@ -65,15 +66,22 @@ type Props = {
 
 export default function TreePanel({ view, harvesting, onHarvest, onOpenCard, onGrown }: Props) {
   const look = useMemo(() => levelLook(view.days, view.harvested), [view.days, view.harvested]);
+  const [levelSlot, setLevelSlot] = useState<HTMLSpanElement | null>(null);
   return (
     <Panel aria-labelledby="h-tree" order={2}>
-      <FlexBox alignItems="center" justifyContent="space-between" gap={12}>
-        <Typography as="h2" id="h-tree" variant="headline2" weight="bold" color="semantic.foreground.neutral.primary">{TREE.title}</Typography>
-        <SeedChip label={view.seedLabel} tip={view.tip} />
+      {/* 머리줄: 왼쪽에 제목과 문장, 오른쪽에 씨앗 칩과 그 바로 아래 레벨 표시(spec 3.5) */}
+      <FlexBox alignItems="flex-start" justifyContent="space-between" gap={12}>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography as="h2" id="h-tree" variant="headline2" weight="bold" color="semantic.foreground.neutral.primary">{TREE.title}</Typography>
+          <Typography as="p" variant="heading1" weight="bold" color="semantic.foreground.neutral.primary" sx={{ marginTop: HEADLINE_TOP }}>
+            {view.headline}
+          </Typography>
+        </Box>
+        <FlexBox flexDirection="column" alignItems="flex-end" gap={HEAD_SIDE_GAP} sx={{ flex: 'none' }}>
+          <SeedChip label={view.seedLabel} tip={view.tip} />
+          <span className="orchard-lv-slot" ref={setLevelSlot} />
+        </FlexBox>
       </FlexBox>
-      <Typography as="p" variant="heading1" weight="bold" color="semantic.foreground.neutral.primary" sx={{ marginTop: HEADLINE_TOP }}>
-        {view.headline}
-      </Typography>
       <FlexBox
         alignItems="flex-start"
         gap={BODY_GAP}
@@ -89,7 +97,9 @@ export default function TreePanel({ view, harvesting, onHarvest, onOpenCard, onG
             onHarvest={view.canHarvest && !harvesting ? onHarvest : undefined}
             harvestLabel={view.harvestLabel}
             onGrown={onGrown}
-            level
+            levelSlot={levelSlot}
+            onLevel={view.harvested ? onOpenCard : undefined}
+            levelActionLabel={TREE.openCard}
           />
         </Box>
         <FlexBox
