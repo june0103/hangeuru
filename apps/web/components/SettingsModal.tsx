@@ -4,6 +4,7 @@ import {
   ActionArea, ActionAreaButton, FlexBox, FormControl, FormControlField, FormControlLabel, FormControlMessage,
   FormControlNegativeMessage, IconButton, Modal, ModalContainer, ModalContent, ModalNavigation, TextField, Typography,
 } from '@montage-ui/core';
+import type { Theme } from '@montage-ui/core';
 import { IconClose } from '@montage-ui/icon';
 import { useActionState, useEffect, useId, useRef, useState } from 'react';
 
@@ -13,6 +14,7 @@ import type { ActionResult, Member, PlanKey, SeedKey } from '@/lib/types';
 
 import PlanPicker from './PlanPicker';
 import SeedPicker from './SeedPicker';
+import { WaterFill } from './orchard/WaterFill';
 import { useActionResult } from './useActionResult';
 import { useFirstErrorFocus } from './useFirstErrorFocus';
 
@@ -91,7 +93,11 @@ function SettingsForm({ me, onDone, onSignOut, signingOut }: { me: Me; onDone: (
       </ModalContent>
       <ActionArea variant="neutral">
         <ActionAreaButton variant="alternative" buttonVariant="solid" buttonColor="assistive" onClick={onDone}>{SETTINGS.cancel}</ActionAreaButton>
-        <ActionAreaButton type="submit" loading={pending}>{SETTINGS.save}</ActionAreaButton>
+        {/* 파란 주 버튼의 물결(spec 3.2) */}
+        <ActionAreaButton type="submit" loading={pending} className="orchard-fill" sx={(theme: Theme) => ({ '--o-base': theme.semantic.foreground.brand.primary })}>
+          <WaterFill />
+          {SETTINGS.save}
+        </ActionAreaButton>
       </ActionArea>
     </FlexBox>
   );

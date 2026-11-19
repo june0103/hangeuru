@@ -1,8 +1,9 @@
 'use client';
 
-import { Box, Button, FlexBox, Typography, containerStyle } from '@montage-ui/core';
+import { Box, FlexBox, Typography, containerStyle } from '@montage-ui/core';
 import Link from 'next/link';
 
+import PrimaryButton from './orchard/WaterFill';
 import { panelStyle } from './Panel';
 
 // 오류와 없는 주소 화면 (spec 9.4)
@@ -13,8 +14,8 @@ export default function MessageScreen({ title, desc, action }: { title: string; 
         <Typography as="h1" variant="heading2" weight="bold" color="semantic.foreground.neutral.primary">{title}</Typography>
         {desc && <Typography as="p" variant="body2" color="semantic.foreground.neutral.secondary">{desc}</Typography>}
         {action.href
-          ? <Button as={Link} href={action.href} size="large" fullWidth sx={{ marginTop: 8 }}>{action.label}</Button>
-          : <Button size="large" fullWidth onClick={action.onClick} sx={{ marginTop: 8 }}>{action.label}</Button>}
+          ? <PrimaryButton as={Link} href={action.href} size="large" fullWidth sx={{ marginTop: 8 }}>{action.label}</PrimaryButton>
+          : <PrimaryButton size="large" fullWidth onClick={action.onClick} sx={{ marginTop: 8 }}>{action.label}</PrimaryButton>}
       </FlexBox>
     </Box>
   );

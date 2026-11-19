@@ -115,8 +115,9 @@ section[aria-labelledby="h-cal"] [role="img"]{width:8px !important;height:8px !i
 .orchard-fill{position:relative;overflow:hidden;isolation:isolate;transition:background-color .36s cubic-bezier(.4,0,1,1)}
 .orchard-fill:hover,.orchard-fill:focus-visible,.orchard-fill:active{background-color:color-mix(in srgb,var(--o-base) 58%,transparent) !important;transition:background-color .6s cubic-bezier(.2,0,0,1)}
 .orchard-water{position:absolute;inset:0;z-index:-1;pointer-events:none;transform:translate3d(0,0,0);transition:transform .36s cubic-bezier(.4,0,1,1)}
-.orchard-fill:hover > .orchard-water,.orchard-fill:focus-visible > .orchard-water,.orchard-fill:active > .orchard-water{transform:translate3d(0,22%,0);transition:transform .7s cubic-bezier(.34,1.25,.64,1)}
-.orchard-fill[aria-disabled="true"] > .orchard-water,.orchard-fill:disabled > .orchard-water{display:none}
+/* 몽타주 Button 은 내용을 span 으로 한 번 더 감싸므로 물 층은 바로 아래 자식이 아니다(">" 를 쓰면 수면이 내려오지 않는다) */
+.orchard-fill:hover .orchard-water,.orchard-fill:focus-visible .orchard-water,.orchard-fill:active .orchard-water{transform:translate3d(0,22%,0);transition:transform .7s cubic-bezier(.34,1.25,.64,1)}
+.orchard-fill[aria-disabled="true"] .orchard-water,.orchard-fill:disabled .orchard-water{display:none}
 .orchard-water .tilt{position:absolute;top:0;bottom:-70%;left:-8%;right:-8%;transform-origin:50% 0}
 .orchard-water .crest{position:absolute;top:-9px;left:0;right:0;height:10px}
 .orchard-water .body{position:absolute;inset:0;background:var(--o-base)}
