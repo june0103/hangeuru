@@ -240,6 +240,16 @@ export function growth(days: number) {
 | 위치를 구하지 못했다 | 지금 위치를 확인하지 못했어요. 잠시 후 다시 시도해 주세요. |
 | 반경 밖이다 | 그라운드에서 {거리}m 떨어져 있어요. 그라운드 500m 안에서 기록할 수 있어요. ({거리}는 10m 단위로 반올림, 1,000m 이상은 "{n.n}km") |
 
+### 2.9 시연 계정
+
+구성원에게 20일 뒤의 모습을 미리 보여 주기 위한 계정이다. 환경 변수 `DEMO_USER_ID`(6.4)에 적은 사용자 한 명만 해당하고, 변수가 비어 있으면 아무도 해당하지 않는다.
+
+- 시연 계정의 총 출근 일수는 늘 20일 이상으로 계산한다. 실제 기록이 20일보다 적으면 시즌 출근일 가운데 기록이 없는 날을 앞에서부터 골라 모자란 만큼 채운다. 오늘은 채우지 않는다. `lib/rules.ts`의 `demoStats`가 계산한다
+- 채운 날은 계산에만 쓰고 `attendance`에는 넣지 않는다
+- 바뀌는 것: 총 출근 일수와 그에 따른 나무 단계, 열매, 수확 가능 여부, 수확 카드의 일수와 첫 출근일. 본인 화면과 모두의 과수원(다른 구성원이 보는 카드)에 똑같이 적용한다
+- 그대로인 것: 주간 목표와 연속 달성, 오늘 출근·퇴근, 오늘 그라운드, 캘린더는 실제 기록대로다
+- 수확은 다른 구성원과 같은 방식으로 `profiles.harvested_at`에 기록한다. 되돌리는 법은 11.2
+
 ## 3. 화면 명세
 
 화면은 스플래시, 로그인, 가입, 씨앗 고르기, 홈, 20일 열매 화면, 캘린더, 모두의 과수원 8개와 내 설정, 수확 카드 모달 2개다. 모양과 동작의 기준은 [열매 출근부 예시 사이트](https://claude.ai/artifact/VMePm6xLE98gMfKFcMxCT4)이고, 이 장의 수치와 문구가 그 사이트와 같다.
@@ -1037,6 +1047,7 @@ export const hhmmKST = (iso: string) =>
 | `NEXT_PUBLIC_SUPABASE_URL` | 브라우저, 서버 | Supabase 프로젝트 URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | 브라우저, 서버 | publishable key |
 | `SUPABASE_SECRET_KEY` | 서버 전용 | secret key. 가입 시 사용자 생성과 출근 기록 쓰기에만 쓴다 |
+| `DEMO_USER_ID` | 서버 전용 | 시연 계정의 사용자 id(2.9). 없어도 된다. 비우면 시연 계정이 없다 |
 
 시즌 날짜와 공휴일은 환경 변수가 아니라 `lib/rules.ts`의 상수다.
 
@@ -1439,6 +1450,7 @@ alter table public.profiles alter column seed drop not null;
 | 잘못 누른 출근이나 수확 되돌리기 | `attendance`의 그 행을 지우거나 `profiles.harvested_at`을 비운다 |
 | 비밀번호를 잊은 사람 돕기 | Authentication 화면에서 새 비밀번호를 정해 전달한다 |
 | 모르는 계정 지우기 | Authentication 화면에서 그 사용자를 지운다. `profiles`와 `attendance`는 같이 지워진다 |
+| 시연 계정 켜고 끄기(2.9) | Authentication 화면에서 그 계정의 User UID를 복사해 Vercel 환경 변수 `DEMO_USER_ID`(Production)에 넣고 다시 배포한다. 끌 때는 변수를 지우고 다시 배포한다. 시연하며 누른 수확은 `profiles.harvested_at`을 비워 되돌린다 |
 
 ### 11.3 확정한 것과 확인할 것
 

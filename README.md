@@ -64,6 +64,7 @@ Supabase 대시보드의 Project Settings → API Keys에서 값을 직접 복�
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_…` |
 | `SUPABASE_SECRET_KEY` | `sb_secret_…`. 서버 전용이고 절대 커밋하지 않는다 |
 | `DEV_TODAY` | 개발 전용. 오늘 날짜를 바꿔 볼 때 `2026-12-17`처럼 적는다. 운영에서는 무시된다 |
+| `DEMO_USER_ID` | 없어도 된다. 시연 계정의 사용자 id. 그 한 명만 출근 20일로 보인다(spec 2.9) |
 
 ### 4. 실행과 확인
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  ALL_WORKDAYS, FRUIT_DAYS, SEASON, SEASON_WEEKS, computeStats, growth, workdaysLeft, workdaysOfWeek,
+  ALL_WORKDAYS, FRUIT_DAYS, SEASON, SEASON_WEEKS, computeStats, demoStats, growth, workdaysLeft, workdaysOfWeek,
 } from './rules';
 
 // 2.6 "예시 기록": 예시 계정의 출근 19일
@@ -119,5 +119,31 @@ describe('열매 수 (2.3)', () => {
   it('20일 전에는 0, 20일에 다섯 개, 그 뒤로 하루에 하나씩', async () => {
     const { fruitCount } = await import('./rules');
     expect([0, 19, 20, 21, 27].map(fruitCount)).toEqual([0, 0, 5, 6, 12]);
+  });
+});
+
+describe('시연 계정 (2.9)', () => {
+  it('기록이 모자라면 오늘을 뺀 출근일을 앞에서부터 채워 20일이 된다', () => {
+    const today = '2026-11-20';
+    const st = demoStats('steady', '2026-11-19', ['2026-11-19'], today);
+    expect(st.days).toBe(FRUIT_DAYS);
+    expect(st.dates[0]).toBe('2026-11-18');
+    expect(st.dates).toContain('2026-11-19');
+    expect(st.dates).not.toContain(today);
+    expect(new Set(st.dates).size).toBe(FRUIT_DAYS);
+    expect(growth(st.days).canHarvest).toBe(true);
+  });
+  it('주간 목표와 연속 달성은 실제 기록 그대로다', () => {
+    const real = computeStats('steady', '2026-11-18', ['2026-11-23'], '2026-11-25');
+    const st = demoStats('steady', '2026-11-18', ['2026-11-23'], '2026-11-25');
+    expect(st.weeks).toEqual(real.weeks);
+    expect(st.cur).toEqual(real.cur);
+    expect(st.streak).toBe(real.streak);
+  });
+  it('오늘 출근해도 20일 그대로고, 실제 기록이 20일을 넘으면 실제 일수다', () => {
+    const today = '2026-11-20';
+    expect(demoStats('steady', '2026-11-18', [today], today).days).toBe(FRUIT_DAYS);
+    const end = '2026-12-24';
+    expect(demoStats('daily', '2026-11-18', ALL_WORKDAYS, end).days).toBe(computeStats('daily', '2026-11-18', ALL_WORKDAYS, end).days);
   });
 });
