@@ -5,7 +5,7 @@ import {
   koDate, koDay, koDuration, koMonth, planLabel, seedLabel,
 } from './copy';
 import {
-  ALL_WORKDAYS, FRUIT_DAYS, HOLIDAYS, SEASON, STAGES, addDays, computeStats, dow, fruitCount, growth, isWorkday,
+  ALL_WORKDAYS, FRUIT_DAYS, HOLIDAYS, SEASON, STAGES, addDays, computeStats, demoStats, dow, fruitCount, growth, isWorkday,
   weekStart, workdaysLeft, workdaysOfWeek,
 } from './rules';
 import { hhmmKST, todayKST } from './time';
@@ -13,8 +13,11 @@ import type { Attendance, Member, PlanKey, Profile, SeedKey } from './types';
 
 type Stats = ReturnType<typeof computeStats>;
 
-export const statsOf = (p: Profile, records: Attendance[], today: string) =>
-  computeStats(p.plan, p.joinDate, records.map(r => r.workDate), today);
+// 시연 계정(spec 2.9)만 20일로 채워 계산한다. DEMO_USER_ID는 서버 전용 환경 변수다
+export const statsOf = (p: Profile, records: Attendance[], today: string) => {
+  const demoId = process.env.DEMO_USER_ID;
+  return (demoId && p.id === demoId ? demoStats : computeStats)(p.plan, p.joinDate, records.map(r => r.workDate), today);
+};
 
 /** 씨앗을 심은 구성원인지 */
 export const isMember = (p: Profile): p is Member => p.seed !== null;

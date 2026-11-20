@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { TODAY, WEEK } from './copy';
 import type { Attendance, Profile } from './types';
-import { campView, monthView, statsOf, todayView, weekView } from './view';
+import { campView, gardenView, monthView, statsOf, todayView, weekView } from './view';
 
 const me: Profile = { id: 'me', name: '고준', plan: 'steady', seed: 'apple', joinDate: '2026-11-18', harvestedAt: null };
 const rec = (d: string, inT = '09:48', outT: string | null = null): Attendance => ({
@@ -128,5 +128,27 @@ describe('씨앗을 아직 심지 않은 구성원', () => {
     const days = (n: number) => ({ ...statsOf(me, [], '2026-12-17'), days: n });
     expect(treeView(member, days(19), false, '2026-12-17').fruits).toBe(0);
     expect(treeView(member, days(22), false, '2026-12-17').fruits).toBe(7);
+  });
+});
+
+describe('시연 계정 (2.9)', () => {
+  afterEach(() => vi.unstubAllEnvs());
+  const other: Profile = { ...me, id: 'other', name: '나무' };
+
+  it('DEMO_USER_ID의 한 명만 20일로 계산한다', () => {
+    vi.stubEnv('DEMO_USER_ID', 'me');
+    expect(statsOf(me, [], '2026-11-20').days).toBe(20);
+    expect(statsOf(other, [], '2026-11-20').days).toBe(0);
+  });
+  it('변수가 없으면 아무도 해당하지 않는다', () => {
+    expect(statsOf(me, [], '2026-11-20').days).toBe(0);
+  });
+  it('다른 구성원이 보는 과수원에서도 20일이고, 오늘 출근 배지는 실제 기록대로다', () => {
+    vi.stubEnv('DEMO_USER_ID', 'me');
+    const g = gardenView('other', [me, other], [], '2026-11-20');
+    const card = g.members.find(m => m.id === 'me')!;
+    expect(card.days).toBe(20);
+    expect(card.todayBadge).toBeNull();
+    expect(g.members.find(m => m.id === 'other')!.days).toBe(0);
   });
 });

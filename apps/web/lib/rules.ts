@@ -85,6 +85,15 @@ export function growth(days: number) {
   return { index, cur: STAGES[index], next: STAGES[index + 1] ?? null, canHarvest: days >= FRUIT_DAYS };
 }
 
+// 2.9 시연 계정. 실제 기록이 20일보다 적으면 기록이 없는 출근일을 앞에서부터 채워 20일로 계산한다.
+// 오늘은 채우지 않는다. 주간 목표와 연속 달성(weeks, cur, streak)은 실제 기록 그대로다
+export function demoStats(plan: keyof typeof PLANS, joinDate: string, recordDates: string[], today: string) {
+  const st = computeStats(plan, joinDate, recordDates, today);
+  const fill = ALL_WORKDAYS.filter(d => d !== today && !st.dates.includes(d)).slice(0, Math.max(0, FRUIT_DAYS - st.days));
+  const dates = [...st.dates, ...fill].sort();
+  return { ...st, dates, days: dates.length };
+}
+
 // 2.8 위치 확인. 그라운드 반경 안에서만 출근·퇴근을 기록한다
 export const CAMP = { lat: 37.503763, lng: 127.103984, radiusM: 500 } as const;
 
