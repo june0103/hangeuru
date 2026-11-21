@@ -35,7 +35,7 @@ export default function AppShell({ me, children }: PropsWithChildren<{ me: Me }>
     <>
       <Global styles={{ '@media (max-width: 767px)': { ':root': { '--app-toast-offset': TOAST_M } } }} />
       {/* 768px 미만: 헤더와 본문은 하단 탭 바 위에서만 스크롤된다(spec 3.10) */}
-      <div className="o-scroll" ref={scroller}>
+      <div className="o-scroll o-zoom" ref={scroller}>
       <Header userName={me.name} onOpenSettings={() => setSettings(true)} />
       <Box
         as="main"
