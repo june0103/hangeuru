@@ -13,12 +13,15 @@ export const koDate = (s: string) => `${md(s)} ${WEEKDAYS[dow(s)]}요일`;
 export const koDay = md;
 /** 2026년 12월 */
 export const koMonth = (ym: string) => `${+ym.slice(0, 4)}년 ${+ym.slice(5, 7)}월`;
-/** 9시간 7분, 42분 */
-export const koDuration = (min: number) => {
-  const h = Math.floor(min / 60);
-  const m = min % 60;
-  return h ? `${h}시간 ${m}분` : `${m}분`;
-};
+/** 9시간 7분, 3시간, 42분, 35초 */
+export function calendarDuration(milliseconds: number): string {
+  const seconds = Math.floor(milliseconds / 1000);
+  if (seconds > 0 && seconds < 60) return `${seconds}초`;
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor(seconds / 60) % 60;
+  if (!hours) return `${minutes}분`;
+  return minutes ? `${hours}시간 ${minutes}분` : `${hours}시간`;
+}
 /** 24시간이 넘어도 시간을 그대로 표시한다. */
 export function clockDuration(milliseconds: number): string {
   const seconds = Math.floor(milliseconds / 1000);
@@ -277,7 +280,7 @@ export const CALENDAR = {
   today: '오늘',
   attended: '출근함',
   timeRange: (inT: string, outT: string | null) => `${inT} ~ ${outT ?? ''}`.trimEnd(),
-  columns: { date: '날짜', in: '출근', out: '퇴근', stay: '머문 시간' },
+  columns: { date: '날짜', in: '출근', out: '퇴근', stay: '머문 시간', cumulative: '누적 시간' },
   empty: '이 달에는 아직 출근 기록이 없어요. 출근하면 여기에 쌓여요.',
 } as const;
 

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { clockDuration, TODAY, WEEK } from './copy';
-import { attendanceTime } from './rules';
+import { attendanceTotals } from './rules';
 import type { Attendance, Profile } from './types';
 import { campView, gardenView, monthView, statsOf, todayView, weekView } from './view';
 
@@ -67,15 +67,42 @@ describe('오늘 그라운드 (3.5)', () => {
 
 describe('캘린더 (3.6)', () => {
   it('머문 시간과 퇴근 없는 기록', () => {
-    const m = monthView('2026-12', [rec('2026-12-01', '09:43', '18:50'), rec('2026-12-02', '09:49'), rec('2026-12-03', '09:00', '09:42')], '2026-12-17');
+    const today = '2026-12-17';
+    const records = [rec('2026-12-01', '09:43', '18:50'), rec('2026-12-02', '09:49'), rec('2026-12-03', '09:00', '09:42')];
+    const { byDate } = attendanceTotals(records, today, '2026-12-17T09:00:00+09:00');
+    const m = monthView('2026-12', records, today, byDate);
     expect(m.title).toBe('2026년 12월');
-    expect(m.rows.map(r => [r.dateText, r.stayText])).toEqual([
-      ['12월 3일 목요일', '42분'], ['12월 2일 수요일', '–'], ['12월 1일 화요일', '9시간 7분'],
+    expect(m.rows.map(r => [r.dateText, r.stayText, r.cumulativeText])).toEqual([
+      ['12월 3일 목요일', '42분', '9시간 49분'],
+      ['12월 2일 수요일', '–', '9시간 7분'],
+      ['12월 1일 화요일', '9시간 7분', '9시간 7분'],
     ]);
     const c = m.cells.find(x => !x.blank && x.key === '2026-12-02');
     expect(c && !c.blank && c.time).toBe('09:49 ~');
     const xmas = m.cells.find(x => !x.blank && x.key === '2026-12-25');
     expect(xmas && !xmas.blank && [xmas.off, xmas.note]).toEqual([true, '성탄절']);
+  });
+  it('이전 달 기록을 이어 합산하고 진행 중인 출근은 확정된 값과 구분한다', () => {
+    const today = '2026-12-02';
+    const records = [rec(today, '09:00'), rec('2026-12-01', '09:00', '12:00'), rec('2026-11-30', '09:00', '10:10')];
+    const { byDate, total } = attendanceTotals(records, today, '2026-12-02T09:15:10+09:00');
+    const november = monthView('2026-11', records, today, byDate);
+    const december = monthView('2026-12', records, today, byDate);
+    expect(november.rows[0]).toMatchObject({ stayText: '1시간 10분', cumulativeText: '1시간 10분' });
+    expect(december.rows[1]).toMatchObject({ stayText: '3시간', cumulativeText: '4시간 10분' });
+    expect(december.rows[0]).toMatchObject({ stayText: '–', cumulativeText: '4시간 10분' });
+    expect(total).toMatchObject({ completedMs: 250 * 60_000, active: { elapsedMs: 910_000 } });
+  });
+
+  it('하루씩 버리지 않고 초를 합산한 뒤 표시한다', () => {
+    const today = '2026-11-24';
+    const records = [
+      { ...rec('2026-11-23', '09:00'), checkOutAt: '2026-11-23T09:00:35+09:00' },
+      { ...rec(today, '09:00'), checkOutAt: '2026-11-24T09:00:35+09:00' },
+    ];
+    const { byDate } = attendanceTotals(records, today, '2026-11-24T09:01:00+09:00');
+    const month = monthView('2026-11', records, today, byDate);
+    expect(month.rows.map(row => [row.stayText, row.cumulativeText])).toEqual([['35초', '1분'], ['35초', '35초']]);
   });
 });
 
@@ -88,9 +115,9 @@ describe('총 출근 시간 (2.7)', () => {
   ];
 
   it('오늘 진행 중인 출근만 타이머에 포함하고 KST 자정에 끝낸다', () => {
-    expect(attendanceTime([...past, rec(today, '23:00')], today, '2026-11-23T23:59:45+09:00'))
+    expect(attendanceTotals([...past, rec(today, '23:00')], today, '2026-11-23T23:59:45+09:00').total)
       .toEqual({ completedMs: 8 * 3_600_000, active: { elapsedMs: 3_585_000, remainingMs: 15_000 } });
-    expect(attendanceTime([...past, rec(today, '23:00')], '2026-11-24', '2026-11-24T00:00:00+09:00'))
+    expect(attendanceTotals([...past, rec(today, '23:00')], '2026-11-24', '2026-11-24T00:00:00+09:00').total)
       .toEqual({ completedMs: 8 * 3_600_000, active: null });
   });
 
@@ -101,12 +128,12 @@ describe('총 출근 시간 (2.7)', () => {
       rec('2026-11-20', '10:00', '09:00'),
       { ...rec(today, '10:00'), checkOutAt: '2026-11-23T12:00:07+09:00' },
     ];
-    expect(attendanceTime(records, today, '2026-11-23T23:00:30+09:00'))
+    expect(attendanceTotals(records, today, '2026-11-23T23:00:30+09:00').total)
       .toEqual({ completedMs: 10 * 3_600_000 + 7_000, active: null });
   });
 
   it('기록이 없으면 0으로 표시하고 24시간 이상도 누적한다', () => {
-    expect(clockDuration(attendanceTime([], today, '2026-11-23T10:00:00+09:00').completedMs)).toBe('00:00:00');
+    expect(clockDuration(attendanceTotals([], today, '2026-11-23T10:00:00+09:00').total.completedMs)).toBe('00:00:00');
     expect(clockDuration(101 * 3_600_000 + 5 * 60_000 + 8_999)).toBe('101:05:08');
   });
 });

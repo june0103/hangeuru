@@ -2,7 +2,7 @@
 // 패널 컴포넌트는 여기서 만든 값만 props로 받고, 날짜나 목표를 다시 계산하지 않는다(spec 12.6).
 import {
   ACTION, BADGES, CALENDAR, CAMP, CARD, DASH, GARDEN, TODAY, TREE, WEEK, WEEKDAYS,
-  koDate, koDay, koDuration, koMonth, planLabel, seedLabel,
+  calendarDuration, koDate, koDay, koMonth, planLabel, seedLabel,
 } from './copy';
 import {
   ALL_WORKDAYS, FRUIT_DAYS, HOLIDAYS, SEASON, STAGES, addDays, computeStats, demoStats, dow, fruitCount, growth, isWorkday,
@@ -244,10 +244,17 @@ export const initialMonth = (today: string) =>
 export type CalendarCell =
   | { blank: true; key: string }
   | { blank: false; key: string; day: number; off: boolean; today: boolean; note: string | null; attended: boolean; time: string | null };
-export type RecordRow = { date: string; dateText: string; inText: string; outText: string; stayText: string };
+export type RecordRow = {
+  date: string;
+  dateText: string;
+  inText: string;
+  outText: string;
+  stayText: string;
+  cumulativeText: string;
+};
 export type MonthView = { ym: string; title: string; weekdays: readonly string[]; cells: CalendarCell[]; rows: RecordRow[] };
 
-export function monthView(ym: string, records: Attendance[], today: string): MonthView {
+export function monthView(ym: string, records: Attendance[], today: string, totalsByDate: ReadonlyMap<string, number>): MonthView {
   const [y, mo] = ym.split('-').map(Number);
   const first = `${ym}-01`;
   const daysIn = new Date(Date.UTC(y, mo, 0)).getUTCDate();
@@ -266,13 +273,15 @@ export function monthView(ym: string, records: Attendance[], today: string): Mon
     });
   }
   const rows = records.filter(r => r.workDate.startsWith(ym)).sort((a, b) => b.workDate.localeCompare(a.workDate)).map(r => {
-    const m = Math.floor(stayDurationMs(r) / 60_000);
+    const stayMs = stayDurationMs(r);
+    const cumulativeMs = totalsByDate.get(r.workDate);
     return {
       date: r.workDate,
       dateText: koDate(r.workDate),
       inText: r.checkInAt ? hhmmKST(r.checkInAt) : DASH,
       outText: r.checkOutAt ? hhmmKST(r.checkOutAt) : DASH,
-      stayText: m > 0 ? koDuration(m) : DASH,
+      stayText: stayMs > 0 ? calendarDuration(stayMs) : DASH,
+      cumulativeText: cumulativeMs === undefined ? DASH : calendarDuration(cumulativeMs),
     };
   });
   return { ym, title: koMonth(ym), weekdays: WEEKDAYS, cells, rows };

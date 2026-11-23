@@ -63,17 +63,26 @@ export type AttendanceTime = {
   active: { elapsedMs: number; remainingMs: number } | null;
 };
 
-export function attendanceTime(records: readonly Attendance[], today: string, now: string): AttendanceTime {
-  const completedMs = records.reduce((total, record) =>
-    record.workDate <= today ? total + stayDurationMs(record) : total, 0);
-  const current = records.find(record => record.workDate === today);
-  if (!current?.checkInAt || current.checkOutAt) return { completedMs, active: null };
+export function attendanceTotals(records: readonly Attendance[], today: string, now: string) {
+  const byDate = new Map<string, number>();
+  let completedMs = 0;
+  let active: AttendanceTime['active'] = null;
 
-  const nowMs = Date.parse(now);
-  const elapsedMs = nowMs - Date.parse(current.checkInAt);
-  const remainingMs = Date.parse(`${addDays(today, 1)}T00:00:00+09:00`) - nowMs;
-  const active = elapsedMs >= 0 && remainingMs > 0 ? { elapsedMs, remainingMs } : null;
-  return { completedMs, active };
+  for (const record of [...records].sort((a, b) => a.workDate.localeCompare(b.workDate))) {
+    if (record.workDate > today) break;
+
+    completedMs += stayDurationMs(record);
+    byDate.set(record.workDate, completedMs);
+
+    if (record.workDate === today && record.checkInAt && !record.checkOutAt) {
+      const nowMs = Date.parse(now);
+      const elapsedMs = nowMs - Date.parse(record.checkInAt);
+      const remainingMs = Date.parse(`${addDays(today, 1)}T00:00:00+09:00`) - nowMs;
+      if (elapsedMs >= 0 && remainingMs > 0) active = { elapsedMs, remainingMs };
+    }
+  }
+
+  return { byDate, total: { completedMs, active } };
 }
 
 export const memberStart = (joinDate: string) => (joinDate > SEASON.start ? joinDate : SEASON.start);

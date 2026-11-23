@@ -11,6 +11,7 @@ import type { TreeView } from '@/lib/view';
 import GrowthTrack from './GrowthTrack';
 import Panel from './Panel';
 import TreeFigure from './TreeFigure';
+import { useAttendanceTimer } from './useAttendanceTimer';
 
 // spec 3.5 내 씨앗 패널
 const HEADLINE_TOP = 8;
@@ -55,29 +56,11 @@ function SeedChip({ label, tip }: { label: string; tip: string[] }) {
   );
 }
 
-function AttendanceTimer({ completedMs, active }: AttendanceTime) {
-  const [elapsedMs, setElapsedMs] = useState(0);
-
-  useEffect(() => {
-    if (!active) return;
-    const started = performance.now();
-    const update = () => {
-      const elapsed = Math.min(performance.now() - started, active.remainingMs);
-      setElapsedMs(elapsed);
-      if (elapsed >= active.remainingMs) window.clearInterval(timer);
-    };
-    const timer = window.setInterval(update, 1000);
-    document.addEventListener('visibilitychange', update);
-    return () => {
-      window.clearInterval(timer);
-      document.removeEventListener('visibilitychange', update);
-    };
-  }, [active]);
-
-  const ongoingMs = active && elapsedMs < active.remainingMs ? active.elapsedMs + elapsedMs : 0;
+function AttendanceTimer(attendance: AttendanceTime) {
+  const { totalMs } = useAttendanceTimer(attendance);
   return (
     <span className="orchard-attendance-time" role="timer" aria-label={TREE.attendanceTime}>
-      {clockDuration(completedMs + ongoingMs)}
+      {clockDuration(totalMs)}
     </span>
   );
 }
@@ -95,7 +78,6 @@ type Props = {
 export default function TreePanel({ view, attendanceTime, harvesting, onHarvest, onOpenCard, onGrown }: Props) {
   const look = useMemo(() => levelLook(view.days, view.harvested), [view.days, view.harvested]);
   const [levelSlot, setLevelSlot] = useState<HTMLSpanElement | null>(null);
-  const active = attendanceTime.active;
   return (
     <Panel aria-labelledby="h-tree" order={2}>
       {/* 머리줄: 왼쪽에 제목과 문장, 오른쪽 위에 레벨 표시(제목 줄에 맞춤, spec 3.5) */}
@@ -108,10 +90,7 @@ export default function TreePanel({ view, attendanceTime, harvesting, onHarvest,
         </Box>
         <span className="orchard-level-summary">
           <span className="orchard-lv-slot" ref={setLevelSlot} />
-          <AttendanceTimer
-            key={active ? `${active.elapsedMs}:${active.remainingMs}` : 'completed'}
-            {...attendanceTime}
-          />
+          <AttendanceTimer {...attendanceTime} />
         </span>
       </FlexBox>
       <FlexBox
