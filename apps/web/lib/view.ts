@@ -6,7 +6,7 @@ import {
 } from './copy';
 import {
   ALL_WORKDAYS, FRUIT_DAYS, HOLIDAYS, SEASON, STAGES, addDays, computeStats, demoStats, dow, fruitCount, growth, isWorkday,
-  weekStart, workdaysLeft, workdaysOfWeek,
+  stayDurationMs, weekStart, workdaysLeft, workdaysOfWeek,
 } from './rules';
 import { hhmmKST, todayKST } from './time';
 import type { Attendance, Member, PlanKey, Profile, SeedKey } from './types';
@@ -23,8 +23,6 @@ export const statsOf = (p: Profile, records: Attendance[], today: string) => {
 export const isMember = (p: Profile): p is Member => p.seed !== null;
 
 const nextWorkday = (s: string) => ALL_WORKDAYS.find(d => d > s) ?? null;
-const stayMinutes = (r: Attendance) =>
-  r.checkInAt && r.checkOutAt ? Math.floor((Date.parse(r.checkOutAt) - Date.parse(r.checkInAt)) / 60000) : 0;
 
 /* ================= 홈 ================= */
 
@@ -268,7 +266,7 @@ export function monthView(ym: string, records: Attendance[], today: string): Mon
     });
   }
   const rows = records.filter(r => r.workDate.startsWith(ym)).sort((a, b) => b.workDate.localeCompare(a.workDate)).map(r => {
-    const m = stayMinutes(r);
+    const m = Math.floor(stayDurationMs(r) / 60_000);
     return {
       date: r.workDate,
       dateText: koDate(r.workDate),

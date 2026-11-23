@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { TODAY, WEEK } from './copy';
+import { clockDuration, TODAY, WEEK } from './copy';
+import { attendanceTime } from './rules';
 import type { Attendance, Profile } from './types';
 import { campView, gardenView, monthView, statsOf, todayView, weekView } from './view';
 
@@ -75,6 +76,38 @@ describe('캘린더 (3.6)', () => {
     expect(c && !c.blank && c.time).toBe('09:49 ~');
     const xmas = m.cells.find(x => !x.blank && x.key === '2026-12-25');
     expect(xmas && !xmas.blank && [xmas.off, xmas.note]).toEqual([true, '성탄절']);
+  });
+});
+
+describe('총 출근 시간 (2.7)', () => {
+  const today = '2026-11-23';
+  const past = [
+    rec('2026-11-18', '09:00', '17:00'),
+    rec('2026-11-19', '09:00'),
+    { ...rec('2026-11-20', '09:00', '10:00'), checkInAt: null },
+  ];
+
+  it('오늘 진행 중인 출근만 타이머에 포함하고 KST 자정에 끝낸다', () => {
+    expect(attendanceTime([...past, rec(today, '23:00')], today, '2026-11-23T23:59:45+09:00'))
+      .toEqual({ completedMs: 8 * 3_600_000, active: { elapsedMs: 3_585_000, remainingMs: 15_000 } });
+    expect(attendanceTime([...past, rec(today, '23:00')], '2026-11-24', '2026-11-24T00:00:00+09:00'))
+      .toEqual({ completedMs: 8 * 3_600_000, active: null });
+  });
+
+  it('퇴근 시각으로 확정하고 잘못된 시간 차이는 제외한다', () => {
+    const records = [
+      ...past,
+      { ...rec('2026-11-20', '09:00'), checkOutAt: 'invalid' },
+      rec('2026-11-20', '10:00', '09:00'),
+      { ...rec(today, '10:00'), checkOutAt: '2026-11-23T12:00:07+09:00' },
+    ];
+    expect(attendanceTime(records, today, '2026-11-23T23:00:30+09:00'))
+      .toEqual({ completedMs: 10 * 3_600_000 + 7_000, active: null });
+  });
+
+  it('기록이 없으면 0으로 표시하고 24시간 이상도 누적한다', () => {
+    expect(clockDuration(attendanceTime([], today, '2026-11-23T10:00:00+09:00').completedMs)).toBe('00:00:00');
+    expect(clockDuration(101 * 3_600_000 + 5 * 60_000 + 8_999)).toBe('101:05:08');
   });
 });
 

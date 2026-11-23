@@ -1,4 +1,6 @@
 // docs/spec.md 2.5의 기준 코드. 예시 사이트에서 검증한 코드라 그대로 옮긴다. 규칙 계산은 이 파일에만 둔다
+import type { Attendance } from './types';
+
 // open: 기록을 받기 시작하는 날, start: 정식 시작일(주간 목표 계산 기준), end: 마지막 날
 export const SEASON = { open: '2026-11-18', start: '2026-11-23', end: '2026-12-25' };
 export const HOLIDAYS: Record<string, string> = { '2026-12-25': '성탄절' };
@@ -49,6 +51,31 @@ export const workdaysOfWeek = (w: string, from: string) => {
   for (let i = 0; i < 5; i++) { const d = addDays(w, i); if (isWorkday(d) && d >= from) out.push(d); }
   return out;
 };
+/** 출근과 퇴근이 모두 기록된 경우에만 머문 시간을 센다. */
+export function stayDurationMs(record: Attendance): number {
+  if (!record.checkInAt || !record.checkOutAt) return 0;
+  const duration = Date.parse(record.checkOutAt) - Date.parse(record.checkInAt);
+  return duration > 0 ? duration : 0;
+}
+
+export type AttendanceTime = {
+  completedMs: number;
+  active: { elapsedMs: number; remainingMs: number } | null;
+};
+
+export function attendanceTime(records: readonly Attendance[], today: string, now: string): AttendanceTime {
+  const completedMs = records.reduce((total, record) =>
+    record.workDate <= today ? total + stayDurationMs(record) : total, 0);
+  const current = records.find(record => record.workDate === today);
+  if (!current?.checkInAt || current.checkOutAt) return { completedMs, active: null };
+
+  const nowMs = Date.parse(now);
+  const elapsedMs = nowMs - Date.parse(current.checkInAt);
+  const remainingMs = Date.parse(`${addDays(today, 1)}T00:00:00+09:00`) - nowMs;
+  const active = elapsedMs >= 0 && remainingMs > 0 ? { elapsedMs, remainingMs } : null;
+  return { completedMs, active };
+}
+
 export const memberStart = (joinDate: string) => (joinDate > SEASON.start ? joinDate : SEASON.start);
 // 오늘 이후로 남은 출근일 수. 오늘 이미 출근했으면 오늘은 빼고 센다
 export const workdaysLeft = (today: string, hasToday: boolean) =>

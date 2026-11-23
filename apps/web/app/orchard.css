@@ -8,7 +8,10 @@ body{background:transparent !important}
 .orchard-tree{-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 .orchard-tree[role="button"]{border-radius:16px}
 /* 레벨 표시: 내 씨앗 패널 머리줄의 오른쪽 위, 제목 줄에 맞춘다(spec 3.5). 수확한 뒤에는 누르면 수확 카드가 다시 열리는 버튼 */
-.orchard-lv-slot{display:flex;flex:none;justify-content:flex-end}
+.orchard-level-summary{display:flex;flex:none;flex-direction:column;align-items:center;gap:4px}
+.orchard-lv-slot{display:flex;min-height:54px}
+.orchard-attendance-time{padding:2px 6px;border-radius:999px;background:color-mix(in srgb,var(--o-black) 66%,transparent);color:var(--o-white);font-size:12px;font-weight:700;line-height:16px;font-variant-numeric:tabular-nums;white-space:nowrap}
+html[data-theme='dark'] .orchard-attendance-time{background:transparent}
 /* 씨앗 칩: 나무 그림 줄(패널 폭)의 오른쪽 아래. 아랫변은 나무 그림 아랫변, 오른쪽 끝은 레벨 표시와 같다(spec 3.5). 말풍선은 칩 아래로 열린다 */
 .orchard-chipfig{position:absolute;right:0;bottom:0;z-index:2}
 .orchard-lv{position:relative;display:block;flex:none;width:54px;height:54px;padding:0;border:0;background:none;filter:drop-shadow(0 6px 10px color-mix(in srgb,var(--o-lv) 34%,transparent))}

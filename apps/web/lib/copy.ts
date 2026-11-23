@@ -19,6 +19,13 @@ export const koDuration = (min: number) => {
   const m = min % 60;
   return h ? `${h}시간 ${m}분` : `${m}분`;
 };
+/** 24시간이 넘어도 시간을 그대로 표시한다. */
+export function clockDuration(milliseconds: number): string {
+  const seconds = Math.floor(milliseconds / 1000);
+  return [Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, seconds % 60]
+    .map(value => String(value).padStart(2, '0'))
+    .join(':');
+}
 export const DASH = '–';
 
 /* ---------- 공통 ---------- */
@@ -188,6 +195,7 @@ export const WEEK = {
 /* ---------- 홈: 내 나무 (3.5) ---------- */
 export const TREE = {
   title: '내 씨앗',
+  attendanceTime: '총 출근 시간',
   headline: {
     harvested: (seed: SeedKey) => `${SEEDS[seed].fruit}${SEEDS[seed].obj} 수확했어요`,
     canHarvest: '열매가 열렸어요',
