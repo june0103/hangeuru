@@ -27,16 +27,18 @@ const tableStyle = {
   width: '100%',
   '& table': { tableLayout: 'fixed' },
   '& col:first-of-type': { width: '24%' },
-  '& col:nth-of-type(2), & col:nth-of-type(3)': { width: '17%' },
   '& :is(th, td)': { whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' },
   '@media (max-width: 767px)': {
-    '& col:nth-of-type(2), & col:nth-of-type(3)': { width: '14%' },
+    '& col:first-of-type': { width: '20%' },
     '& :is(th, td)': { padding: '10px 4px', fontSize: 12, lineHeight: '18px' },
+    '& td': { paddingBlock: 14 },
     '& :is(th, td):first-of-type': { paddingLeft: 8 },
-    '& :is(th, td):last-of-type': { paddingRight: 8 },
     '& :is(th, td):is(:first-of-type, :nth-of-type(n + 4))': {
       whiteSpace: 'normal', wordBreak: 'keep-all', overflowWrap: 'normal',
     },
+  },
+  '@media (max-width: 399px)': {
+    '& [role="timer"]': { fontSize: 11 },
   },
 } as const;
 
