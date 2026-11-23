@@ -3,13 +3,15 @@
 import { Box, ContentBadge, FlexBox, SectionMessage, Typography } from '@montage-ui/core';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 
-import { TREE } from '@/lib/copy';
+import { clockDuration, TREE } from '@/lib/copy';
 import { levelLook } from '@/lib/orchard/extras';
+import type { AttendanceTime } from '@/lib/rules';
 import type { TreeView } from '@/lib/view';
 
 import GrowthTrack from './GrowthTrack';
 import Panel from './Panel';
 import TreeFigure from './TreeFigure';
+import { useAttendanceTimer } from './useAttendanceTimer';
 
 // spec 3.5 내 씨앗 패널
 const HEADLINE_TOP = 8;
@@ -54,8 +56,18 @@ function SeedChip({ label, tip }: { label: string; tip: string[] }) {
   );
 }
 
+function AttendanceTimer(attendance: AttendanceTime) {
+  const { totalMs } = useAttendanceTimer(attendance);
+  return (
+    <span className="orchard-attendance-time" role="timer" aria-label={TREE.attendanceTime}>
+      {clockDuration(totalMs)}
+    </span>
+  );
+}
+
 type Props = {
   view: TreeView;
+  attendanceTime: AttendanceTime;
   harvesting: boolean;
   onHarvest: () => void;
   onOpenCard: () => void;
@@ -63,7 +75,7 @@ type Props = {
   onGrown: (days: number) => void;
 };
 
-export default function TreePanel({ view, harvesting, onHarvest, onOpenCard, onGrown }: Props) {
+export default function TreePanel({ view, attendanceTime, harvesting, onHarvest, onOpenCard, onGrown }: Props) {
   const look = useMemo(() => levelLook(view.days, view.harvested), [view.days, view.harvested]);
   const [levelSlot, setLevelSlot] = useState<HTMLSpanElement | null>(null);
   return (
@@ -76,7 +88,10 @@ export default function TreePanel({ view, harvesting, onHarvest, onOpenCard, onG
             {view.headline}
           </Typography>
         </Box>
-        <span className="orchard-lv-slot" ref={setLevelSlot} />
+        <span className="orchard-level-summary">
+          <span className="orchard-lv-slot" ref={setLevelSlot} />
+          <AttendanceTimer {...attendanceTime} />
+        </span>
       </FlexBox>
       <FlexBox
         alignItems="flex-start"

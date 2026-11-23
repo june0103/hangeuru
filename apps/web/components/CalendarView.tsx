@@ -5,10 +5,12 @@ import type { Theme } from '@montage-ui/core';
 import { IconChevronLeft, IconChevronRight } from '@montage-ui/icon';
 import { useState } from 'react';
 
-import { CALENDAR } from '@/lib/copy';
-import type { MonthView } from '@/lib/view';
+import { CALENDAR, clockDuration } from '@/lib/copy';
+import type { AttendanceTime } from '@/lib/rules';
+import type { MonthView, RecordRow } from '@/lib/view';
 
 import Panel from './Panel';
+import { useAttendanceTimer } from './useAttendanceTimer';
 
 // spec 3.6 캘린더
 const GRID_TOP = 20;
@@ -20,7 +22,72 @@ const MARK = 14;
 const TABLE_TOP = 24;
 const srOnly = { position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' } as const;
 
-export default function CalendarView({ months, initial }: { months: MonthView[]; initial: number }) {
+const tableStyle = {
+  marginTop: TABLE_TOP,
+  width: '100%',
+  '& table': { tableLayout: 'fixed' },
+  '& col:first-of-type': { width: '24%' },
+  '& :is(th, td)': { whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' },
+  '@media (max-width: 767px)': {
+    '& col:first-of-type': { width: '20%' },
+    '& :is(th, td)': { padding: '10px 4px', fontSize: 12, lineHeight: '18px' },
+    '& td': { paddingBlock: 14 },
+    '& :is(th, td):first-of-type': { paddingLeft: 8 },
+    '& :is(th, td):is(:first-of-type, :nth-of-type(n + 4))': {
+      whiteSpace: 'normal', wordBreak: 'keep-all', overflowWrap: 'normal',
+    },
+  },
+  '@media (max-width: 399px)': {
+    '& [role="timer"]': { fontSize: 11 },
+  },
+} as const;
+
+function AttendanceRecordsTable({ rows, today, attendance }: { rows: RecordRow[]; today: string; attendance: AttendanceTime }) {
+  const { totalMs, isRunning } = useAttendanceTimer(attendance);
+  if (!rows.length) {
+    return (
+      <Typography as="p" variant="body2" align="center" color="semantic.foreground.neutral.tertiary" sx={{ padding: '32px 20px' }}>
+        {CALENDAR.empty}
+      </Typography>
+    );
+  }
+
+  return (
+    <Table sx={tableStyle}>
+      <colgroup>
+        <col />
+        <col />
+        <col />
+        <col />
+        <col />
+      </colgroup>
+      <TableHead>
+        <TableRow>
+          {Object.values(CALENDAR.columns).map(label => <TableHeadCell key={label} scope="col">{label}</TableHeadCell>)}
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {rows.map(row => (
+          <TableRow key={row.date}>
+            <TableCell>{row.dateText}</TableCell>
+            <TableCell>{row.inText}</TableCell>
+            <TableCell>{row.outText}</TableCell>
+            <TableCell>{row.stayText}</TableCell>
+            <TableCell>
+              {row.date === today && isRunning
+                ? <span role="timer" aria-label={CALENDAR.columns.cumulative} style={{ whiteSpace: 'nowrap' }}>{clockDuration(totalMs)}</span>
+                : row.cumulativeText}
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}
+
+type Props = { months: MonthView[]; initial: number; today: string; attendance: AttendanceTime };
+
+export default function CalendarView({ months, initial, today, attendance }: Props) {
   const [i, setI] = useState(initial);
   const m = months[i];
   return (
@@ -72,32 +139,7 @@ export default function CalendarView({ months, initial }: { months: MonthView[];
         ))}
       </Box>
 
-      {m.rows.length ? (
-        // 몽타주 표 칸은 overflow-wrap: anywhere라서 좁은 화면에서 "09:52"가 한 글자씩 끊긴다.
-        // 칸 글자를 한 줄로 두고, 넘치면 표만 가로로 스크롤한다(spec 3.6)
-        <Table sx={{ marginTop: TABLE_TOP, width: '100%', '& :is(th, td)': { whiteSpace: 'nowrap' } }}>
-          <TableHead>
-            <TableRow>
-              <TableHeadCell scope="col">{CALENDAR.columns.date}</TableHeadCell>
-              <TableHeadCell scope="col">{CALENDAR.columns.in}</TableHeadCell>
-              <TableHeadCell scope="col">{CALENDAR.columns.out}</TableHeadCell>
-              <TableHeadCell scope="col">{CALENDAR.columns.stay}</TableHeadCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {m.rows.map(r => (
-              <TableRow key={r.date}>
-                <TableCell>{r.dateText}</TableCell>
-                <TableCell sx={{ fontVariantNumeric: 'tabular-nums' }}>{r.inText}</TableCell>
-                <TableCell sx={{ fontVariantNumeric: 'tabular-nums' }}>{r.outText}</TableCell>
-                <TableCell>{r.stayText}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      ) : (
-        <Typography as="p" variant="body2" align="center" color="semantic.foreground.neutral.tertiary" sx={{ padding: '32px 20px' }}>{CALENDAR.empty}</Typography>
-      )}
+      <AttendanceRecordsTable rows={m.rows} today={today} attendance={attendance} />
     </Panel>
   );
 }

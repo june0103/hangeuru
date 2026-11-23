@@ -1,7 +1,8 @@
 import HomeView from '@/components/HomeView';
 import { PAGE_TITLES, SIGNUP } from '@/lib/copy';
 import { getSessionUserId, getProfile, listAttendanceOf, listAttendanceOn, listProfiles } from '@/lib/data';
-import { serverToday } from '@/lib/time';
+import { attendanceTotals } from '@/lib/rules';
+import { serverNow, serverToday } from '@/lib/time';
 import type { Member } from '@/lib/types';
 import { badgesView, campView, cardModel, statsOf, todayView, treeView, weekView } from '@/lib/view';
 
@@ -20,6 +21,7 @@ export default async function HomePage({ searchParams }: PageProps<'/'>) {
       today={todayView(me, todayRecord, today)}
       week={weekView(me, st, today)}
       tree={treeView(me, st, !!todayRecord, today)}
+      attendanceTime={attendanceTotals(records, today, serverNow()).total}
       camp={campView(today, todays, profiles)}
       card={cardModel(me, records, today)}
       badges={badgesView(me, st, today)}

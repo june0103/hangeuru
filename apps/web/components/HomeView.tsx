@@ -7,7 +7,7 @@ import { useEffect, useRef, useState, useTransition } from 'react';
 import { checkIn, checkOut, harvest } from '@/app/actions';
 import { LOCATION } from '@/lib/copy';
 import { getPosition } from '@/lib/geo';
-import { FRUIT_DAYS } from '@/lib/rules';
+import { type AttendanceTime, FRUIT_DAYS } from '@/lib/rules';
 import type { ActionResult } from '@/lib/types';
 import type { BadgeView, CampView, CardModel, TodayView, TreeView, WeekView } from '@/lib/view';
 
@@ -30,13 +30,14 @@ type Props = {
   today: TodayView;
   week: WeekView | null;
   tree: TreeView;
+  attendanceTime: AttendanceTime;
   camp: CampView;
   card: CardModel | null;
   badges: BadgeView[];
   welcome: string | null;
 };
 
-export default function HomeView({ today, week, tree, camp, card, badges, welcome }: Props) {
+export default function HomeView({ today, week, tree, attendanceTime, camp, card, badges, welcome }: Props) {
   const toast = useToast();
   const router = useRouter();
   const params = useSearchParams();
@@ -86,7 +87,14 @@ export default function HomeView({ today, week, tree, camp, card, badges, welcom
   const todayPanel = <TodayPanel view={today} button={button} />;
   const weekPanel = week && <WeekPanel view={week} />;
   const treePanel = (
-    <TreePanel view={tree} harvesting={harvesting} onHarvest={onHarvest} onOpenCard={() => setCardOpen(true)} onGrown={onGrown} />
+    <TreePanel
+      view={tree}
+      attendanceTime={attendanceTime}
+      harvesting={harvesting}
+      onHarvest={onHarvest}
+      onOpenCard={() => setCardOpen(true)}
+      onGrown={onGrown}
+    />
   );
   const campPanel = <CampPanel view={camp} />;
 
