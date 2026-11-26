@@ -52,7 +52,8 @@ button.orchard-lv::after{content:"";position:absolute;inset:-6px;border-radius:5
 @media (min-width:768px){[data-orchard-head="bar"]{display:grid !important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center !important}[data-orchard-head="tabs"]{margin-left:0 !important;align-self:center !important;justify-self:center;display:flex !important}[data-orchard-head="user"]{margin-left:0 !important;justify-self:end}}
 /* 768px 이상: 탭은 헤더 한 줄 정가운데. 글자는 로고·이름과 같은 높이이고, 고른 탭의 밑줄은 글자 바로 아래 6px 에 둔다(헤더 아랫변까지 내리면 글자와 멀어 보였다, 2026-11-20). 탭 아래 회색 줄은 없앤다(spec 3.2) */
 [data-orchard-head="tabs"] [data-component="tab-list-item"]{padding-top:6px !important;padding-bottom:6px !important}
-[data-orchard-head="tabs"] [data-component="tab-list"]::after{display:none !important}
+[data-orchard-head="tabs"] [data-component="tab-list"]::after,[data-orchard-head="tabs"] [data-role="tab-motion"]{display:none !important}
+[data-orchard-head="tabs"] [aria-selected="true"] [data-role="tab-list-item-divider"]{bottom:-6px;max-height:2px;background-color:var(--tab-list-divider-color)}
 [data-orchard-lead]{display:grid !important;gap:6px;margin:0}
 .orchard-now{font-size:16px;line-height:26px;font-weight:500;letter-spacing:.0057em;color:var(--o-fg);text-wrap:pretty}html[data-theme="dark"] .orchard-now{color:var(--o-fg)}
 .orchard-next{font-size:13px;line-height:20px;font-weight:400;letter-spacing:.0194em;color:var(--o-fg3)}
