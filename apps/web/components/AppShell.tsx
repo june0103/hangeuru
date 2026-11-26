@@ -1,11 +1,10 @@
 'use client';
 
-import { Box, Global, Typography, containerStyle } from '@montage-ui/core';
+import { Box, Global, containerStyle } from '@montage-ui/core';
 import { usePathname } from 'next/navigation';
 import { type PropsWithChildren, useEffect, useRef, useState, useTransition } from 'react';
 
 import type { signOut, updateProfile } from '@/app/actions';
-import { DEMO } from '@/lib/copy';
 import type { Member } from '@/lib/types';
 
 import BottomNav from './BottomNav';
@@ -53,11 +52,6 @@ export default function AppShell({ account, children }: PropsWithChildren<{ acco
           },
         ]}
       >
-        {!account && (
-          <Typography as="p" variant="label1" color="semantic.foreground.neutral.secondary" sx={{ marginBottom: 12 }}>
-            {DEMO.notice}
-          </Typography>
-        )}
         {children}
       </Box>
       </div>

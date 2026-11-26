@@ -66,8 +66,7 @@ export const PAGE_TITLES = {
 } as const;
 
 export const DEMO = {
-  notice: '포트폴리오 데모 · 예시 데이터를 보여드려요.',
-  attendanceHint: '데모에서는 출퇴근 기록을 조회할 수 있어요.',
+  attendanceHint: '출퇴근 기록은 캘린더에서 확인할 수 있어요.',
   memberName: (index: number) => `구성원 ${String(index + 1).padStart(2, '0')}`,
 } as const;
 

@@ -11,12 +11,12 @@ import { GLASS, panelStyle } from './Panel';
 const MAX_WIDTH = 420;
 const TOP = 24;
 
-export default function AuthShell({ children }: PropsWithChildren) {
+export default function AuthShell({ children, brandHref }: PropsWithChildren<{ brandHref?: string }>) {
   useOrchardLayout('auth');
   return (
     // .o-zoom: 큰 화면에서 화면 배율을 키운다(spec 3.2, app/orchard.css)
     <div className="o-zoom">
-      <Header userName={null} />
+      <Header userName={null} brandHref={brandHref} />
       <Box as="main" sx={[containerStyle(), { paddingTop: TOP, paddingBottom: 96, '@media (max-width: 767px)': { paddingTop: 16 } }]}>
         <Box as="section" {...GLASS} sx={[panelStyle, { maxWidth: MAX_WIDTH, margin: '0 auto' }]}>{children}</Box>
       </Box>
