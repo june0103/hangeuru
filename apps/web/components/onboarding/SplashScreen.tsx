@@ -17,7 +17,7 @@ import './onboarding.css';
 const N = SPLASH.scenes.length;
 const MOBILE = 767;
 
-export default function SplashScreen() {
+export default function SplashScreen({ startHref = '/start', loginHref = '/login' }: { startHref?: string; loginHref?: string }) {
   const router = useRouter();
   const hero = useRef<HTMLDivElement>(null);
   const caps = useRef<(HTMLElement | null)[]>([]);
@@ -78,8 +78,8 @@ export default function SplashScreen() {
     <div className="ob">
       <div className="app journey">
         <header className="top">
-          <BrandMark href="/start" />
-          <Link className="skip" href="/login">{SPLASH.skip}</Link>
+          <BrandMark href={startHref} />
+          <Link className="skip" href={loginHref}>{SPLASH.skip}</Link>
         </header>
         <main className="track">
           {/* 좁은 화면에서는 화면 아무 곳이나 누르면 다음 장면으로 넘어간다. 키보드와 스크린리더는 아래 링크와 스크롤로 간다 */}
@@ -101,7 +101,7 @@ export default function SplashScreen() {
                     <p>{s.text.map((line, n) => <span key={line}>{n > 0 && <br />}{line}</span>)}</p>
                     {i === N - 1 && (
                       <div className="btn">
-                        <PrimaryButton size="large" onClick={() => router.push('/login')}>{SPLASH.start}</PrimaryButton>
+                        <PrimaryButton size="large" onClick={() => router.push(loginHref)}>{SPLASH.start}</PrimaryButton>
                       </div>
                     )}
                   </section>
@@ -113,7 +113,7 @@ export default function SplashScreen() {
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9.5l6 6 6-6" /></svg>
             </button>
             {/* 모바일의 시작하기: 화면을 누를 때처럼 다음 장면(Step 1, Step 2)으로 넘기고, 마지막 장면에서 누르면 로그인으로 간다(spec 3.12) */}
-            <Link className="startglass" href="/login" onClick={e => { if (advance()) e.preventDefault(); }}>
+            <Link className="startglass" href={loginHref} onClick={e => { if (advance()) e.preventDefault(); }}>
               <span>{SPLASH.start}</span>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6l6 6-6 6" /></svg>
             </Link>
