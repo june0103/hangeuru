@@ -69,10 +69,10 @@ type Props = {
   view: TreeView;
   attendanceTime: AttendanceTime;
   harvesting: boolean;
-  onHarvest: () => void;
+  onHarvest?: () => void;
   onOpenCard: () => void;
   /** 출근해서 자라는 장면이 끝난 뒤 */
-  onGrown: (days: number) => void;
+  onGrown?: (days: number) => void;
 };
 
 export default function TreePanel({ view, attendanceTime, harvesting, onHarvest, onOpenCard, onGrown }: Props) {
