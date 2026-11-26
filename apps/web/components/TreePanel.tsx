@@ -47,7 +47,7 @@ function SeedChip({ label, tip }: { label: string; tip: string[] }) {
         onClick={() => setOpen(v => !v)}
         onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpen(v => !v); } }}
       >
-        <ContentBadge size="medium" color="neutral" variant="solid">{label}</ContentBadge>
+        <ContentBadge className="orchard-seedbadge" size="medium" color="neutral" variant="solid">{label}</ContentBadge>
       </span>
       <span role="tooltip" id={id} hidden={!open}>
         {tip.map(line => <span key={line}>{line}</span>)}

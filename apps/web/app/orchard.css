@@ -63,7 +63,11 @@ button.orchard-lv::after{content:"";position:absolute;inset:-6px;border-radius:5
 .orchard-seedtip [role="tooltip"]{position:absolute;top:calc(100% + 10px);right:0;z-index:6;width:max-content;max-width:min(260px,72vw);padding:10px 14px;border-radius:12px;background:rgba(27,28,30,.92);color:var(--o-white);font-size:13px;line-height:20px;font-weight:500;letter-spacing:.0194em;text-align:left;box-shadow:0 8px 24px -10px rgba(23,23,25,.4);transform-origin:top right;animation:orchard-menu .2s cubic-bezier(.2,0,0,1) backwards}
 .orchard-seedtip [role="tooltip"]::before{content:"";position:absolute;top:-5px;right:16px;width:10px;height:10px;border-radius:2px;background:inherit;transform:rotate(45deg)}
 .orchard-seedtip [role="tooltip"] span{display:block;position:relative}.orchard-seedtip [role="tooltip"] span + span{font-weight:400;opacity:.78}
-html[data-theme="dark"] .orchard-seedtip [role="tooltip"]{background:rgba(247,247,248,.94);color:var(--o-fg);box-shadow:0 8px 24px -10px rgba(0,0,0,.7)}
+html[data-theme="dark"] .orchard-seedtip .orchard-seedbadge{background-color:color-mix(in srgb,var(--o-fg) 10%,var(--o-menu));color:var(--o-fg)}
+html[data-theme="dark"] .orchard-seedtip > [role="button"]:hover{opacity:1}
+html[data-theme="dark"] .orchard-seedtip > [role="button"]:hover .orchard-seedbadge{background-color:color-mix(in srgb,var(--o-fg) 16%,var(--o-menu))}
+html[data-theme="dark"] .orchard-seedtip [role="tooltip"]{background:var(--o-menu);color:var(--o-fg);box-shadow:0 8px 24px -10px var(--o-shadow)}
+html[data-theme="dark"] .orchard-seedtip [role="tooltip"] span + span{color:var(--o-fg2);opacity:1}
 .orchard-seedtip [role="tooltip"][hidden]{display:none}
 @media (prefers-reduced-motion:reduce){.orchard-seedtip [role="tooltip"]{animation:none}}
 .orchard-card{--oc-fg:var(--o-fg);--oc-fg2:rgba(46,47,51,.88);--oc-fg3:rgba(55,56,60,.61);--oc-glass:rgba(255,255,255,.62);--oc-edge:rgba(112,115,124,.14);position:relative;isolation:isolate;overflow:hidden;box-sizing:border-box;width:100%;max-width:296px;padding:16px;border-radius:20px;color:var(--oc-fg);text-align:left;background:radial-gradient(90% 60% at 8% 0%,var(--oc-b1) 0,transparent 62%),radial-gradient(80% 55% at 100% 14%,var(--oc-b2) 0,transparent 60%),radial-gradient(90% 60% at 92% 100%,var(--oc-b3) 0,transparent 62%),radial-gradient(80% 50% at 0% 92%,var(--oc-b4) 0,transparent 60%),var(--o-white);box-shadow:inset 0 0 0 1px rgba(112,115,124,.12),0 16px 36px -20px rgba(23,23,25,.28)}
