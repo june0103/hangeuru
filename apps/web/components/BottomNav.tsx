@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation';
 
 import { NAV } from '@/lib/copy';
 
-import { navKey } from './Header';
+import { navHref, navKey } from './Header';
 
 // 768px 미만에서만 보이는 하단 탭 바 (spec 3.2, 3.10)
 const ITEMS = [
@@ -16,7 +16,7 @@ const ITEMS = [
   { href: '/garden', key: 'garden', label: NAV.gardenShort, icon: <IconPersons /> },
 ] as const;
 
-export default function BottomNav() {
+export default function BottomNav({ demo = false }: { demo?: boolean }) {
   const pathname = usePathname();
   return (
     <Box
@@ -28,9 +28,9 @@ export default function BottomNav() {
         '@media (min-width: 768px)': { display: 'none' },
       }}
     >
-      <BottomNavigation value={navKey(pathname)}>
+      <BottomNavigation value={navKey(pathname, demo)}>
         {ITEMS.map(item => (
-          <BottomNavigationItem key={item.key} as={Link} href={item.href} value={item.key} label={item.label} icon={item.icon} />
+          <BottomNavigationItem key={item.key} as={Link} href={navHref(item.href, demo)} value={item.key} label={item.label} icon={item.icon} />
         ))}
       </BottomNavigation>
     </Box>

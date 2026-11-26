@@ -6,6 +6,8 @@ import { serverNow, serverToday } from '@/lib/time';
 import type { Member } from '@/lib/types';
 import { badgesView, campView, cardModel, statsOf, todayView, treeView, weekView } from '@/lib/view';
 
+import { checkIn, checkOut, harvest } from '../actions';
+
 export const metadata = { title: PAGE_TITLES.home };
 
 export default async function HomePage({ searchParams }: PageProps<'/'>) {
@@ -26,6 +28,7 @@ export default async function HomePage({ searchParams }: PageProps<'/'>) {
       card={cardModel(me, records, today)}
       badges={badgesView(me, st, today)}
       welcome={welcome}
+      actions={{ checkIn, checkOut, harvest }}
     />
   );
 }

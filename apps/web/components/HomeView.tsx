@@ -1,10 +1,10 @@
 'use client';
 
 import { FlexBox, useToast } from '@montage-ui/core';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, useTransition } from 'react';
 
-import { checkIn, checkOut, harvest } from '@/app/actions';
+import type { checkIn, checkOut, harvest } from '@/app/actions';
 import { LOCATION } from '@/lib/copy';
 import { getPosition } from '@/lib/geo';
 import { type AttendanceTime, FRUIT_DAYS } from '@/lib/rules';
@@ -14,6 +14,7 @@ import type { BadgeView, CampView, CardModel, TodayView, TreeView, WeekView } fr
 import BadgesPanel from './BadgesPanel';
 import CampPanel from './CampPanel';
 import HarvestCardModal from './HarvestCardModal';
+import { navHref } from './Header';
 import MainActionButton from './MainActionButton';
 import { useOrchardScheme } from './orchard/OrchardProvider';
 import TodayPanel from './TodayPanel';
@@ -35,12 +36,12 @@ type Props = {
   card: CardModel | null;
   badges: BadgeView[];
   welcome: string | null;
+  actions?: { checkIn: typeof checkIn; checkOut: typeof checkOut; harvest: typeof harvest };
 };
 
-export default function HomeView({ today, week, tree, attendanceTime, camp, card, badges, welcome }: Props) {
+export default function HomeView({ today, week, tree, attendanceTime, camp, card, badges, welcome, actions }: Props) {
   const toast = useToast();
   const router = useRouter();
-  const params = useSearchParams();
   const [pending, start] = useTransition();
   const [harvesting, startHarvest] = useTransition();
   const [cardOpen, setCardOpen] = useState(false);
@@ -49,12 +50,12 @@ export default function HomeView({ today, week, tree, attendanceTime, camp, card
 
   // 가입 직후 환영 토스트를 한 번 띄우고 주소에서 지운다 (spec 8.3)
   useEffect(() => {
-    if (welcome && params.get('welcome') === '1' && !welcomed.current) {
+    if (welcome && !welcomed.current) {
       welcomed.current = true;
       toast({ content: welcome, variant: 'positive' });
       router.replace('/');
     }
-  }, [welcome, params, router, toast]);
+  }, [welcome, router, toast]);
 
   const report = (r: ActionResult) => {
     if (r.message) toast({ content: r.message, variant: r.ok ? 'positive' : 'negative' });
@@ -64,7 +65,7 @@ export default function HomeView({ today, week, tree, attendanceTime, camp, card
 
   const onMain = () => {
     const act = today.button.action;
-    if (!act) return;
+    if (!act || !actions) return;
     start(async () => {
       // 버튼을 누르면 위치부터 구한다. 구하지 못하면 기록하지 않고 안내만 한다(spec 2.8)
       const pos = await getPosition();
@@ -72,13 +73,14 @@ export default function HomeView({ today, week, tree, attendanceTime, camp, card
         toast({ content: pos === 'denied' ? LOCATION.denied : LOCATION.unavailable, variant: 'normal' });
         return;
       }
-      const r = act === 'checkIn' ? await checkIn(pos) : await checkOut(pos);
+      const r = await actions[act](pos);
       report(r);
     });
   };
   const onHarvest = () => {
+    if (!actions) return;
     startHarvest(async () => {
-      const r = await harvest();
+      const r = await actions.harvest();
       if (r.ok) setCardOpen(true); else report(r);
     });
   };
@@ -91,12 +93,12 @@ export default function HomeView({ today, week, tree, attendanceTime, camp, card
       view={tree}
       attendanceTime={attendanceTime}
       harvesting={harvesting}
-      onHarvest={onHarvest}
+      onHarvest={actions ? onHarvest : undefined}
       onOpenCard={() => setCardOpen(true)}
-      onGrown={onGrown}
+      onGrown={actions ? onGrown : undefined}
     />
   );
-  const campPanel = <CampPanel view={camp} />;
+  const campPanel = <CampPanel view={camp} gardenHref={navHref('/garden', !actions)} />;
 
   return (
     <>
@@ -123,7 +125,7 @@ export default function HomeView({ today, week, tree, attendanceTime, camp, card
           <div className="p-badges"><BadgesPanel badges={badges} /></div>
         </div>
       </FlexBox>
-      <HarvestCardModal open={cardOpen} onOpenChange={setCardOpen} model={card} />
+      {actions && <HarvestCardModal open={cardOpen} onOpenChange={setCardOpen} model={card} />}
     </>
   );
 }

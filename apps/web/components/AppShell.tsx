@@ -1,10 +1,11 @@
 'use client';
 
-import { Box, Global, containerStyle } from '@montage-ui/core';
+import { Box, Global, Typography, containerStyle } from '@montage-ui/core';
 import { usePathname } from 'next/navigation';
 import { type PropsWithChildren, useEffect, useRef, useState, useTransition } from 'react';
 
-import { signOut } from '@/app/actions';
+import type { signOut, updateProfile } from '@/app/actions';
+import { DEMO } from '@/lib/copy';
 import type { Member } from '@/lib/types';
 
 import BottomNav from './BottomNav';
@@ -22,8 +23,9 @@ const PAD_BOTTOM_M = 24;
 const TOAST_M = '52px';
 
 type Me = Pick<Member, 'name' | 'seed' | 'plan'> & { harvested: boolean };
+type Account = { me: Me; signOut: typeof signOut; updateProfile: typeof updateProfile };
 
-export default function AppShell({ me, children }: PropsWithChildren<{ me: Me }>) {
+export default function AppShell({ account, children }: PropsWithChildren<{ account?: Account }>) {
   const [settings, setSettings] = useState(false);
   const [signingOut, startSignOut] = useTransition();
   useOrchardLayout('app');
@@ -36,7 +38,7 @@ export default function AppShell({ me, children }: PropsWithChildren<{ me: Me }>
       <Global styles={{ '@media (max-width: 767px)': { ':root': { '--app-toast-offset': TOAST_M } } }} />
       {/* 768px 미만: 헤더와 본문은 하단 탭 바 위에서만 스크롤된다(spec 3.10) */}
       <div className="o-scroll o-zoom" ref={scroller}>
-      <Header userName={me.name} onOpenSettings={() => setSettings(true)} />
+      <Header userName={account?.me.name ?? null} demo={!account} onOpenSettings={account && (() => setSettings(true))} />
       <Box
         as="main"
         sx={[
@@ -51,11 +53,19 @@ export default function AppShell({ me, children }: PropsWithChildren<{ me: Me }>
           },
         ]}
       >
+        {!account && (
+          <Typography as="p" variant="label1" color="semantic.foreground.neutral.secondary" sx={{ marginBottom: 12 }}>
+            {DEMO.notice}
+          </Typography>
+        )}
         {children}
       </Box>
       </div>
-      <BottomNav />
-      <SettingsModal open={settings} onOpenChange={setSettings} me={me} onSignOut={() => startSignOut(() => signOut())} signingOut={signingOut} />
+      <BottomNav demo={!account} />
+      {account && (
+        <SettingsModal open={settings} onOpenChange={setSettings} me={account.me} updateProfileAction={account.updateProfile}
+          onSignOut={() => startSignOut(() => account.signOut())} signingOut={signingOut} />
+      )}
     </>
   );
 }

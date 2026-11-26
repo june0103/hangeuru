@@ -8,7 +8,7 @@ import type { Theme } from '@montage-ui/core';
 import { IconClose } from '@montage-ui/icon';
 import { useActionState, useEffect, useId, useRef, useState } from 'react';
 
-import { updateProfile } from '@/app/actions';
+import type { updateProfile } from '@/app/actions';
 import { FIELD, SETTINGS } from '@/lib/copy';
 import type { ActionResult, Member, PlanKey, SeedKey } from '@/lib/types';
 
@@ -23,9 +23,10 @@ const ORDER = ['name'] as const;
 
 type Me = Pick<Member, 'name' | 'seed' | 'plan'> & { harvested: boolean };
 type SignOut = { onSignOut: () => void; signingOut: boolean };
+type SettingsAccount = { me: Me; updateProfileAction: typeof updateProfile };
 
-function SettingsForm({ me, onDone, onSignOut, signingOut }: { me: Me; onDone: () => void } & SignOut) {
-  const [state, action, pending] = useActionState<ActionResult | null, FormData>(updateProfile, null);
+function SettingsForm({ me, updateProfileAction, onDone, onSignOut, signingOut }: SettingsAccount & { onDone: () => void } & SignOut) {
+  const [state, action, pending] = useActionState<ActionResult | null, FormData>(updateProfileAction, null);
   const [seed, setSeed] = useState<SeedKey>(me.seed);
   const [plan, setPlan] = useState<PlanKey>(me.plan);
   const ids = { seed: useId(), plan: useId(), seedHelp: useId(), planHelp: useId() };
@@ -103,11 +104,13 @@ function SettingsForm({ me, onDone, onSignOut, signingOut }: { me: Me; onDone: (
   );
 }
 
-export default function SettingsModal({ open, onOpenChange, me, onSignOut, signingOut }: { open: boolean; onOpenChange: (v: boolean) => void; me: Me } & SignOut) {
+export default function SettingsModal({ open, onOpenChange, me, updateProfileAction, onSignOut, signingOut }:
+  SettingsAccount & { open: boolean; onOpenChange: (v: boolean) => void } & SignOut) {
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContainer variant="bottom" size="large" sm={{ variant: 'popup' }}>
-        {open && <SettingsForm me={me} onDone={() => onOpenChange(false)} onSignOut={onSignOut} signingOut={signingOut} />}
+        {open && <SettingsForm me={me} updateProfileAction={updateProfileAction}
+          onDone={() => onOpenChange(false)} onSignOut={onSignOut} signingOut={signingOut} />}
       </ModalContainer>
     </Modal>
   );

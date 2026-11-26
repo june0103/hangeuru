@@ -15,7 +15,7 @@ const CHIPS_TOP = 12;
 const CHIP_GAP = 6;
 const DOT = 6;
 
-export default function CampPanel({ view }: { view: CampView }) {
+export default function CampPanel({ view, gardenHref }: { view: CampView; gardenHref: string }) {
   return (
     <Panel aria-labelledby="h-camp" order={3}>
       <Typography as="h2" id="h-camp" variant="headline2" weight="bold" color="semantic.foreground.neutral.primary">{CAMP.title}</Typography>
@@ -39,7 +39,7 @@ export default function CampPanel({ view }: { view: CampView }) {
           ))}
         </FlexBox>
       )}
-      <TextButton as={Link} href="/garden" size="small" color="primary" sx={{ marginTop: CHIPS_TOP }}>{CAMP.toGarden}</TextButton>
+      <TextButton as={Link} href={gardenHref} size="small" color="primary" sx={{ marginTop: CHIPS_TOP }}>{CAMP.toGarden}</TextButton>
     </Panel>
   );
 }
